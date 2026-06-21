@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChilliTech — యజమాని ఫ్లోలు</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+           background: #f0f2f5; color: #1a1a2e; font-size: 15px; line-height: 1.6; }
+    .shell { display: flex; min-height: 100vh; }
+    .sidebar { width: 260px; flex-shrink: 0; background: #1a1a2e; color: #c9d1d9;
+               position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 0 0 2rem; }
+    .sidebar-brand { padding: 1.2rem 1.2rem 1rem; border-bottom: 1px solid #30363d;
+                     font-weight: 700; font-size: 1rem; color: #fff; }
+    .sidebar-brand span { color: #58a6ff; }
+    .sidebar-section { padding: 0.8rem 1.2rem 0.2rem; font-size: 0.7rem;
+                       text-transform: uppercase; letter-spacing: 0.1em; color: #6e7681; }
+    .sidebar a { display: block; padding: 0.45rem 1.2rem 0.45rem 1.5rem;
+                 color: #c9d1d9; text-decoration: none; font-size: 0.88rem;
+                 border-left: 3px solid transparent; transition: all 0.15s; }
+    .sidebar a:hover, .sidebar a.active { background: #21262d; color: #fff; border-left-color: #58a6ff; }
+    .sidebar a.sub { padding-left: 2.2rem; font-size: 0.83rem; color: #8b949e; }
+    .sidebar a.sub:hover, .sidebar a.sub.active { color: #c9d1d9; }
+    .main { flex: 1; padding: 2rem 2.5rem; max-width: 900px; }
+    section { display: none; }
+    section.active { display: block; }
+    h1 { font-size: 1.6rem; font-weight: 700; color: #1a1a2e; margin-bottom: 0.4rem; }
+    h2 { font-size: 1.25rem; font-weight: 600; color: #1a1a2e; margin: 2rem 0 0.8rem; }
+    h3 { font-size: 1rem; font-weight: 600; color: #444; margin: 1.5rem 0 0.5rem; }
+    p  { color: #444; margin-bottom: 0.8rem; }
+    .subtitle { color: #6e7681; font-size: 0.92rem; margin-bottom: 1.5rem; }
+    .card { background: #fff; border-radius: 10px; padding: 1.4rem 1.6rem;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 1.4rem; }
+    .badge { display: inline-block; padding: 0.2rem 0.7rem; border-radius: 20px;
+             font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; }
+    .badge-farmer   { background: #dbeafe; color: #1d4ed8; }
+    .badge-employee { background: #fef3c7; color: #92400e; }
+    .badge-owner    { background: #f3e8ff; color: #6b21a8; }
+    .role-card { border-radius: 10px; padding: 1.4rem 1.6rem; margin-bottom: 1rem; }
+    .role-card.owner { background: #faf5ff; border-left: 4px solid #8b5cf6; }
+    .role-card h3 { margin-top: 0; }
+    .role-card ul { padding-left: 1.2rem; color: #444; }
+    .role-card ul li { margin-bottom: 0.3rem; font-size: 0.9rem; }
+    .role-card .can { color: #16a34a; }
+    .flow-steps { display: flex; flex-direction: column; gap: 0; margin: 1rem 0 1.5rem; }
+    .flow-step { display: flex; align-items: flex-start; gap: 1rem;
+                 padding: 0.8rem 1rem; background: #fff; border-radius: 8px;
+                 border-left: 4px solid #e5e7eb; margin-bottom: 0.15rem;
+                 box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .flow-step.owner  { border-left-color: #8b5cf6; }
+    .flow-step.system { border-left-color: #94a3b8; }
+    .step-num { width: 26px; height: 26px; border-radius: 50%; background: #f1f5f9; color: #475569;
+                display: flex; align-items: center; justify-content: center;
+                font-size: 0.78rem; font-weight: 700; flex-shrink: 0; margin-top: 0.1rem; }
+    .step-body { flex: 1; }
+    .step-title { font-weight: 600; font-size: 0.9rem; color: #1a1a2e; }
+    .step-desc  { font-size: 0.84rem; color: #555; margin-top: 0.1rem; }
+    .dashboard-frame { background: #f8fafc; border-radius: 12px; overflow: hidden;
+                       border: 1px solid #e2e8f0; margin: 1rem 0 2rem;
+                       box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+    .db-topbar { background: #1a1a2e; color: #fff; padding: 0.7rem 1.2rem;
+                 display: flex; align-items: center; gap: 0.8rem; font-size: 0.85rem; }
+    .db-topbar-brand  { font-weight: 700; color: #58a6ff; }
+    .db-topbar-tenant { color: #8b949e; font-size: 0.78rem; }
+    .db-topbar-role   { margin-left: auto; }
+    .db-body { display: flex; min-height: 280px; }
+    .db-sidenav { width: 140px; background: #fff; border-right: 1px solid #e2e8f0; padding: 0.8rem 0; }
+    .db-nav-item { padding: 0.5rem 1rem; font-size: 0.82rem; color: #64748b; cursor: pointer;
+                   border-left: 3px solid transparent; }
+    .db-nav-item.active { background: #eff6ff; color: #1d4ed8; border-left-color: #3b82f6; font-weight: 600; }
+    .db-content { flex: 1; padding: 1.2rem; }
+    .db-section-title { font-weight: 700; font-size: 0.95rem; color: #1a1a2e; margin-bottom: 0.8rem; }
+    .db-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .db-table th { background: #f1f5f9; text-align: left; padding: 0.4rem 0.6rem;
+                   font-size: 0.76rem; color: #64748b; text-transform: uppercase; }
+    .db-table td { padding: 0.45rem 0.6rem; border-bottom: 1px solid #f1f5f9; color: #334155; }
+    .db-table tr:last-child td { border-bottom: none; }
+    .status-pill { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 20px;
+                   font-size: 0.72rem; font-weight: 600; }
+    .s-stored  { background: #d1fae5; color: #065f46; }
+    .s-pending { background: #fef3c7; color: #92400e; }
+    .perm-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 1rem 0; }
+    .perm-table th { padding: 0.5rem 0.8rem; background: #f8fafc; color: #475569;
+                     font-size: 0.78rem; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; }
+    .perm-table td { padding: 0.5rem 0.8rem; border-bottom: 1px solid #f1f5f9; }
+    .perm-table tr:last-child td { border-bottom: none; }
+    .check { color: #16a34a; }
+    .cross { color: #dc2626; }
+    .btn { padding: 0.35rem 0.9rem; border-radius: 6px; font-size: 0.82rem;
+           font-weight: 600; border: none; cursor: pointer; }
+    .btn-confirm { background: #16a34a; color: #fff; }
+    .info-box { border-radius: 8px; padding: 0.9rem 1.1rem; margin: 1rem 0;
+                font-size: 0.88rem; line-height: 1.5; }
+    .info-box.blue   { background: #eff6ff; border-left: 4px solid #3b82f6; color: #1e40af; }
+    .info-box.yellow { background: #fffbeb; border-left: 4px solid #f59e0b; color: #92400e; }
+    .info-box.green  { background: #f0fdf4; border-left: 4px solid #16a34a; color: #166534; }
+    .info-box.red    { background: #fef2f2; border-left: 4px solid #ef4444; color: #991b1b; }
+    .info-box strong { font-weight: 700; }
+    .page-header { background: #fff; border-radius: 10px; padding: 1.4rem 1.6rem;
+                   margin-bottom: 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .page-header .tags { display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap; }
+    @media (max-width: 700px) {
+      .sidebar { display: none; }
+      .main { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <nav class="sidebar">
+    <div class="sidebar-brand">🌶 <span>ChilliTech</span></div>
+    <div style="padding:0.5rem 1.2rem;font-size:0.72rem;color:#a78bfa;background:#1a1226;border-bottom:1px solid #30363d">👑 యజమాని ఫ్లోలు — Telugu</div>
+
+    <div class="sidebar-section">యజమాని ఫ్లోలు</div>
+    <a href="#" onclick="show('o-overview')" class="active sub">↳ డాష్‌బోర్డ్ అవలోకనం</a>
+    <a href="#" onclick="show('o-perms')" class="sub">↳ ఉద్యోగి అనుమతులు</a>
+    <a href="#" onclick="show('o-audit')" class="sub">↳ ఆడిట్ లాగ్</a>
+    <a href="#" onclick="show('o-loans')" class="sub">↳ రుణ పోర్ట్‌ఫోలియో &amp; రిస్క్</a>
+    <a href="#" onclick="show('o-capacity')" class="sub">↳ సామర్థ్యం &amp; అంగీకరించే పంటలు</a>
+    <a href="#" onclick="show('d-fillrate')" class="sub">↳ పంట వారీగా నింపు రేటు</a>
+
+    <div class="sidebar-section">సంప్రదింపు</div>
+    <a href="#" onclick="show('ref-owner')">యజమాని సహాయ కార్డ్</a>
+  </nav>
+
+  <main class="main">
+
+    <!-- ─── యజమాని: అవలోకనం ─── -->
+    <section id="o-overview" class="active">
+      <div class="page-header">
+        <h1>యజమాని ఫ్లో — డాష్‌బోర్డ్ అవలోకనం</h1>
+        <p class="subtitle">యజమాని అన్నీ చూస్తాడు — ఇన్వెంటరీ, ఆర్థిక వివరాలు, సిబ్బంది కార్యకలాపాలు మరియు సిస్టమ్ కాన్ఫిగ్.</p>
+        <div class="tags"><span class="badge badge-owner">యజమాని</span></div>
+      </div>
+
+      <div class="dashboard-frame">
+        <div class="db-topbar">
+          <span class="db-topbar-brand">ChilliTech</span>
+          <span class="db-topbar-tenant">tenant_001 · GNT1</span>
+          <span class="db-topbar-role"><span class="badge badge-owner">యజమాని</span></span>
+        </div>
+        <div class="db-body">
+          <div class="db-sidenav">
+            <div class="db-nav-item active">అవలోకనం</div>
+            <div class="db-nav-item">లాట్లు</div>
+            <div class="db-nav-item">రైతులు</div>
+            <div class="db-nav-item">లెడ్జర్</div>
+            <div class="db-nav-item">సిబ్బంది</div>
+            <div class="db-nav-item">ఆడిట్ లాగ్</div>
+            <div class="db-nav-item">కాన్ఫిగ్</div>
+          </div>
+          <div class="db-content">
+            <div class="db-section-title">ఈరోజు — 06 జూన్ 2026</div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.6rem;margin-bottom:1.2rem">
+              <div style="background:#eff6ff;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.4rem;font-weight:700;color:#1d4ed8">48</div>
+                <div style="font-size:0.72rem;color:#555">యాక్టివ్ లాట్లు</div>
+              </div>
+              <div style="background:#fef3c7;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.4rem;font-weight:700;color:#d97706">3</div>
+                <div style="font-size:0.72rem;color:#555">పెండింగ్ నిర్ధారణలు</div>
+              </div>
+              <div style="background:#f0fdf4;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.4rem;font-weight:700;color:#16a34a">₹1.2L</div>
+                <div style="font-size:0.72rem;color:#555">అడ్వాన్సులు బాకీ</div>
+              </div>
+              <div style="background:#faf5ff;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.4rem;font-weight:700;color:#6b21a8">12</div>
+                <div style="font-size:0.72rem;color:#555">యాక్టివ్ రైతులు</div>
+              </div>
+            </div>
+            <div class="db-section-title">ఇటీవలి కార్యకలాపాలు</div>
+            <table class="db-table">
+              <thead><tr><th>సమయం</th><th>చర్య</th><th>ఎవరు</th><th>రైతు</th><th>స్థితి</th></tr></thead>
+              <tbody>
+                <tr><td>10:14 AM</td><td>ఇన్‌వార్డ్ నిర్ధారించబడింది</td><td>సురేశ్</td><td>రాజు కుమార్</td><td><span class="status-pill s-stored">నిల్వలో</span></td></tr>
+                <tr><td>10:02 AM</td><td>ఇన్‌వార్డ్ అభ్యర్థించబడింది (WA)</td><td>AI బాట్</td><td>రాజు కుమార్</td><td><span class="status-pill s-pending">పెండింగ్</span></td></tr>
+                <tr><td>9:30 AM</td><td>అవుట్‌వార్డ్ అభ్యర్థించబడింది (WA)</td><td>AI బాట్</td><td>వెంకట్ రెడ్డి</td><td><span class="status-pill s-pending">పెండింగ్</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box blue">
+        <strong>యజమాని మాత్రమే చూడగలిగేవి:</strong> సిబ్బంది నిర్వహణ, పూర్తి ఆడిట్ లాగ్, సిస్టమ్ కాన్ఫిగ్ (చార్జ్ రేట్లు, చాంబర్లు, రకాలు), అన్ని రైతుల ఆర్థిక రికార్డులు, మరియు అన్ని రైతుల నిల్వ వ్యాపారం యొక్క పూర్తి చిత్రం.
+      </div>
+    </section>
+
+    <!-- ─── యజమాని: అనుమతులు ─── -->
+    <section id="o-perms">
+      <div class="page-header">
+        <h1>యజమాని ఫ్లో — ఉద్యోగి అనుమతులు</h1>
+        <p class="subtitle">యజమానులు ప్రతి ఉద్యోగి ఏమి చేయగలరో ఏమి చేయలేరో ఖచ్చితంగా నియంత్రిస్తారు. కోడ్ మార్పు అవసరం లేదు — ఇది డాష్‌బోర్డ్ సెట్టింగ్.</p>
+        <div class="tags"><span class="badge badge-owner">యజమాని</span></div>
+      </div>
+
+      <div class="info-box blue">
+        <strong>ఇది ఎందుకు ఉంది:</strong> నమ్మకమైన సీనియర్ ఉద్యోగి ఆర్థిక వ్యవహారాలు నిర్వహించవచ్చు; జూనియర్ సిబ్బంది కేవలం ఇన్‌వార్డ్‌లు నిర్ధారించవచ్చు. యజమాని ఇది ఉద్యోగి వారీగా నిర్ణయిస్తాడు మరియు ఎప్పుడైనా మార్చవచ్చు.
+      </div>
+
+      <div class="dashboard-frame">
+        <div class="db-topbar">
+          <span class="db-topbar-brand">ChilliTech</span>
+          <span class="db-topbar-tenant">tenant_001</span>
+          <span class="db-topbar-role"><span class="badge badge-owner">యజమాని</span></span>
+        </div>
+        <div class="db-body">
+          <div class="db-sidenav">
+            <div class="db-nav-item">అవలోకనం</div>
+            <div class="db-nav-item active">సిబ్బంది</div>
+          </div>
+          <div class="db-content">
+            <div class="db-section-title">ఉద్యోగి: సురేశ్ కుమార్</div>
+            <table class="perm-table">
+              <thead><tr><th>అనుమతి</th><th>అనుమతించబడిందా?</th><th>వివరాలు</th></tr></thead>
+              <tbody>
+                <tr><td>ఏ రైతు ఆర్థిక రికార్డులైనా చూడటం</td><td><span class="check">✔ అవును</span></td><td>డిఫాల్ట్‌గా ఆన్</td></tr>
+                <tr><td>రైతు తరపున ఇన్‌వార్డ్ నిర్ధారించడం</td><td><span class="check">✔ అవును</span></td><td>డిఫాల్ట్‌గా ఆన్</td></tr>
+                <tr><td>రైతు తరపున అవుట్‌వార్డ్ నిర్ధారించడం</td><td><span class="check">✔ అవును</span></td><td>డిఫాల్ట్‌గా ఆన్</td></tr>
+                <tr><td>రికార్డులలో సర్దుబాట్లు చేయడం</td><td><span class="cross">✗ లేదు</span></td><td>డిఫాల్ట్‌గా ఆఫ్ — యజమాని మంజూరు అవసరం</td></tr>
+                <tr><td>అన్ని రైతులను చూడడం (నిర్ణయించిన వారే కాదు)</td><td><span class="check">✔ అవును</span></td><td>డిఫాల్ట్‌గా ఆన్</td></tr>
+                <tr><td>ఇన్వెంటరీ తనిఖీ (స్టాక్-టేక్) చేయడం</td><td><span class="cross">✗ లేదు</span></td><td>Post-MVP ఫీచర్</td></tr>
+                <tr><td>పంట రుణ లావాదేవీలు నమోదు చేయడం</td><td><span class="cross">✗ లేదు</span></td><td>డిఫాల్ట్‌గా ఆఫ్ — యజమాని మంజూరు అవసరం</td></tr>
+                <tr><td>రుణ బాలెన్స్ &amp; చరిత్ర చూడడం</td><td><span class="check">✔ అవును</span></td><td>ఆర్థిక విజిబిలిటీ అనుమతి ప్రకారం</td></tr>
+              </tbody>
+            </table>
+            <div style="margin-top:0.8rem;display:flex;gap:0.5rem">
+              <button class="btn btn-confirm">మార్పులు సేవ్ చేయి</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── యజమాని: ఆడిట్ లాగ్ ─── -->
+    <section id="o-audit">
+      <div class="page-header">
+        <h1>యజమాని ఫ్లో — ఆడిట్ లాగ్</h1>
+        <p class="subtitle">ఇన్వెంటరీ లేదా డబ్బుపై ప్రతి చర్య శాశ్వతంగా నమోదు చేయబడుతుంది — ఎవరు చేశారు, ఎప్పుడు, ఎవరి తరపున. ఏదీ నిశ్శబ్దంగా తొలగించబడదు.</p>
+        <div class="tags"><span class="badge badge-owner">యజమాని</span></div>
+      </div>
+
+      <div class="info-box green">
+        <strong>ఇది ఎందుకు ముఖ్యమో:</strong> "మీ అనుమతి లేకుండా నా లాట్ విడుదల చేశారు" లేదా "బరువు తప్పు" అని వివాదం వస్తే — ఆడిట్ లాగ్ అది పరిష్కరించే రికార్డు. ఆపరేటర్‌ను, ఉద్యోగిని మరియు రైతును సమానంగా రక్షిస్తుంది.
+      </div>
+
+      <div class="dashboard-frame">
+        <div class="db-topbar">
+          <span class="db-topbar-brand">ChilliTech</span>
+          <span class="db-topbar-tenant">tenant_001</span>
+          <span class="db-topbar-role"><span class="badge badge-owner">యజమాని</span></span>
+        </div>
+        <div class="db-body">
+          <div class="db-sidenav">
+            <div class="db-nav-item active">ఆడిట్ లాగ్</div>
+          </div>
+          <div class="db-content">
+            <div class="db-section-title">ఆడిట్ లాగ్ — అన్ని చర్యలు</div>
+            <table class="db-table">
+              <thead><tr><th>సమయం</th><th>చర్య</th><th>నటుడు</th><th>తరపున</th><th>వివరాలు</th></tr></thead>
+              <tbody>
+                <tr><td>10:14 AM</td><td>ఇన్‌వార్డ్ నిర్ధారించబడింది</td><td>సురేశ్ (ఉద్యోగి)</td><td>రాజు కుమార్ (రైతు)</td><td>లాట్ GNT1-20260606-0001 · 975 kg · C2</td></tr>
+                <tr><td>10:13 AM</td><td>WhatsApp ద్వారా YES రిప్లై</td><td>సురేశ్ (ఉద్యోగి)</td><td>—</td><td>పెండింగ్ చర్య #PA-0041 నిర్ధారించబడింది</td></tr>
+                <tr><td>10:02 AM</td><td>ఇన్‌వార్డ్ ప్రతిపాదించబడింది</td><td>AI బాట్</td><td>రాజు కుమార్ (రైతు)</td><td>200 బస్తాలు Teja — నమ్మకం: అధికం</td></tr>
+                <tr><td>9:30 AM</td><td>అవుట్‌వార్డ్ ప్రతిపాదించబడింది</td><td>AI బాట్</td><td>వెంకట్ రెడ్డి (రైతు)</td><td>లాట్ GNT1-20260606-0001 — నమ్మకం: అధికం</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box yellow">
+        <strong>సర్దుబాట్లు కూడా లాగ్ చేయబడతాయి:</strong> యజమాని బరువు లేదా ఆర్థిక రికార్డు మార్చినప్పుడు, పాత విలువ, కొత్త విలువ, కారణం, యజమాని పేరు మరియు timestamp అన్నీ ఆడిట్ లాగ్‌లో శాశ్వతంగా నమోదు చేయబడతాయి. ఏ సర్దుబాటు నిశ్శబ్దంగా చేయలేరు.
+      </div>
+    </section>
+
+    <!-- ─── యజమాని: రుణ పోర్ట్‌ఫోలియో & రిస్క్ ─── -->
+    <section id="o-loans">
+      <div class="page-header">
+        <h1>యజమాని ఫ్లో — రుణ పోర్ట్‌ఫోలియో &amp; రిస్క్ సారాంశం</h1>
+        <p class="subtitle">యజమాని మొత్తం అప్పు పుస్తకం చూస్తాడు — అన్ని రైతుల నుండి మొత్తం బాకీలు, సెక్యూరిటీ స్థితి వారీగా విభజించబడి. ఏ రైతు వివరాలైనా డ్రిల్-డౌన్ చేయవచ్చు.</p>
+        <div class="tags"><span class="badge badge-owner">యజమాని</span></div>
+      </div>
+
+      <div class="info-box blue">
+        <strong>ఈ వ్యూ ఎందుకు ముఖ్యమో:</strong> మార్కెట్ ధరలు తగ్గితే, నిన్న "సురక్షితంగా" ఉన్న రుణాలు నేడు "పాక్షికంగా సురక్షితం" అవుతాయి. పోర్ట్‌ఫోలియో వ్యూ ఒక్క స్క్రీన్‌లో అన్ని రైతుల ప్రస్తుత రిస్క్ స్థితి చూపుతుంది — యజమాని ఎవరికి ఫోన్ చేయాలో తెలుసుకుంటాడు.
+      </div>
+
+      <div class="dashboard-frame">
+        <div class="db-topbar">
+          <span class="db-topbar-brand">ChilliTech</span>
+          <span class="db-topbar-tenant">tenant_001 · GNT1</span>
+          <span class="db-topbar-role"><span class="badge badge-owner">యజమాని</span></span>
+        </div>
+        <div class="db-body">
+          <div class="db-sidenav">
+            <div class="db-nav-item">అవలోకనం</div>
+            <div class="db-nav-item">లాట్లు</div>
+            <div class="db-nav-item">రైతులు</div>
+            <div class="db-nav-item">లెడ్జర్</div>
+            <div class="db-nav-item active">రుణాలు</div>
+            <div class="db-nav-item">సిబ్బంది</div>
+            <div class="db-nav-item">ఆడిట్ లాగ్</div>
+          </div>
+          <div class="db-content">
+            <div class="db-section-title">రుణ పోర్ట్‌ఫోలియో — 07 జూన్ 2026 (నేరుగా)</div>
+
+            <!-- సారాంశ కార్డులు -->
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.6rem;margin-bottom:1.2rem">
+              <div style="background:#eff6ff;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.3rem;font-weight:700;color:#1d4ed8">₹2.85L</div>
+                <div style="font-size:0.72rem;color:#555">మొత్తం బాకీ</div>
+              </div>
+              <div style="background:#f0fdf4;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.3rem;font-weight:700;color:#16a34a">₹1.80L</div>
+                <div style="font-size:0.72rem;color:#555">సురక్షితం (నిల్వ ≥ బాలెన్స్)</div>
+              </div>
+              <div style="background:#fef3c7;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.3rem;font-weight:700;color:#d97706">₹75,000</div>
+                <div style="font-size:0.72rem;color:#555">పాక్షికంగా సురక్షితం</div>
+              </div>
+              <div style="background:#fef2f2;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.3rem;font-weight:700;color:#dc2626">₹30,000</div>
+                <div style="font-size:0.72rem;color:#555">అసురక్షితం (నిల్వ లేదు)</div>
+              </div>
+            </div>
+
+            <!-- రైతుల వివరాలు — రిస్క్ క్రమంలో -->
+            <div class="db-section-title">రైతు వారీగా — రిస్క్ క్రమంలో ↑</div>
+            <table class="db-table">
+              <thead>
+                <tr>
+                  <th>రైతు</th>
+                  <th>బాకీ</th>
+                  <th>సెక్యూరిటీ విలువ</th>
+                  <th>కవరేజ్</th>
+                  <th>స్థితి</th>
+                  <th>యాక్టివ్ లాట్లు</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>మోహన్ దాస్</td>
+                  <td>₹30,000</td>
+                  <td>₹0</td>
+                  <td>0%</td>
+                  <td><span class="status-pill" style="background:#fee2e2;color:#991b1b">అసురక్షితం</span></td>
+                  <td>0 (విడుదల అయ్యాయి)</td>
+                  <td><button class="btn btn-sm" style="font-size:0.72rem;padding:0.2rem 0.5rem">చూడు</button></td>
+                </tr>
+                <tr>
+                  <td>వెంకట్ రెడ్డి</td>
+                  <td>₹75,000</td>
+                  <td>₹42,000</td>
+                  <td>56%</td>
+                  <td><span class="status-pill" style="background:#fef9c3;color:#854d0e">పాక్షికంగా సురక్షితం</span></td>
+                  <td>2 లాట్లు · 560 kg</td>
+                  <td><button class="btn btn-sm" style="font-size:0.72rem;padding:0.2rem 0.5rem">చూడు</button></td>
+                </tr>
+                <tr>
+                  <td>రాజు కుమార్</td>
+                  <td>₹45,000</td>
+                  <td>₹63,000</td>
+                  <td>140%</td>
+                  <td><span class="status-pill" style="background:#dcfce7;color:#166534">సురక్షితం</span></td>
+                  <td>2 లాట్లు · 1,120 kg</td>
+                  <td><button class="btn btn-sm" style="font-size:0.72rem;padding:0.2rem 0.5rem">చూడు</button></td>
+                </tr>
+                <tr>
+                  <td>శ్రీనివాస్ రావు</td>
+                  <td>₹1,35,000</td>
+                  <td>₹1,89,000</td>
+                  <td>140%</td>
+                  <td><span class="status-pill" style="background:#dcfce7;color:#166534">సురక్షితం</span></td>
+                  <td>3 లాట్లు · 3,360 kg</td>
+                  <td><button class="btn btn-sm" style="font-size:0.72rem;padding:0.2rem 0.5rem">చూడు</button></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- కాన్ఫిగ్ నోట్ -->
+            <div style="margin-top:1rem;font-size:0.78rem;color:#888;border-top:1px solid #e5e7eb;padding-top:0.6rem">
+              సెక్యూరిటీ ఫ్యాక్టర్: <strong>75%</strong> &nbsp;|&nbsp; వాడిన మార్కెట్ ధర: <strong>₹75/kg (తేజా, 07 జూన్ 2026)</strong> &nbsp;|&nbsp; <a href="#" style="color:#1d4ed8">కాన్ఫిగ్‌లో సెక్యూరిటీ ఫ్యాక్టర్ మార్చు →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2 style="margin-top:1.5rem">రైతు నిల్వ విడుదల చేసినప్పుడు — ఏమి మారుతుంది</h2>
+      <table class="db-table">
+        <thead><tr><th>సంఘటన</th><th>రుణంపై ప్రభావం</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>రైతు సెక్యూరిటీ లాట్ పూర్తిగా విడుదల చేశాడు</td>
+            <td>ఆ లాట్ security_lot_ids నుండి తొలగిపోతుంది. సెక్యూరిటీ విలువ తగ్గుతుంది. స్థితి సురక్షితం → పాక్షికం లేదా అసురక్షితంగా మారవచ్చు. యజమాని వెంటనే చూస్తాడు.</td>
+          </tr>
+          <tr>
+            <td>రైతు కొత్త నిల్వ వేశాడు (ఇన్‌వార్డ్)</td>
+            <td>ఉద్యోగి కొత్త లాట్‌ను రుణం security_lot_ids‌కు చేర్చవచ్చు. సెక్యూరిటీ విలువ పెరుగుతుంది.</td>
+          </tr>
+          <tr>
+            <td>మార్కెట్ ధర తగ్గింది</td>
+            <td>సెక్యూరిటీ విలువ తగ్గుతుంది (సూత్రం నేరుగా మళ్ళీ లెక్కిస్తుంది). తదుపరి లోడ్‌లో పోర్ట్‌ఫోలియో వ్యూ రిఫ్రెష్ అవుతుంది.</td>
+          </tr>
+          <tr>
+            <td>రైతు రుణం పూర్తిగా చెల్లించాడు</td>
+            <td>ఉద్యోగి full_repayment లావాదేవీ నమోదు చేస్తాడు. రుణ స్థితి "మూసివేసింది"గా మారుతుంది. యాక్టివ్ పోర్ట్‌ఫోలియో నుండి తొలగిపోతుంది.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ─── యజమాని: సామర్థ్యం & అంగీకరించే పంటలు ─── -->
+    <section id="o-capacity">
+      <div class="page-header">
+        <h1>యజమాని ఫ్లో — నిల్వ సామర్థ్యం &amp; అంగీకరించే పంటలు</h1>
+        <p class="subtitle">ప్రతి సౌకర్యం యొక్క మొత్తం సామర్థ్యం మరియు లక్ష్య నింపు రేటు నిర్ణయించండి, మరియు ఏ పంటలు అంగీకరించబడతాయో పేర్కొనండి. ఇవి కాన్ఫిగ్ విలువలు — అప్‌డేట్ చేయడానికి కోడ్ మార్పు అవసరం లేదు.</p>
+        <div class="tags"><span class="badge badge-owner">యజమాని</span></div>
+      </div>
+
+      <div class="info-box blue">
+        <strong>సౌకర్యం వారీగా ఎందుకు?</strong> వేర్వేరు కోల్డ్ రూమ్‌లు వేర్వేరు ఉష్ణోగ్రత శ్రేణులలో పని చేస్తాయి — ఒకటి మిరప కోసం, మరొకటి ఉల్లి లేదా బంగాళదుంప కోసం. అంగీకరించే పంటలు సౌకర్యం వారీగా కాన్ఫిగ్ చేయడం వల్ల సిస్టమ్ ఇన్‌వార్డ్ సమయంలో తప్పు పంటలు వేయకుండా నిరోధిస్తుంది, మరియు నింపు రేటు ట్రాకింగ్ పంట రకం వారీగా అర్థవంతంగా ఉంటుంది.
+      </div>
+
+      <div class="dashboard-frame" style="margin-bottom:1.5rem">
+        <div class="db-topbar">
+          <span class="db-topbar-brand">ChilliTech</span>
+          <span class="db-topbar-tenant">tenant_001</span>
+          <span class="db-topbar-role"><span class="badge badge-owner">యజమాని</span></span>
+        </div>
+        <div class="db-body">
+          <div class="db-sidenav">
+            <div class="db-nav-item">అవలోకనం</div>
+            <div class="db-nav-item">లాట్లు</div>
+            <div class="db-nav-item">రైతులు</div>
+            <div class="db-nav-item">లెడ్జర్</div>
+            <div class="db-nav-item">రుణాలు</div>
+            <div class="db-nav-item">సిబ్బంది</div>
+            <div class="db-nav-item active">కాన్ఫిగ్</div>
+          </div>
+          <div class="db-content">
+            <div class="db-section-title">నిల్వ సౌకర్యాలు — సామర్థ్యం &amp; అంగీకరించే పంటలు</div>
+
+            <!-- సౌకర్యం కార్డ్: GNT1 -->
+            <div style="border:1px solid #e5e7eb;border-radius:8px;padding:1rem;margin-bottom:1rem">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem">
+                <div>
+                  <span style="font-weight:600;font-size:0.95rem">GNT1 — గుంటూరు మెయిన్ స్టోర్</span>
+                  <span style="font-size:0.78rem;color:#888;margin-left:0.5rem">గుంటూరు, ఆంధ్రప్రదేశ్</span>
+                </div>
+                <span class="status-pill s-stored" style="font-size:0.72rem">యాక్టివ్</span>
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.8rem;margin-bottom:0.8rem">
+                <div>
+                  <label style="font-size:0.75rem;color:#555;display:block;margin-bottom:0.25rem">మొత్తం సామర్థ్యం (క్వింటాళ్ళు)</label>
+                  <input type="text" value="5000" style="width:100%;padding:0.35rem 0.5rem;border:1px solid #d1d5db;border-radius:5px;font-size:0.85rem"/>
+                </div>
+                <div>
+                  <label style="font-size:0.75rem;color:#555;display:block;margin-bottom:0.25rem">లక్ష్య ఆక్యుపెన్సీ (%)</label>
+                  <input type="text" value="85" style="width:100%;padding:0.35rem 0.5rem;border:1px solid #d1d5db;border-radius:5px;font-size:0.85rem"/>
+                  <div style="font-size:0.7rem;color:#888;margin-top:0.2rem">పై స్థాయిలో పసుపు, దిగువన పచ్చగా చూపిస్తుంది</div>
+                </div>
+                <div>
+                  <label style="font-size:0.75rem;color:#555;display:block;margin-bottom:0.25rem">ఉష్ణోగ్రత పరిధి</label>
+                  <input type="text" value="−2°C నుండి +4°C" style="width:100%;padding:0.35rem 0.5rem;border:1px solid #d1d5db;border-radius:5px;font-size:0.85rem"/>
+                  <div style="font-size:0.7rem;color:#888;margin-top:0.2rem">సంప్రదింపు మాత్రమే, సిస్టమ్ లాజిక్‌లో వాడదు</div>
+                </div>
+              </div>
+
+              <div>
+                <label style="font-size:0.75rem;color:#555;display:block;margin-bottom:0.4rem">అంగీకరించే పంటలు <span style="color:#888">(వర్తించేవి గుర్తించండి — టెనెంట్ పంట జాబితా నుండి)</span></label>
+                <div style="display:flex;gap:1.2rem;flex-wrap:wrap">
+                  <label style="font-size:0.82rem;display:flex;align-items:center;gap:0.3rem"><input type="checkbox" checked/> ఎర్ర మిర్చి</label>
+                  <label style="font-size:0.82rem;display:flex;align-items:center;gap:0.3rem"><input type="checkbox" checked/> పొడి మిర్చి</label>
+                  <label style="font-size:0.82rem;display:flex;align-items:center;gap:0.3rem"><input type="checkbox"/> ఉల్లిపాయ</label>
+                  <label style="font-size:0.82rem;display:flex;align-items:center;gap:0.3rem"><input type="checkbox"/> బంగాళదుంప</label>
+                  <label style="font-size:0.82rem;display:flex;align-items:center;gap:0.3rem"><input type="checkbox"/> అల్లం</label>
+                </div>
+                <div style="font-size:0.72rem;color:#888;margin-top:0.3rem">గుర్తించని పంట ఇన్‌వార్డ్ నిరాకరించబడుతుంది. కొత్త పంటలు ముందు టెనెంట్ కేటలాగ్‌లో చేర్చండి (కాన్ఫిగ్ → పంటలు).</div>
+              </div>
+
+              <div style="margin-top:0.8rem">
+                <button class="btn btn-confirm">GNT1 సెట్టింగ్‌లు సేవ్ చేయి</button>
+              </div>
+            </div>
+
+            <div style="font-size:0.82rem;color:#1d4ed8;cursor:pointer">+ మరో సౌకర్యం చేర్చు</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box green">
+        <strong>లక్ష్య ఆక్యుపెన్సీ ఏమి చేస్తుంది:</strong> ఇది ఇన్‌వార్డ్‌లను అడ్డుకోదు — లక్ష్యం దాటినా సిస్టమ్ నిల్వ స్వీకరిస్తుంది. ఇది కేవలం నింపు రేటు డాష్‌బోర్డ్ కోసం దృశ్యమాన పరిమితి: పచ్చ = లక్ష్యానికి దిగువన, పసుపు = లక్ష్యం దగ్గర లేదా పైన, ఎరుపు = 100% కంటే ఎక్కువ (డేటా లోపం — భౌతిక తనిఖీ అవసరం). యజమాని ఎప్పుడైనా లక్ష్యం మార్చవచ్చు; వెంటనే నింపు రేటు వ్యూలో మారుతుంది.
+      </div>
+    </section>
+
+    <!-- ─── యజమాని / ఉద్యోగి: పంట వారీగా నింపు రేటు ─── -->
+    <section id="d-fillrate">
+      <div class="page-header">
+        <h1>డాష్‌బోర్డ్ — పంట వారీగా నింపు రేటు</h1>
+        <p class="subtitle">అన్ని సౌకర్యాలలో ప్రస్తుత నిల్వ ఆక్యుపెన్సీ, పంట రకం వారీగా విభజించబడింది. ప్రతి సౌకర్యం లక్ష్య ఆక్యుపెన్సీకి వ్యతిరేకంగా రంగు కోడ్ చేయబడింది.</p>
+        <div class="tags"><span class="badge badge-employee">ఉద్యోగి</span><span class="badge badge-owner">యజమాని</span></div>
+      </div>
+
+      <div class="info-box blue">
+        <strong>ఎలా లెక్కిస్తారు:</strong> నింపు రేటు = యాక్టివ్ లాట్ నికర బరువు మొత్తం ÷ సౌకర్యం మొత్తం సామర్థ్యం, లాట్ టేబుల్ నుండి నేరుగా లెక్కిస్తారు. నిల్వ చేయబడిన ప్రత్యేక కౌంటర్ లేదు. ఉద్యోగి చాంబర్ నిర్ణయానికి; యజమాని పంట మిక్స్ మరియు సామర్థ్య headroom చూడడానికి వాడతారు.
+      </div>
+
+      <div class="dashboard-frame">
+        <div class="db-topbar">
+          <span class="db-topbar-brand">ChilliTech</span>
+          <span class="db-topbar-tenant">tenant_001 · GNT1</span>
+        </div>
+        <div class="db-body">
+          <div class="db-sidenav">
+            <div class="db-nav-item active">అవలోకనం</div>
+            <div class="db-nav-item">లాట్లు</div>
+            <div class="db-nav-item">రైతులు</div>
+          </div>
+          <div class="db-content">
+            <div class="db-section-title">నింపు రేటు — GNT1 (గుంటూరు మెయిన్ స్టోర్) · 07 జూన్ 2026</div>
+
+            <!-- మొత్తం సామర్థ్య బార్ -->
+            <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;padding:1rem;margin-bottom:1.2rem">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.4rem">
+                <span style="font-weight:600;font-size:0.9rem">మొత్తం ఆక్యుపెన్సీ</span>
+                <span style="font-size:0.82rem;color:#555">3,240 క్వింటాళ్ళు / 5,000 క్వింటాళ్ళు &nbsp;·&nbsp; <strong style="color:#d97706">64.8%</strong> &nbsp;·&nbsp; లక్ష్యం: 85%</span>
+              </div>
+              <div style="background:#e5e7eb;border-radius:4px;height:14px;overflow:hidden">
+                <div style="width:64.8%;background:#22c55e;height:100%;border-radius:4px"></div>
+              </div>
+              <div style="font-size:0.72rem;color:#888;margin-top:0.3rem">🟢 లక్ష్యానికి దిగువన — 1,760 క్వింటాళ్ళు headroom మిగిలింది</div>
+            </div>
+
+            <!-- పంట వారీగా -->
+            <div class="db-section-title">పంట రకం వారీగా వివరాలు</div>
+            <table class="db-table" style="margin-bottom:1rem">
+              <thead>
+                <tr><th>పంట</th><th>యాక్టివ్ లాట్లు</th><th>నిల్వ (క్విం.)</th><th>సౌకర్యం %</th><th>నింపు బార్</th><th>స్థితి</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>ఎర్ర మిర్చి (తేజా S17)</strong></td>
+                  <td>28 లాట్లు</td>
+                  <td>1,980</td>
+                  <td>39.6%</td>
+                  <td>
+                    <div style="background:#e5e7eb;border-radius:3px;height:10px;width:120px;overflow:hidden">
+                      <div style="width:46.6%;background:#22c55e;height:100%;border-radius:3px"></div>
+                    </div>
+                  </td>
+                  <td><span class="status-pill" style="background:#dcfce7;color:#166534;font-size:0.7rem">లక్ష్యానికి దిగువన</span></td>
+                </tr>
+                <tr>
+                  <td><strong>ఎర్ర మిర్చి (గుంటూరు సన్నం)</strong></td>
+                  <td>14 లాట్లు</td>
+                  <td>890</td>
+                  <td>17.8%</td>
+                  <td>
+                    <div style="background:#e5e7eb;border-radius:3px;height:10px;width:120px;overflow:hidden">
+                      <div style="width:20.9%;background:#22c55e;height:100%;border-radius:3px"></div>
+                    </div>
+                  </td>
+                  <td><span class="status-pill" style="background:#dcfce7;color:#166534;font-size:0.7rem">లక్ష్యానికి దిగువన</span></td>
+                </tr>
+                <tr>
+                  <td><strong>పొడి మిర్చి (మిక్స్)</strong></td>
+                  <td>6 లాట్లు</td>
+                  <td>370</td>
+                  <td>7.4%</td>
+                  <td>
+                    <div style="background:#e5e7eb;border-radius:3px;height:10px;width:120px;overflow:hidden">
+                      <div style="width:8.7%;background:#22c55e;height:100%;border-radius:3px"></div>
+                    </div>
+                  </td>
+                  <td><span class="status-pill" style="background:#dcfce7;color:#166534;font-size:0.7rem">లక్ష్యానికి దిగువన</span></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- చాంబర్ వారీగా -->
+            <div class="db-section-title">చాంబర్ వారీగా వివరాలు</div>
+            <table class="db-table">
+              <thead>
+                <tr><th>చాంబర్</th><th>సామర్థ్యం (క్విం.)</th><th>ఉపయోగించినది</th><th>నింపు %</th><th>నిల్వ పంటలు</th><th>స్థితి</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>C1</td><td>1,200</td><td>1,100</td><td>91.7%</td>
+                  <td>ఎర్ర మిర్చి (తేజా)</td>
+                  <td><span class="status-pill" style="background:#fef9c3;color:#854d0e;font-size:0.7rem">లక్ష్యం దగ్గర</span></td>
+                </tr>
+                <tr>
+                  <td>C2</td><td>1,200</td><td>880</td><td>73.3%</td>
+                  <td>ఎర్ర మిర్చి (తేజా, సన్నం)</td>
+                  <td><span class="status-pill" style="background:#dcfce7;color:#166534;font-size:0.7rem">లక్ష్యానికి దిగువన</span></td>
+                </tr>
+                <tr>
+                  <td>C3</td><td>1,600</td><td>1,260</td><td>78.8%</td>
+                  <td>ఎర్ర మిర్చి (సన్నం), పొడి మిర్చి</td>
+                  <td><span class="status-pill" style="background:#dcfce7;color:#166534;font-size:0.7rem">లక్ష్యానికి దిగువన</span></td>
+                </tr>
+                <tr>
+                  <td>C4 (వేర్పాటు)</td><td>1,000</td><td>0</td><td>0%</td>
+                  <td>—</td>
+                  <td><span class="status-pill" style="background:#f1f5f9;color:#64748b;font-size:0.7rem">ఖాళీ</span></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div style="margin-top:0.8rem;font-size:0.78rem;color:#888;border-top:1px solid #e5e7eb;padding-top:0.6rem">
+              🟢 లక్ష్యానికి దిగువన &nbsp;|&nbsp; 🟡 లక్ష్యం దగ్గర లేదా పైన (≥85%) &nbsp;|&nbsp; 🔴 సామర్థ్యం మించింది (>100%) — భౌతిక తనిఖీ అవసరం &nbsp;|&nbsp; యాక్టివ్ లాట్ బరువుల నుండి నేరుగా లెక్కిస్తారు.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── యజమాని సహాయ కార్డ్ ─── -->
+    <section id="ref-owner">
+      <div class="page-header">
+        <h1>యజమాని — సహాయ కార్డ్</h1>
+        <p class="subtitle">ఉద్యోగులకు మించి యజమానులు ఏమి చేయగలరు. పర్యవేక్షణ, కాన్ఫిగ్ మరియు అసాధారణ పరిస్థితుల నిర్వహణపై దృష్టి.</p>
+      </div>
+
+      <div class="role-card owner">
+        <h3>👑 యజమానిగా, మీకు పూర్తి నియంత్రణ ఉంది:</h3>
+        <ul>
+          <li class="can">✅ ఉద్యోగి చేయగలిగేవన్నీ</li>
+          <li class="can">✅ <strong>రికార్డులు సర్దుబాటు చేయండి</strong> — తప్పు బరువు లేదా లెడ్జర్ నమోదు దిద్దుకోండి (లాగ్ చేసిన కారణంతో)</li>
+          <li class="can">✅ <strong>సిబ్బందిని నిర్వహించండి</strong> — ఉద్యోగులను చేర్చండి, నిష్క్రియం చేయండి, వ్యక్తి వారీగా అనుమతులు నిర్ణయించండి</li>
+          <li class="can">✅ <strong>పూర్తి ఆడిట్ జాబితా చూడండి</strong> — ఎవరు ఏమి చేశారో ఎప్పుడు చేశారో ఖచ్చితంగా చూడండి</li>
+          <li class="can">✅ <strong>సిస్టమ్ కాన్ఫిగ్ మార్చండి</strong> — నిల్వ రుసుము రేట్లు, చాంబర్ లేఅవుట్, రకాలు</li>
+          <li class="can">✅ <strong>అన్ని ఆర్థిక రికార్డులు చూడండి</strong> — అన్ని రైతుల అడ్వాన్సులు, బాకీలు, పూర్తిళ్ళు</li>
+          <li class="can">✅ <strong>రైతు డేటా తొలగించండి లేదా అజ్ఞాతీకరించండి</strong> అభ్యర్థనపై (గోప్యత సమ్మతి)</li>
+        </ul>
+      </div>
+
+      <h2>సర్దుబాటు చేయడం (రికార్డు దిద్దుకోవడం)</h2>
+      <div class="info-box red">
+        <strong>సర్దుబాట్లు ఎల్లప్పుడూ లాగ్ చేయబడతాయి.</strong> మీరు బరువు లేదా ఆర్థిక రికార్డు నిశ్శబ్దంగా మార్చలేరు. ప్రతి సర్దుబాటుకు వ్రాసిన కారణం అవసరం మరియు ఆడిట్ లాగ్‌లో శాశ్వతంగా నమోదు చేయబడుతుంది — ఎవరు మార్చారు, ముందు ఏముంది, ఇప్పుడు ఏముంది, మరియు ఎందుకు.
+      </div>
+
+      <div class="flow-steps">
+        <div class="flow-step owner">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">దిద్దుకోవాల్సిన లాట్ లేదా లెడ్జర్ నమోదుకు వెళ్ళండి</div>
+          </div>
+        </div>
+        <div class="flow-step owner">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">"సర్దుబాటు చేయి" క్లిక్ చేయి — కొత్త విలువ మరియు కారణం నమోదు చేయి</div>
+            <div class="step-desc">ఉదా. "తిరిగి తూకం తర్వాత బరువు దిద్దుబాటు — అసలు బస్తాల లెక్క తప్పు"</div>
+          </div>
+        </div>
+        <div class="flow-step system">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">ఆడిట్ లాగ్ నమోదు స్వయంచాలకంగా సృష్టించబడుతుంది</div>
+            <div class="step-desc">పాత విలువ, కొత్త విలువ, కారణం, మీ పేరు మరియు timestamp అన్నీ శాశ్వతంగా నమోదు చేయబడతాయి.</div>
+          </div>
+        </div>
+      </div>
+
+      <h2>సిస్టమ్ కాన్ఫిగ్ మార్చడం</h2>
+      <div class="info-box blue">
+        <strong>కాన్ఫిగ్ మారుస్తే కోడ్ మారదు.</strong> నిల్వ రుసుము రేటు, కొత్త రకం చేర్చడం, చాంబర్ లేఅవుట్ అప్‌డేట్ — ఇవన్నీ డాష్‌బోర్డ్‌లో కాన్ఫిగ్ సెట్టింగ్‌లు. భవిష్యత్ కస్టమర్ నంబర్ 2 వేరే రకాలు లేదా వేరే చార్జ్ రేట్లు కోరుకుంటే — కాన్ఫిగ్ మార్పు మాత్రమే, కోడ్ మార్పు కాదు.
+      </div>
+
+      <h2>ఉద్యోగి అనుమతి అప్‌డేట్ చేయడం</h2>
+      <div class="info-box yellow">
+        <strong>సిబ్బంది → ఉద్యోగి పేరు → అనుమతులు సెట్ చేయి → మార్పులు సేవ్ చేయి.</strong> ఎప్పుడైనా మార్చవచ్చు. ఉదా. నమ్మకమైన ఉద్యోగికి "సర్దుబాట్లు చేయడం" అనుమతి ఇవ్వడం, లేదా కొత్త ఉద్యోగిని జోడించడం, లేదా నిష్క్రమించిన ఉద్యోగి ఖాతాను నిష్క్రియం చేయడం.
+      </div>
+
+      <h2>రైతు డేటా తొలగించడం (DPDP సమ్మతి)</h2>
+      <div class="info-box red">
+        <strong>రైతు సమాచారం తొలగించాలని అభ్యర్థించినప్పుడు:</strong> సిస్టమ్ రైతు వ్యక్తిగత వివరాలు (పేరు, ఫోన్ నంబర్) తొలగించడానికి మద్దతు ఇస్తుంది. ఆర్థిక రికార్డులు ఆడిట్ అవసరాల కోసం అజ్ఞాతీకరించిన రూపంలో ఉంచబడతాయి. ఈ చర్యకు యజమాని యాక్సెస్ అవసరం మరియు ఆడిట్ లాగ్‌లో నమోదు చేయబడుతుంది.
+      </div>
+
+      <h2>యజమానిగా మీ రోజువారీ పర్యవేక్షణ</h2>
+      <div class="card">
+        <table class="db-table">
+          <thead><tr><th>ఏమి చూడాలి</th><th>ఎక్కడ చూడాలి</th><th>ఎందుకు ముఖ్యమో</th></tr></thead>
+          <tbody>
+            <tr><td>పెండింగ్ చర్యలు గడువు ముగుస్తున్నాయా</td><td>అవలోకనం → పెండింగ్ కౌంట్</td><td>24 గంటలు దాటిన చర్యలు గడువు ముగుస్తాయి</td></tr>
+            <tr><td>ఉద్యోగి కార్యకలాపాలు సాధారణంగా ఉన్నాయా</td><td>ఆడిట్ లాగ్ → చివరి 24 గంటలు</td><td>అసాధారణ చర్యలు గుర్తించడానికి</td></tr>
+            <tr><td>అన్ని రైతుల మొత్తం అడ్వాన్సులు</td><td>లెడ్జర్ → సారాంశం</td><td>నగదు ప్రవాహ పర్యవేక్షణ</td></tr>
+            <tr><td>చాంబర్ ఉపయోగం / ఖాళీ సామర్థ్యం</td><td>లాట్లు → చాంబర్ వీక్షణ</td><td>ఇన్వెంటరీ ప్రణాళిక</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-box green">
+        <strong>కీలక సూత్రం:</strong> యజమాని వ్యవస్థ పర్యవేక్షకుడు మరియు సర్దుబాటు అధికారం. ఉద్యోగి రోజువారీ కార్యకలాపాలు నిర్వహిస్తాడు. AI ప్రతిపాదిస్తుంది. ఏదైనా తప్పు పోయినా — ఆడిట్ లాగ్ ఏమి జరిగిందో ఖచ్చితంగా చెప్తుంది మరియు యజమాని దిద్దుబాటు చేయగలడు.
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  function show(id) {
+    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    event.target.classList.add('active');
+    window.scrollTo(0, 0);
+  }
+</script>
+</body>
+</html>

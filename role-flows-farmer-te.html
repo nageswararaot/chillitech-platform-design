@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChilliTech — రైతు ఫ్లోలు</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+           background: #f0f2f5; color: #1a1a2e; font-size: 15px; line-height: 1.6; }
+    .shell { display: flex; min-height: 100vh; }
+    .sidebar { width: 260px; flex-shrink: 0; background: #1a1a2e; color: #c9d1d9;
+               position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 0 0 2rem; }
+    .sidebar-brand { padding: 1.2rem 1.2rem 1rem; border-bottom: 1px solid #30363d;
+                     font-weight: 700; font-size: 1rem; color: #fff; }
+    .sidebar-brand span { color: #58a6ff; }
+    .sidebar-section { padding: 0.8rem 1.2rem 0.2rem; font-size: 0.7rem;
+                       text-transform: uppercase; letter-spacing: 0.1em; color: #6e7681; }
+    .sidebar a { display: block; padding: 0.45rem 1.2rem 0.45rem 1.5rem;
+                 color: #c9d1d9; text-decoration: none; font-size: 0.88rem;
+                 border-left: 3px solid transparent; transition: all 0.15s; }
+    .sidebar a:hover, .sidebar a.active { background: #21262d; color: #fff; border-left-color: #58a6ff; }
+    .sidebar a.sub { padding-left: 2.2rem; font-size: 0.83rem; color: #8b949e; }
+    .sidebar a.sub:hover, .sidebar a.sub.active { color: #c9d1d9; }
+    .main { flex: 1; padding: 2rem 2.5rem; max-width: 900px; }
+    section { display: none; }
+    section.active { display: block; }
+    h1 { font-size: 1.6rem; font-weight: 700; color: #1a1a2e; margin-bottom: 0.4rem; }
+    h2 { font-size: 1.25rem; font-weight: 600; color: #1a1a2e; margin: 2rem 0 0.8rem; }
+    h3 { font-size: 1rem; font-weight: 600; color: #444; margin: 1.5rem 0 0.5rem; }
+    p  { color: #444; margin-bottom: 0.8rem; }
+    .subtitle { color: #6e7681; font-size: 0.92rem; margin-bottom: 1.5rem; }
+    .card { background: #fff; border-radius: 10px; padding: 1.4rem 1.6rem;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 1.4rem; }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .badge { display: inline-block; padding: 0.2rem 0.7rem; border-radius: 20px;
+             font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; }
+    .badge-farmer   { background: #dbeafe; color: #1d4ed8; }
+    .badge-employee { background: #fef3c7; color: #92400e; }
+    .badge-owner    { background: #f3e8ff; color: #6b21a8; }
+    .badge-bot      { background: #d1fae5; color: #065f46; }
+    .role-card { border-radius: 10px; padding: 1.4rem 1.6rem; margin-bottom: 1rem; }
+    .role-card.farmer   { background: #eff6ff; border-left: 4px solid #3b82f6; }
+    .role-card.employee { background: #fffbeb; border-left: 4px solid #f59e0b; }
+    .role-card.owner    { background: #faf5ff; border-left: 4px solid #8b5cf6; }
+    .role-card h3 { margin-top: 0; }
+    .role-card ul { padding-left: 1.2rem; color: #444; }
+    .role-card ul li { margin-bottom: 0.3rem; font-size: 0.9rem; }
+    .role-card .cannot { color: #dc2626; }
+    .role-card .can    { color: #16a34a; }
+    .wa-scene { margin: 1.2rem 0 2rem; }
+    .wa-scene-label { font-size: 0.78rem; font-weight: 600; text-transform: uppercase;
+                      letter-spacing: 0.08em; color: #6e7681; margin-bottom: 0.5rem; }
+    .wa-phone { width: 340px; border-radius: 24px; overflow: hidden;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.18); border: 2px solid #ddd; background: #e5ddd5; }
+    .wa-header { background: #075e54; color: #fff; padding: 0.8rem 1rem;
+                 display: flex; align-items: center; gap: 0.7rem; }
+    .wa-avatar { width: 38px; height: 38px; border-radius: 50%; background: #128c7e;
+                 display: flex; align-items: center; justify-content: center;
+                 font-weight: 700; font-size: 1rem; color: #fff; }
+    .wa-header-info { flex: 1; }
+    .wa-header-name { font-weight: 600; font-size: 0.95rem; }
+    .wa-header-sub  { font-size: 0.72rem; opacity: 0.85; }
+    .wa-body { padding: 0.8rem 0.6rem; min-height: 200px; }
+    .wa-msg { margin-bottom: 0.5rem; display: flex; flex-direction: column; }
+    .wa-msg.out { align-items: flex-end; }
+    .wa-msg.in  { align-items: flex-start; }
+    .wa-bubble { max-width: 80%; padding: 0.55rem 0.8rem; border-radius: 8px;
+                 font-size: 0.84rem; line-height: 1.45; }
+    .wa-msg.out .wa-bubble { background: #dcf8c6; border-radius: 8px 0 8px 8px; }
+    .wa-msg.in  .wa-bubble { background: #fff;    border-radius: 0 8px 8px 8px; }
+    .wa-time { font-size: 0.68rem; color: #999; margin-top: 0.15rem; padding: 0 0.2rem; }
+    .wa-system-note { text-align: center; margin: 0.8rem 0; font-size: 0.75rem;
+                      color: #666; font-style: italic;
+                      background: rgba(255,255,255,0.6); border-radius: 8px; padding: 0.3rem 0.6rem; }
+    .wa-sender { font-size: 0.72rem; font-weight: 600; margin-bottom: 0.1rem; }
+    .wa-msg.in .wa-sender { color: #128c7e; }
+    .flow-steps { display: flex; flex-direction: column; gap: 0; margin: 1rem 0 1.5rem; }
+    .flow-step { display: flex; align-items: flex-start; gap: 1rem;
+                 padding: 0.8rem 1rem; background: #fff; border-radius: 8px;
+                 border-left: 4px solid #e5e7eb; margin-bottom: 0.15rem;
+                 box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .flow-step.farmer   { border-left-color: #3b82f6; }
+    .flow-step.bot      { border-left-color: #10b981; }
+    .flow-step.employee { border-left-color: #f59e0b; }
+    .flow-step.system   { border-left-color: #94a3b8; }
+    .step-num { width: 26px; height: 26px; border-radius: 50%; background: #f1f5f9; color: #475569;
+                display: flex; align-items: center; justify-content: center;
+                font-size: 0.78rem; font-weight: 700; flex-shrink: 0; margin-top: 0.1rem; }
+    .step-body { flex: 1; }
+    .step-title { font-weight: 600; font-size: 0.9rem; color: #1a1a2e; }
+    .step-desc  { font-size: 0.84rem; color: #555; margin-top: 0.1rem; }
+    .step-note  { font-size: 0.78rem; color: #ef4444; margin-top: 0.2rem; font-style: italic; }
+    .step-note.green { color: #16a34a; }
+    .info-box { border-radius: 8px; padding: 0.9rem 1.1rem; margin: 1rem 0;
+                font-size: 0.88rem; line-height: 1.5; }
+    .info-box.blue   { background: #eff6ff; border-left: 4px solid #3b82f6; color: #1e40af; }
+    .info-box.yellow { background: #fffbeb; border-left: 4px solid #f59e0b; color: #92400e; }
+    .info-box.green  { background: #f0fdf4; border-left: 4px solid #16a34a; color: #166534; }
+    .info-box.red    { background: #fef2f2; border-left: 4px solid #ef4444; color: #991b1b; }
+    .info-box strong { font-weight: 700; }
+    .perm-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 1rem 0; }
+    .perm-table th { padding: 0.5rem 0.8rem; background: #f8fafc; color: #475569;
+                     font-size: 0.78rem; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; }
+    .perm-table td { padding: 0.5rem 0.8rem; border-bottom: 1px solid #f1f5f9; }
+    .perm-table tr:last-child td { border-bottom: none; }
+    .check { color: #16a34a; font-size: 1rem; }
+    .cross { color: #dc2626; font-size: 1rem; }
+    .conf  { color: #d97706; font-size: 0.85rem; }
+    .page-header { background: #fff; border-radius: 10px; padding: 1.4rem 1.6rem;
+                   margin-bottom: 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .page-header .tags { display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap; }
+    .db-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .db-table th { background: #f1f5f9; text-align: left; padding: 0.4rem 0.6rem;
+                   font-size: 0.76rem; color: #64748b; text-transform: uppercase; }
+    .db-table td { padding: 0.45rem 0.6rem; border-bottom: 1px solid #f1f5f9; color: #334155; }
+    .db-table tr:last-child td { border-bottom: none; }
+    .status-pill { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 20px;
+                   font-size: 0.72rem; font-weight: 600; }
+    .s-stored   { background: #d1fae5; color: #065f46; }
+    .s-pending  { background: #fef3c7; color: #92400e; }
+    .s-released { background: #f1f5f9; color: #475569; }
+    .s-partial  { background: #e0f2fe; color: #0369a1; }
+    @media (max-width: 700px) {
+      .sidebar { display: none; }
+      .main { padding: 1rem; }
+      .wa-phone { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <nav class="sidebar">
+    <div class="sidebar-brand">🌶 <span>ChilliTech</span></div>
+    <div style="padding:0.5rem 1.2rem;font-size:0.72rem;color:#f59e0b;background:#1e2a1e;border-bottom:1px solid #30363d">🌾 రైతు ఫ్లోలు — Telugu</div>
+
+    <div class="sidebar-section">అవలోకనం</div>
+    <a href="#" onclick="show('overview')" class="active">సిస్టమ్ అవలోకనం</a>
+    <a href="#" onclick="show('roles')">పాత్రలు — సంక్షిప్తంగా</a>
+
+    <div class="sidebar-section">రైతు ఫ్లోలు</div>
+    <a href="#" onclick="show('f-inward')" class="sub">↳ ఇన్‌వార్డ్ (డిపాజిట్)</a>
+    <a href="#" onclick="show('f-status')" class="sub">↳ లాట్ స్థితి / బాకీ</a>
+    <a href="#" onclick="show('f-price')" class="sub">↳ మార్కెట్ ధర విచారణ</a>
+    <a href="#" onclick="show('f-release')" class="sub">↳ విడుదల అభ్యర్థన (పూర్తి/పాక్షిక)</a>
+    <a href="#" onclick="show('f-outward')" class="sub">↳ అవుట్‌వార్డ్ (పూర్తి — నిర్ధారించబడింది)</a>
+    <a href="#" onclick="show('f-scope')" class="sub">↳ పరిధిలో vs పరిధి వెలుపల</a>
+
+    <div class="sidebar-section">సంప్రదింపు</div>
+    <a href="#" onclick="show('ref-farmer')">రైతు సహాయ కార్డ్</a>
+    <a href="#" onclick="show('ref-glossary')">పదకోశం</a>
+  </nav>
+
+  <main class="main">
+
+    <!-- ─── అవలోకనం ─── -->
+    <section id="overview" class="active">
+      <div class="page-header">
+        <h1>ChilliTech ప్లాట్‌ఫారమ్</h1>
+        <p class="subtitle">పాత్ర ఫ్లోలు, స్క్రీన్ మాకప్‌లు మరియు సిస్టమ్ అవసరాలు — అభివృద్ధి ప్రారంభించే ముందు సమీక్ష కోసం.</p>
+        <div class="tags">
+          <span class="badge badge-farmer">రైతు</span>
+          <span class="badge badge-employee">ఉద్యోగి</span>
+          <span class="badge badge-owner">యజమాని</span>
+          <span class="badge badge-bot">AI బాట్</span>
+        </div>
+      </div>
+
+      <div class="info-box blue">
+        <strong>ఈ పత్రాన్ని ఎలా చదవాలి:</strong> రైతు ఫ్లోలు, సహాయ కార్డ్ మరియు పదకోశం మధ్య నావిగేట్ చేయడానికి ఎడమ సైడ్‌బార్ ఉపయోగించండి. WhatsApp ఫ్లోలు నిజమైన సందేశ సంభాషణలు చూపుతాయి.
+      </div>
+
+      <h2>ఈ సిస్టమ్ ఏమి చేస్తుంది</h2>
+      <p>ChilliTech శీతల గిడ్డంగి వ్యాపారం యొక్క రోజువారీ కార్యకలాపాలను డిజిటలైజ్ చేస్తుంది. రైతులు పూర్తిగా <strong>WhatsApp</strong> ద్వారా మాట్లాడతారు — తెలుగు లేదా ఇంగ్లీషులో, టెక్స్ట్ లేదా వాయిస్ నోట్ ద్వారా. ఆపరేటర్లు (ఉద్యోగులు మరియు యజమాని) <strong>వెబ్ డాష్‌బోర్డ్</strong> ద్వారా వ్యాపారాన్ని నిర్వహిస్తారు.</p>
+
+      <div class="card-grid">
+        <div class="card">
+          <h3>📦 ఇన్‌వార్డ్</h3>
+          <p style="font-size:0.88rem">రైతు ఉత్పత్తి డిపాజిట్ చేస్తాడు. సిస్టమ్ లాట్‌ను నమోదు చేస్తుంది, బరువు రికార్డ్ చేస్తుంది, చాంబర్ నిర్ణయిస్తుంది మరియు లాట్ ID తో నిర్ధారణ పంపుతుంది.</p>
+        </div>
+        <div class="card">
+          <h3>🚚 అవుట్‌వార్డ్</h3>
+          <p style="font-size:0.88rem">రైతు ఉపసంహరణ అభ్యర్థిస్తాడు. సిస్టమ్ బాకీలు లెక్కిస్తుంది, ఆపరేటర్ నిర్ధారిస్తాడు, లాట్ విడుదలవుతుంది మరియు రసీదు పంపబడుతుంది.</p>
+        </div>
+        <div class="card">
+          <h3>📋 రసీదులు</h3>
+          <p style="font-size:0.88rem">ప్రతి ఇన్‌వార్డ్ మరియు అవుట్‌వార్డ్ తర్వాత నిర్మాణాత్మక WhatsApp నిర్ధారణ పంపబడుతుంది. పూర్తి PDF రసీదులు తర్వాతి దశలో.</p>
+        </div>
+        <div class="card">
+          <h3>💰 లెడ్జర్</h3>
+          <p style="font-size:0.88rem">అడ్వాన్సులు, బాకీలు మరియు చెల్లింపులు రైతు వారీగా ట్రాక్ చేయబడతాయి. అన్ని నమోదులు append-only — ఏదీ మాయం చేయబడదు.</p>
+        </div>
+      </div>
+
+      <h2>స్వర్ణ నియమం</h2>
+      <div class="info-box yellow">
+        <strong>AI ప్రతిపాదిస్తుంది. మనిషి నిర్ధారిస్తాడు.</strong> ఏ ఇన్‌వార్డ్, అవుట్‌వార్డ్ లేదా ఆర్థిక చర్య స్వయంచాలకంగా జరగదు. AI రైతు సందేశాన్ని చదివి <em>పెండింగ్ చర్య</em> సృష్టిస్తుంది. సిస్టమ్‌లో ఏదైనా మారే ముందు ఆపరేటర్ నిర్ధారించాలి. ఇది తప్పనిసరి — తప్పుడు విడుదల అంటే నిజమైన మిర్చి తప్పుగా గేటు దాటడమే.
+      </div>
+
+      <h2>tenant_001 సెటప్ వివరాలు</h2>
+      <div class="card">
+        <table class="db-table">
+          <tr><th>వివరం</th><th>విలువ (placeholder — మామయ్యతో నిర్ధారించాలి)</th></tr>
+          <tr><td>వ్యాపార పేరు</td><td>[మామయ్య వ్యాపార పేరు]</td></tr>
+          <tr><td>స్థలం</td><td>గుంటూరు, ఆంధ్రప్రదేశ్</td></tr>
+          <tr><td>సదుపాయ కోడ్</td><td>GNT1</td></tr>
+          <tr><td>వస్తువు</td><td>ఎర్ర మిర్చి (రకాలు: Teja S17, 334, Guntur Sannam)</td></tr>
+          <tr><td>చార్జ్ రేటు</td><td>₹[X] క్వింటాల్‌కు నెలకు (మామయ్యతో నిర్ధారించండి)</td></tr>
+          <tr><td>చాంబర్లు</td><td>C1, C2, C3, C4 (సామర్థ్యం నమోదు చేయాలి)</td></tr>
+          <tr><td>కరెన్సీ</td><td>INR (రూపాయలు)</td></tr>
+          <tr><td>భాష (MVP)</td><td>ఇంగ్లీషు (తెలుగు Phase 2 లో)</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- ─── పాత్రలు ─── -->
+    <section id="roles">
+      <div class="page-header">
+        <h1>పాత్రలు — సంక్షిప్తంగా</h1>
+        <p class="subtitle">మూడు పాత్రలు, ఒక పదవీ క్రమం. ప్రతి పాత్ర దానికంటే దిగువ పాత్ర నుండి అన్నీ వారసత్వంగా పొందుతుంది.</p>
+      </div>
+
+      <div class="info-box blue" style="margin-bottom:1.5rem">
+        <strong>వారసత్వ క్రమం:</strong> యజమాని ⊃ ఉద్యోగి ⊃ రైతు. యజమాని ఉద్యోగి చేయగలిగేవన్నీ చేయగలడు, ఉద్యోగి రైతు చేయగలిగేవన్నీ చేయగలడు — ఇంకా అదనంగా.
+      </div>
+
+      <div class="role-card farmer">
+        <h3>🌾 రైతు <span class="badge badge-farmer" style="margin-left:0.5rem">WhatsApp మాత్రమే</span></h3>
+        <p style="font-size:0.88rem;margin-bottom:0.6rem">పూర్తిగా WhatsApp ద్వారా మాట్లాడతాడు. లాగిన్ లేదు, యాప్ లేదు. ఫోన్ నంబర్ ద్వారా గుర్తింపు.</p>
+        <ul>
+          <li class="can">✅ సొంత లాట్ స్థితి అడగవచ్చు ("నా లాట్ ఏమైంది?")</li>
+          <li class="can">✅ సొంత బాకీ / అడ్వాన్స్ తనిఖీ చేయవచ్చు</li>
+          <li class="can">✅ ఇన్‌వార్డ్ (డిపాజిట్) అభ్యర్థించవచ్చు — AI ప్రతిపాదిస్తుంది, ఆపరేటర్ నిర్ధారిస్తాడు</li>
+          <li class="can">✅ అవుట్‌వార్డ్ (ఉపసంహరణ) అభ్యర్థించవచ్చు — AI ప్రతిపాదిస్తుంది, ఆపరేటర్ నిర్ధారిస్తాడు</li>
+          <li class="can">✅ చర్యల తర్వాత WhatsApp నిర్ధారణ/రసీదు అందుకోవచ్చు</li>
+          <li class="cannot">❌ ఇతర రైతుల సమాచారం చూడలేరు</li>
+          <li class="cannot">❌ నేరుగా ఏ చర్యా చేయలేరు — అన్నీ ఆపరేటర్ నిర్ధారణ ద్వారా</li>
+          <li class="cannot">❌ వెబ్ డాష్‌బోర్డ్ యాక్సెస్ లేదు</li>
+        </ul>
+      </div>
+
+      <div class="role-card employee">
+        <h3>👷 ఉద్యోగి <span class="badge badge-employee" style="margin-left:0.5rem">WhatsApp + డాష్‌బోర్డ్</span></h3>
+        <p style="font-size:0.88rem;margin-bottom:0.6rem">రోజువారీ కార్యకలాపాలు నిర్వహిస్తాడు. డాష్‌బోర్డ్ లాగిన్ ఉంది. యజమాని వ్యక్తిగత అనుమతులు నిర్ణయిస్తాడు.</p>
+        <ul>
+          <li class="can">✅ ఏ రైతు కోసమైనా రైతు చేయగలిగేవన్నీ</li>
+          <li class="can">✅ AI-ప్రతిపాదిత చర్యలను నిర్ధారించు లేదా తిరస్కరించు (ముఖ్యమైన రోజువారీ పని)</li>
+          <li class="can">✅ రైతు తరపున ఇన్‌వార్డ్/అవుట్‌వార్డ్ నమోదు చేయవచ్చు ("ప్రాక్సీ")</li>
+          <li class="can">✅ రైతు లెడ్జర్లు మరియు బాకీలు చూడవచ్చు</li>
+          <li class="can">✅ అన్ని యాక్టివ్ లాట్లు మరియు చాంబర్లు చూడవచ్చు</li>
+          <li class="cannot">❌ బరువులు లేదా ఆర్థిక రికార్డులు సర్దుబాటు చేయలేరు (యజమాని అనుమతి లేకుండా)</li>
+          <li class="cannot">❌ ఇతర ఉద్యోగులను నిర్వహించలేరు</li>
+        </ul>
+      </div>
+
+      <div class="role-card owner">
+        <h3>👑 యజమాని <span class="badge badge-owner" style="margin-left:0.5rem">పూర్తి యాక్సెస్</span></h3>
+        <p style="font-size:0.88rem;margin-bottom:0.6rem">పూర్తి నియంత్రణ. ఉద్యోగి అనుమతులు మంజూరు లేదా నిరాకరించగలడు. అన్నీ చూడగలడు.</p>
+        <ul>
+          <li class="can">✅ ఉద్యోగి చేయగలిగేవన్నీ</li>
+          <li class="can">✅ రికార్డులలో సర్దుబాట్లు (లాగ్ చేసిన కారణంతో)</li>
+          <li class="can">✅ ఉద్యోగులను నిర్వహించు — చేర్చు, నిష్క్రియం చేయు, అనుమతులు నిర్ణయించు</li>
+          <li class="can">✅ పూర్తి ఆడిట్ జాబితా చూడవచ్చు</li>
+          <li class="can">✅ అన్ని రైతుల ఆర్థిక రికార్డులు చూడవచ్చు</li>
+          <li class="can">✅ సిస్టమ్ కాన్ఫిగ్ మార్చవచ్చు (చార్జ్ రేట్లు, చాంబర్లు మొదలైనవి)</li>
+        </ul>
+      </div>
+
+      <h2>అనుమతి మాట్రిక్స్</h2>
+      <div class="card">
+        <table class="perm-table">
+          <thead>
+            <tr><th>చర్య</th><th>రైతు</th><th>ఉద్యోగి</th><th>యజమాని</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>సొంత లాట్ స్థితి / బాకీ తనిఖీ</td><td class="check">✔</td><td class="check">✔</td><td class="check">✔</td></tr>
+            <tr><td>ఇన్‌వార్డ్ అభ్యర్థన (WhatsApp ద్వారా)</td><td class="check">✔</td><td class="check">✔</td><td class="check">✔</td></tr>
+            <tr><td>అవుట్‌వార్డ్ అభ్యర్థన (WhatsApp ద్వారా)</td><td class="check">✔</td><td class="check">✔</td><td class="check">✔</td></tr>
+            <tr><td>AI చర్యలను నిర్ధారించు / తిరస్కరించు</td><td class="cross">✗</td><td class="check">✔</td><td class="check">✔</td></tr>
+            <tr><td>రైతు తరపున ఇన్‌వార్డ్ నమోదు</td><td class="cross">✗</td><td class="check">✔</td><td class="check">✔</td></tr>
+            <tr><td>ఏ రైతు లెడ్జర్ అయినా చూడడం</td><td class="cross">✗</td><td class="conf">యజమాని పరిమితం చేయవచ్చు</td><td class="check">✔</td></tr>
+            <tr><td>సర్దుబాట్లు (బరువు / ఆర్థిక)</td><td class="cross">✗</td><td class="conf">యజమాని అనుమతించవచ్చు</td><td class="check">✔</td></tr>
+            <tr><td>ఉద్యోగులను నిర్వహించు</td><td class="cross">✗</td><td class="cross">✗</td><td class="check">✔</td></tr>
+            <tr><td>సిస్టమ్ కాన్ఫిగ్ / చార్జ్ రేట్లు మార్చు</td><td class="cross">✗</td><td class="cross">✗</td><td class="check">✔</td></tr>
+            <tr><td>పూర్తి ఆడిట్ జాబితా చూడడం</td><td class="cross">✗</td><td class="cross">✗</td><td class="check">✔</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ─── రైతు: ఇన్‌వార్డ్ ─── -->
+    <section id="f-inward">
+      <div class="page-header">
+        <h1>రైతు ఫ్లో — ఇన్‌వార్డ్ (డిపాజిట్)</h1>
+        <p class="subtitle">రైతు ఉత్పత్తి డిపాజిట్ చేయడానికి WhatsApp సందేశం పంపుతాడు. AI విశ్లేషిస్తుంది, ఆపరేటర్ నిర్ధారిస్తాడు, లాట్ సృష్టించబడుతుంది.</p>
+        <div class="tags"><span class="badge badge-farmer">రైతు</span><span class="badge badge-bot">AI బాట్</span><span class="badge badge-employee">ఉద్యోగి</span></div>
+      </div>
+
+      <h2>దశల వారీ క్రమం</h2>
+      <div class="flow-steps">
+        <div class="flow-step farmer">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">రైతు WhatsApp సందేశం పంపుతాడు</div>
+            <div class="step-desc">టెక్స్ట్ లేదా వాయిస్ నోట్. ఇంగ్లీషు లేదా తెలుగు. "నాకు 200 బస్తాల తేజా వేయాలి" లేదా "200 బస్తాలు తేజా ఇన్‌వార్డ్".</div>
+          </div>
+        </div>
+        <div class="flow-step bot">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">AI సందేశాన్ని చదివి విశ్లేషిస్తుంది</div>
+            <div class="step-desc">Claude ఉద్దేశాన్ని (ఇన్‌వార్డ్) గుర్తిస్తుంది, వివరాలు (పరిమాణం: 200 బస్తాలు, రకం: Teja) తీసుకుంటుంది. నమ్మకం స్కోర్ నిర్ణయిస్తుంది.</div>
+          </div>
+        </div>
+        <div class="flow-step bot">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">బాట్ రైతుకు స్పందిస్తుంది — స్వీకరణ</div>
+            <div class="step-desc">"అర్థమైంది రాజు! మీ 200 బస్తాల తేజా డిపాజిట్ అభ్యర్థన నమోదు అయింది. ఆపరేటర్ త్వరలో నిర్ధారిస్తారు."</div>
+          </div>
+        </div>
+        <div class="flow-step system">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <div class="step-title">సిస్టమ్‌లో పెండింగ్ చర్య సృష్టించబడింది</div>
+            <div class="step-desc">ఆపరేటర్ డాష్‌బోర్డ్ క్యూలో పెండింగ్ చర్య కనిపిస్తుంది. ఇంకా ఇన్వెంటరీలో మార్పు జరగలేదు.</div>
+            <div class="step-note">⚠ ఇక్కడ ఇన్వెంటరీ మార్పు జరగదు. AI కేవలం ప్రతిపాదిస్తుంది మాత్రమే.</div>
+          </div>
+        </div>
+        <div class="flow-step employee">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <div class="step-title">ఆపరేటర్ సమీక్షించి నిర్ధారిస్తాడు (లేదా తిరస్కరిస్తాడు)</div>
+            <div class="step-desc">డాష్‌బోర్డ్ ద్వారా లేదా WhatsApp నోటిఫికేషన్‌కు YES అని రిప్లై చేయడం ద్వారా. ఆపరేటర్ స్థూల బరువు, తారా బరువు నమోదు చేసి చాంబర్ నిర్ణయిస్తాడు.</div>
+          </div>
+        </div>
+        <div class="flow-step system">
+          <div class="step-num">6</div>
+          <div class="step-body">
+            <div class="step-title">లాట్ సృష్టించబడింది, రైతుకు రసీదు పంపబడింది</div>
+            <div class="step-desc">లాట్ GNT1-20260606-0001 నమోదు చేయబడింది. రైతుకు లాట్ ID, బరువు, చాంబర్ మరియు తేదీతో WhatsApp నిర్ధారణ వస్తుంది.</div>
+            <div class="step-note green">✅ ఈ దశలో మాత్రమే ఇన్వెంటరీ మారుతుంది.</div>
+          </div>
+        </div>
+      </div>
+
+      <h2>WhatsApp సంభాషణ — రైతు ఫోన్‌లో</h2>
+      <div class="wa-scene">
+        <div class="wa-scene-label">రైతు ఫోన్</div>
+        <div class="wa-phone">
+          <div class="wa-header">
+            <div class="wa-avatar">CT</div>
+            <div class="wa-header-info">
+              <div class="wa-header-name">ChilliTech స్టోరేజ్</div>
+              <div class="wa-header-sub">వ్యాపార అకౌంట్</div>
+            </div>
+          </div>
+          <div class="wa-body">
+            <div class="wa-msg out">
+              <div class="wa-bubble">నాకు 200 బస్తాల తేజా వేయాలి</div>
+              <div class="wa-time">10:02 AM ✓✓</div>
+            </div>
+            <div class="wa-msg in">
+              <div class="wa-sender">ChilliTech స్టోరేజ్</div>
+              <div class="wa-bubble">అర్థమైంది రాజు! మీ డిపాజిట్ అభ్యర్థన నమోదు అయింది:<br><br>📦 <strong>200 బస్తాలు – Teja (S17)</strong><br><br>ఆపరేటర్ త్వరలో నిర్ధారించి మీ లాట్ వివరాలు తెలియజేస్తారు.</div>
+              <div class="wa-time">10:02 AM</div>
+            </div>
+            <div class="wa-system-note">— ఆపరేటర్ డాష్‌బోర్డ్‌లో సమీక్షించి నిర్ధారిస్తాడు —</div>
+            <div class="wa-msg in">
+              <div class="wa-sender">ChilliTech స్టోరేజ్</div>
+              <div class="wa-bubble">✅ <strong>ఇన్‌వార్డ్ నిర్ధారించబడింది!</strong><br><br>లాట్ ID: <strong>GNT1-20260606-0001</strong><br>రకం: Teja (S17)<br>నికర బరువు: 195 బస్తాలు / 975 kg<br>చాంబర్: <strong>C2</strong><br>తేదీ: 06 జూన్ 2026<br><br>ఈ లాట్ ID మీ రికార్డ్ కోసం సేవ్ చేసుకోండి.</div>
+              <div class="wa-time">10:14 AM</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box green">
+        <strong>మామయ్యకు ముఖ్యమైన విషయం:</strong> రైతుకు వెంటనే స్వీకరణ ("మేము నమోదు చేశాము") మరియు ఆపరేటర్ నిర్ధారించిన తర్వాత రెండవ సందేశం వస్తుంది. రైతుకు ఎల్లప్పుడూ తెలుస్తుంది — సిస్టమ్ వారి సందేశం అందుకుంది.
+      </div>
+    </section>
+
+    <!-- ─── రైతు: లాట్ స్థితి ─── -->
+    <section id="f-status">
+      <div class="page-header">
+        <h1>రైతు ఫ్లో — లాట్ స్థితి & బాకీ (ఈరోజు)</h1>
+        <p class="subtitle">రీడ్-ఓన్లీ విచారణలు వెంటనే జవాబిస్తాయి — నిర్ధారణ అవసరం లేదు. ప్రస్తుత స్థితి మాత్రమే చూపుతుంది, పూర్తి చరిత్ర కాదు.</p>
+        <div class="tags"><span class="badge badge-farmer">రైతు</span><span class="badge badge-bot">AI బాట్</span></div>
+      </div>
+
+      <div class="info-box blue">
+        <strong>రీడ్-ఓన్లీ విచారణలకు నిర్ధారణ అవసరం లేదు.</strong> రైతు ఈరోజు స్నాప్‌షాట్ చూస్తాడు — లాట్, పరిమాణం, బాకీ అయిన రుసుములు, అడ్వాన్స్ మరియు నికర బాకీ. ఫోన్‌లో చదవడానికి సులభంగా ఉంటుంది.
+      </div>
+
+      <h2>WhatsApp సంభాషణ</h2>
+      <div class="wa-scene">
+        <div class="wa-scene-label">రైతు ఫోన్</div>
+        <div class="wa-phone">
+          <div class="wa-header">
+            <div class="wa-avatar">CT</div>
+            <div class="wa-header-info">
+              <div class="wa-header-name">ChilliTech స్టోరేజ్</div>
+              <div class="wa-header-sub">వ్యాపార అకౌంట్</div>
+            </div>
+          </div>
+          <div class="wa-body">
+            <div class="wa-msg out">
+              <div class="wa-bubble">నా లాట్ ఏమైంది</div>
+              <div class="wa-time">2:15 PM ✓✓</div>
+            </div>
+            <div class="wa-msg in">
+              <div class="wa-sender">ChilliTech స్టోరేజ్</div>
+              <div class="wa-bubble">
+                నమస్కారం రాజు! <strong>06 జూన్ 2026</strong> నాటికి మీ స్టోరేజ్ సారాంశం:<br><br>
+                📦 <strong>లాట్ GNT1-20260606-0001</strong><br>
+                Teja (S17) · 975 kg · చాంబర్ C2<br>
+                నిల్వ నుండి: 06 జూన్ 2026 (14 రోజులు) ✅<br><br>
+                💰 <strong>ఈరోజు బాకీ</strong><br>
+                అందుకున్న అడ్వాన్స్: ₹5,000<br>
+                ఇప్పటి వరకు నిల్వ రుసుము: ₹685<br>
+                <strong>మీకు చెల్లించాల్సినది: ₹4,315</strong><br><br>
+                మార్కెట్ ధర తెలుసుకోవడానికి "తేజా ధర" అని మెసేజ్ చేయండి.<br>
+                విడుదల చేయాలంటే "నా లాట్ విడుదల చేయాలి" అని మెసేజ్ చేయండి.
+              </div>
+              <div class="wa-time">2:15 PM</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2>రైతు ఏమి చూస్తాడు — ఏమి చూడడు</h2>
+      <div class="card">
+        <table class="db-table">
+          <thead><tr><th>రైతు అడిగేది</th><th>బాట్ చూపేది</th><th>నిర్ధారణ కావాలా?</th></tr></thead>
+          <tbody>
+            <tr><td>"నా లాట్ స్థితి" / "నా మిర్చి ఎక్కడుంది?"</td><td>ప్రస్తుత లాట్, చాంబర్, నిల్వ రోజులు, ఈరోజు బాకీ, నికర బాకీ</td><td>లేదు ✅</td></tr>
+            <tr><td>"నా బాకీ" / "అడ్వాన్స్ ఎంత?"</td><td>అదే సారాంశం — అడ్వాన్స్ + బాకీ + నికరం</td><td>లేదు ✅</td></tr>
+            <tr><td>"తేజా ధర" / "ఈరోజు మార్కెట్ ధర"</td><td>ఈరోజు ధర పరిధి (మార్కెట్ ధర ఫ్లో చూడండి)</td><td>లేదు ✅</td></tr>
+            <tr><td>"విడుదల చేయాలి" / "అమ్మాలనుకుంటున్నాను"</td><td>స్వీకరణ + ఉద్యోగి రైతుకు ఫోన్ చేస్తాడు</td><td>అవును — ఉద్యోగి ఫోన్ చేసి, తర్వాత ప్రాక్సీ విడుదల</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="info-box blue" style="margin-top:0">
+        <strong>రైతు WhatsApp ద్వారా చూడనివి:</strong> పూర్తి లావాదేవీల చరిత్ర, ఇతర రైతుల డేటా, రా లెడ్జర్ నమోదులు. ఉద్యోగి పూర్తి రన్నింగ్ స్టేట్‌మెంట్ చూస్తాడు — రైతు ఈరోజు స్నాప్‌షాట్ మాత్రమే.
+      </div>
+    </section>
+
+    <!-- ─── రైతు: మార్కెట్ ధర ─── -->
+    <section id="f-price">
+      <div class="page-header">
+        <h1>రైతు ఫ్లో — మార్కెట్ ధర విచారణ</h1>
+        <p class="subtitle">రైతు తన వస్తువు ఈరోజు ధర పరిధి అడుగుతాడు — నిల్వ చేసిన లాట్ అమ్మాలా వేచి ఉండాలా అని నిర్ణయించుకోవడానికి.</p>
+        <div class="tags"><span class="badge badge-farmer">రైతు</span><span class="badge badge-bot">AI బాట్</span></div>
+      </div>
+
+      <div class="info-box green">
+        <strong>ఇది పరిధిలో ఉందా (సాధారణ మార్కెట్ విచారణ కాదు):</strong> రైతు <em>ఈ శీతల గిడ్డంగిలో ప్రస్తుతం నిల్వ ఉన్న</em> ఉత్పత్తి ధర అడుగుతున్నాడు. నిల్వ చేయాలా విడుదల చేయాలా అని నిర్ణయించడానికి సహాయం చేయడం శీతల గిడ్డంగి వ్యాపార సంబంధం యొక్క నేరుగా భాగం. "రేపు వాతావరణం ఎలా?" అని అడగడం వంటిది కాదు — ఇది సంభావ్య అవుట్‌వార్డ్ చర్యను నడిపిస్తుంది.
+      </div>
+
+      <h2>ధర డేటా ఎలా పనిచేస్తుంది</h2>
+      <div class="card-grid">
+        <div class="card">
+          <h3>📝 ఉద్యోగి ప్రతి ఉదయం ధర నమోదు చేస్తాడు</h3>
+          <p style="font-size:0.87rem">ఉద్యోగి (లేదా యజమాని) ప్రతిరోజూ వస్తువు వారీగా ధర పరిధి డాష్‌బోర్డ్‌లో నమోదు చేస్తాడు. సుమారు 2 నిమిషాలు పడుతుంది. చారిత్రక విలువలు భవిష్యత్ కాలానుగుణ విశ్లేషణ కోసం శాశ్వతంగా నిల్వ అవుతాయి.</p>
+        </div>
+        <div class="card">
+          <h3>📅 Fallback: చివరగా అందుబాటులో ఉన్న ధర</h3>
+          <p style="font-size:0.87rem">ఈరోజు ధర ఇంకా నమోదు కాకపోతే (లేదా సెలవు రోజు అయితే), బాట్ "తేదీ నాటికి" లేబుల్‌తో అందుబాటులో ఉన్న తాజా ధర చూపుతుంది — నిశ్శబ్దంగా పాత డేటా చూపదు.</p>
+        </div>
+        <div class="card">
+          <h3>📈 మొదటి రోజు నుండి చరిత్ర నిల్వ</h3>
+          <p style="font-size:0.87rem">ప్రతి ధర నమోదు తేదీతో ఉంచబడుతుంది. కాలక్రమేణా ధర చరిత్ర నిర్మించబడుతుంది — ఆపరేటర్ కాలానుగుణ నమూనాలను గుర్తించడానికి ఉపయోగపడుతుంది (Phase 2 analytics).</p>
+        </div>
+      </div>
+
+      <h2>WhatsApp సంభాషణ — ఈరోజు ధర అందుబాటులో ఉంది</h2>
+      <div class="wa-scene">
+        <div class="wa-scene-label">రైతు ఫోన్</div>
+        <div class="wa-phone">
+          <div class="wa-header">
+            <div class="wa-avatar">CT</div>
+            <div class="wa-header-info">
+              <div class="wa-header-name">ChilliTech స్టోరేజ్</div>
+              <div class="wa-header-sub">వ్యాపార అకౌంట్</div>
+            </div>
+          </div>
+          <div class="wa-body">
+            <div class="wa-msg out">
+              <div class="wa-bubble">ఈరోజు తేజా ధర ఎంత?</div>
+              <div class="wa-time">9:10 AM ✓✓</div>
+            </div>
+            <div class="wa-msg in">
+              <div class="wa-sender">ChilliTech స్టోరేజ్</div>
+              <div class="wa-bubble">
+                📊 <strong>మార్కెట్ ధర — Teja (S17)</strong><br>
+                తేదీ: <strong>06 జూన్ 2026</strong><br><br>
+                తక్కువ: ₹180 / kg<br>
+                ఎక్కువ: ₹210 / kg<br>
+                సాధారణ: ₹192–198 / kg<br><br>
+                మూలం: గుంటూరు మార్కెట్ (ఆపరేటర్ నమోదు చేసినది)<br><br>
+                💡 మీ లాట్ GNT1-20260606-0001 లో 975 kg ఉంది.<br>
+                ఈరోజు సాధారణ ధరతో: ~₹1.87–1.93 లక్షలు<br><br>
+                మీ లాట్ విడుదల చేయాలంటే "విడుదల చేయాలి" అని మెసేజ్ చేయండి.
+              </div>
+              <div class="wa-time">9:10 AM</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2>WhatsApp సంభాషణ — ఈరోజు ధర ఇంకా నమోదు కాలేదు (Fallback)</h2>
+      <div class="wa-scene">
+        <div class="wa-phone">
+          <div class="wa-header">
+            <div class="wa-avatar">CT</div>
+            <div class="wa-header-info">
+              <div class="wa-header-name">ChilliTech స్టోరేజ్</div>
+              <div class="wa-header-sub">వ్యాపార అకౌంట్</div>
+            </div>
+          </div>
+          <div class="wa-body">
+            <div class="wa-msg out">
+              <div class="wa-bubble">తేజా ధర చెప్పండి</div>
+              <div class="wa-time">7:30 AM ✓✓</div>
+            </div>
+            <div class="wa-msg in">
+              <div class="wa-sender">ChilliTech స్టోరేజ్</div>
+              <div class="wa-bubble">
+                📊 <strong>మార్కెట్ ధర — Teja (S17)</strong><br>
+                ⚠️ ఈరోజు ధర ఇంకా నమోదు కాలేదు.<br><br>
+                <strong>చివరి అందుబాటు — 05 జూన్ 2026:</strong><br>
+                తక్కువ: ₹175 / kg &nbsp;·&nbsp; ఎక్కువ: ₹205 / kg<br>
+                సాధారణ: ₹188–195 / kg<br><br>
+                ఈరోజు ధర త్వరలో ఆపరేటర్ నమోదు చేస్తారు. కొంచెం సేపు తర్వాత మళ్ళీ అడగండి లేదా కార్యాలయాన్ని సంప్రదించండి.
+              </div>
+              <div class="wa-time">7:30 AM</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2>ఏ వస్తువుల ధర అడగవచ్చు</h2>
+      <div class="card">
+        <table class="db-table">
+          <thead><tr><th>రైతు సందేశం</th><th>బాట్ చూపేది</th></tr></thead>
+          <tbody>
+            <tr><td>"తేజా ధర" / "ఈరోజు తేజా రేటు ఎంత?"</td><td>ఈరోజు Teja (S17) ధర పరిధి (లేదా తేదీతో తాజా)</td></tr>
+            <tr><td>"334 ధర" / "334 రేటు ఎంత?"</td><td>334 రకం ధర పరిధి</td></tr>
+            <tr><td>"Guntur Sannam ధర"</td><td>Guntur Sannam ధర పరిధి</td></tr>
+            <tr><td>"మిర్చి ధర" (రకం చెప్పకుండా)</td><td>అన్ని యాక్టివ్ రకాల ధరలు చూపుతుంది</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:0.8rem;color:#94a3b8;margin-top:0.5rem">చూపించే రకాలు tenant వారీగా కాన్ఫిగర్ చేయబడతాయి — RULE 3. కొత్త రకం చేర్చడం = కాన్ఫిగ్ మార్పు, కోడ్ మార్పు కాదు.</p>
+      </div>
+    </section>
+
+    <!-- ─── రైతు: విడుదల అభ్యర్థన ─── -->
+    <section id="f-release">
+      <div class="page-header">
+        <h1>రైతు ఫ్లో — విడుదల అభ్యర్థన (పూర్తి లేదా పాక్షిక)</h1>
+        <p class="subtitle">రైతు తన నిల్వ లాట్ పూర్తిగా లేదా పాక్షికంగా విడుదల చేయాలని సంకేతిస్తాడు. ఉద్యోగి ఫోన్ చేసి పరిమాణం, ధర మరియు తేదీ నిర్ధారిస్తాడు — తర్వాత ప్రాక్సీ చర్యగా విడుదల నమోదు చేస్తాడు.</p>
+        <div class="tags"><span class="badge badge-farmer">రైతు</span><span class="badge badge-bot">AI బాట్</span><span class="badge badge-employee">ఉద్యోగి</span></div>
+      </div>
+
+      <div class="info-box yellow">
+        <strong>ఫోన్ కాల్ దశ ఎందుకు?</strong> విడుదల నిర్ణయాలు — ముఖ్యంగా పాక్షికమైనవి — ఖచ్చితమైన పరిమాణం, సమయం, కొనుగోలుదారు మరియు కొన్నిసార్లు ధర గురించి అంగీకారం అవసరం. ఇది WhatsApp సందేశం ద్వారా మాత్రమే సురక్షితంగా పరిష్కరించలేం. ఉద్యోగి రైతుకు ఫోన్ చేసి అంగీకరిస్తాడు, తర్వాత ప్రాక్సీ విడుదలగా నమోదు చేస్తాడు.
+      </div>
+
+      <h2>దశల వారీ క్రమం</h2>
+      <div class="flow-steps">
+        <div class="flow-step farmer">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">రైతు WhatsApp ద్వారా విడుదల ఉద్దేశం తెలియజేస్తాడు</div>
+            <div class="step-desc">"నా లాట్ విడుదల చేయాలి" / "నా మిర్చి కొంత అమ్మాలనుకుంటున్నాను" / "GNT1-20260606-0001 నుండి 100 బస్తాలు విడుదల"</div>
+          </div>
+        </div>
+        <div class="flow-step bot">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">బాట్ స్వీకరిస్తుంది మరియు ప్రస్తుత బాకీ చూపుతుంది</div>
+            <div class="step-desc">లాట్ వివరాలు, ఇప్పటి వరకు బాకీ, నికర బాకీ చూపుతుంది. ఆపరేటర్ ఫోన్ చేసి వివరాలు నిర్ధారిస్తారని రైతుకు చెప్తుంది.</div>
+          </div>
+        </div>
+        <div class="flow-step system">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">ఉద్యోగి డాష్‌బోర్డ్ క్యూలో విడుదల అభ్యర్థన కనిపిస్తుంది</div>
+            <div class="step-desc">"ఫోన్ కాల్ అవసరం" అని ఫ్లాగ్ చేయబడుతుంది — సాధారణ నిర్ధారించు/తిరస్కరించు కాదు. ఉద్యోగి రైతు సందేశం మరియు నంబర్ చూస్తాడు.</div>
+          </div>
+        </div>
+        <div class="flow-step employee">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <div class="step-title">ఉద్యోగి రైతుకు ఫోన్ చేస్తాడు</div>
+            <div class="step-desc">పూర్తి లేదా పాక్షిక విడుదల, ఖచ్చితమైన పరిమాణం (పాక్షిక అయితే), తేదీ, ధర పరిగణనలు గురించి అంగీకరిస్తారు. ఉద్యోగి అంగీకరించిన వివరాలు నమోదు చేస్తాడు.</div>
+          </div>
+        </div>
+        <div class="flow-step employee">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <div class="step-title">ఉద్యోగి డాష్‌బోర్డ్‌లో విడుదల నమోదు చేస్తాడు (ప్రాక్సీ చర్య)</div>
+            <div class="step-desc">అంగీకరించిన పరిమాణం, తేదీ, నోట్సు నమోదు చేస్తాడు. రైతు తరపున పెండింగ్ చర్య సృష్టిస్తాడు. యజమాని లేదా ఉద్యోగి నిర్ధారిస్తాడు.</div>
+            <div class="step-note green">✅ ఆడిట్ జాబితా: "ఉద్యోగి సురేశ్ రైతు రాజు కుమార్ తరపున — 06 జూన్ 2026 ఫోన్ కాల్ ద్వారా అంగీకరించారు"</div>
+          </div>
+        </div>
+        <div class="flow-step system">
+          <div class="step-num">6</div>
+          <div class="step-body">
+            <div class="step-title">రైతుకు WhatsApp నిర్ధారణ వస్తుంది</div>
+            <div class="step-desc">లాట్ ID, విడుదలైన పరిమాణం, బాకీ మరియు నికర చెల్లించాల్సిన మొత్తంతో విడుదల నిర్ధారణ సందేశం. పూర్తి లేదా పాక్షిక అయినా అదే సందేశం.</div>
+          </div>
+        </div>
+      </div>
+
+      <h2>WhatsApp సంభాషణ — రైతు ఫోన్‌లో</h2>
+      <div class="wa-scene">
+        <div class="wa-phone">
+          <div class="wa-header">
+            <div class="wa-avatar">CT</div>
+            <div class="wa-header-info">
+              <div class="wa-header-name">ChilliTech స్టోరేజ్</div>
+              <div class="wa-header-sub">వ్యాపార అకౌంట్</div>
+            </div>
+          </div>
+          <div class="wa-body">
+            <div class="wa-msg out">
+              <div class="wa-bubble">నా లాట్ నుండి సుమారు 300 బస్తాలు అమ్మాలని ఉంది</div>
+              <div class="wa-time">11:00 AM ✓✓</div>
+            </div>
+            <div class="wa-msg in">
+              <div class="wa-sender">ChilliTech స్టోరేజ్</div>
+              <div class="wa-bubble">
+                అర్థమైంది రాజు! మీ విడుదల అభ్యర్థన నమోదు అయింది.<br><br>
+                📦 <strong>లాట్ GNT1-20260606-0001</strong><br>
+                Teja (S17) · 975 kg నిల్వ · చాంబర్ C2<br><br>
+                💰 ఇప్పటి వరకు నిల్వ బాకీ: ₹685<br>
+                తీసుకున్న అడ్వాన్స్: ₹5,000<br><br>
+                మా సిబ్బంది త్వరలో మీకు ఫోన్ చేసి పరిమాణం, తేదీ మరియు ఇతర వివరాలు నిర్ధారిస్తారు. దయచేసి ఫోన్ దగ్గర ఉండండి. 🙏
+              </div>
+              <div class="wa-time">11:00 AM</div>
+            </div>
+            <div class="wa-system-note">— ఉద్యోగి రైతుకు ఫోన్ చేసి 300 బస్తాల పాక్షిక విడుదల అంగీకరిస్తాడు —</div>
+            <div class="wa-msg in">
+              <div class="wa-sender">ChilliTech స్టోరేజ్</div>
+              <div class="wa-bubble">
+                ✅ <strong>పాక్షిక విడుదల నిర్ధారించబడింది!</strong><br><br>
+                లాట్: GNT1-20260606-0001<br>
+                విడుదలైనది: <strong>300 బస్తాలు / 450 kg</strong><br>
+                నిల్వలో మిగిలింది: 525 kg (చాంబర్ C2)<br><br>
+                విడుదలైన భాగంపై నిల్వ బాకీ: ₹211<br>
+                అడ్వాన్స్ సర్దుబాటు: ₹1,534<br>
+                <strong>మీకు చెల్లించాల్సినది: ₹1,323</strong><br><br>
+                తేదీ: 06 జూన్ 2026. ధన్యవాదాలు రాజు!
+              </div>
+              <div class="wa-time">11:42 AM</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2>పూర్తి vs పాక్షిక విడుదల — తేడాలు</h2>
+      <div class="card">
+        <table class="db-table">
+          <thead><tr><th></th><th>పూర్తి విడుదల</th><th>పాక్షిక విడుదల</th></tr></thead>
+          <tbody>
+            <tr><td>విడుదల తర్వాత లాట్ స్థితి</td><td><span class="status-pill s-released">విడుదలైంది</span></td><td><span class="status-pill s-partial">పాక్షికం</span></td></tr>
+            <tr><td>నిల్వలో మిగిలింది</td><td>లేదు — లాట్ మూసుకుంది</td><td>మిగిలిన kg అదే చాంబర్‌లో</td></tr>
+            <tr><td>బాకీ లెక్క</td><td>పూర్తి లాట్ బరువుపై</td><td>విడుదలైన భాగంపై మాత్రమే</td></tr>
+            <tr><td>అడ్వాన్స్ సర్దుబాటు</td><td>పూర్తి అడ్వాన్స్ పూర్తి</td><td>అడ్వాన్స్ దామాషా తగ్గింపు</td></tr>
+            <tr><td>రైతు మళ్ళీ అభ్యర్థించగలడా?</td><td>లేదు — లాట్ మూసుకుంది</td><td>అవును — మిగిలిన నిల్వ నుండి మళ్ళీ విడుదల అభ్యర్థించవచ్చు</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ─── రైతు: అవుట్‌వార్డ్ ─── -->
+    <section id="f-outward">
+      <div class="page-header">
+        <h1>రైతు ఫ్లో — అవుట్‌వార్డ్ (ఉపసంహరణ)</h1>
+        <p class="subtitle">రైతు ఉత్పత్తి తీసుకువెళ్ళడానికి అభ్యర్థిస్తాడు. బాకీలు లెక్కించబడతాయి, ఆపరేటర్ నిర్ధారిస్తాడు, లాట్ విడుదలవుతుంది.</p>
+        <div class="tags"><span class="badge badge-farmer">రైతు</span><span class="badge badge-bot">AI బాట్</span><span class="badge badge-employee">ఉద్యోగి</span></div>
+      </div>
+
+      <div class="flow-steps">
+        <div class="flow-step farmer">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">రైతు ఉపసంహరణ అభ్యర్థిస్తాడు</div>
+            <div class="step-desc">"నా లాట్ GNT1-20260606-0001 తీసుకువెళ్ళాలి" లేదా "నా మిర్చి విడుదల చేయండి".</div>
+          </div>
+        </div>
+        <div class="flow-step bot">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">సిస్టమ్ బాకీలు లెక్కిస్తుంది</div>
+            <div class="step-desc">నిల్వ రోజులు × రేటు × పరిమాణం ఆధారంగా నిల్వ రుసుములు లెక్కించబడతాయి. నికర మొత్తం (బాకీ మైనస్ అడ్వాన్స్) చూపబడుతుంది.</div>
+          </div>
+        </div>
+        <div class="flow-step bot">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">బాట్ బాకీ సారాంశంతో స్పందిస్తుంది</div>
+            <div class="step-desc">విడుదల జరగే ముందు రైతు ఎంత నిల్వ రుసుము బాకీ పడిందో చూస్తాడు.</div>
+          </div>
+        </div>
+        <div class="flow-step employee">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <div class="step-title">ఆపరేటర్ డాష్‌బోర్డ్‌లో విడుదల నిర్ధారిస్తాడు</div>
+            <div class="step-desc">ఆపరేటర్ బాకీలు సమీక్షించి, చెల్లింపు ధృవీకరించి, అవుట్‌వార్డ్ నిర్ధారిస్తాడు. WhatsApp లో YES అని రిప్లై చేయవచ్చు.</div>
+            <div class="step-note">⚠ ఈ దశ వరకు లాట్ గేటు దాటదు.</div>
+          </div>
+        </div>
+        <div class="flow-step system">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <div class="step-title">లాట్ విడుదలైంది, నిర్ధారణ పంపబడింది</div>
+            <div class="step-desc">లాట్ స్థితి "విడుదలైంది"గా మారుతుంది. రైతుకు WhatsApp నిర్ధారణ వస్తుంది. LedgerEntry నమోదు చేయబడుతుంది.</div>
+            <div class="step-note green">✅ గేటు విడుదల ఇక్కడ మాత్రమే జరుగుతుంది.</div>
+          </div>
+        </div>
+      </div>
+
+      <h2>WhatsApp సంభాషణ — రైతు ఫోన్‌లో</h2>
+      <div class="wa-scene">
+        <div class="wa-phone">
+          <div class="wa-header">
+            <div class="wa-avatar">CT</div>
+            <div class="wa-header-info">
+              <div class="wa-header-name">ChilliTech స్టోరేజ్</div>
+              <div class="wa-header-sub">వ్యాపార అకౌంట్</div>
+            </div>
+          </div>
+          <div class="wa-body">
+            <div class="wa-msg out">
+              <div class="wa-bubble">నా లాట్ GNT1-20260606-0001 విడుదల చేయాలి</div>
+              <div class="wa-time">9:30 AM ✓✓</div>
+            </div>
+            <div class="wa-msg in">
+              <div class="wa-sender">ChilliTech స్టోరేజ్</div>
+              <div class="wa-bubble">నమస్కారం రాజు! లాట్ <strong>GNT1-20260606-0001</strong> వివరాలు:<br><br>📦 Teja (S17) · 975 kg · చాంబర్ C2<br>📅 నిల్వ: 06 జూన్ – 20 జూన్ 2026 (14 రోజులు)<br><br>💰 <strong>బాకీ లెక్క</strong><br>నిల్వ రుసుము: ₹685<br>తీసుకున్న అడ్వాన్స్: ₹5,000<br><strong>మీకు అందాల్సిన మొత్తం: ₹4,315</strong><br><br>ఆపరేటర్ ఆమోదం కోసం విడుదల అభ్యర్థన పంపుతున్నాను.</div>
+              <div class="wa-time">9:30 AM</div>
+            </div>
+            <div class="wa-system-note">— ఆపరేటర్ బాకీలు సమీక్షించి డాష్‌బోర్డ్‌లో నిర్ధారిస్తాడు —</div>
+            <div class="wa-msg in">
+              <div class="wa-sender">ChilliTech స్టోరేజ్</div>
+              <div class="wa-bubble">✅ <strong>లాట్ విడుదలైంది!</strong><br><br>లాట్: GNT1-20260606-0001<br>విడుదల తేదీ: 20 జూన్ 2026<br>నికర బరువు: 975 kg<br><br>దయచేసి చాంబర్ C2 నుండి తీసుకెళ్ళండి. ₹4,315 అంగీకరించిన విధంగా చెల్లించబడుతుంది.<br><br>ధన్యవాదాలు రాజు!</div>
+              <div class="wa-time">9:44 AM</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── పరిధిలో vs పరిధి వెలుపల ─── -->
+    <section id="f-scope">
+      <div class="page-header">
+        <h1>పరిధిలో vs పరిధి వెలుపల సందేశాలు</h1>
+        <p class="subtitle">బాట్ శీతల గిడ్డంగి కార్యకలాపాలు మాత్రమే నిర్వహిస్తుంది. ఆ పరిధి వెలుపల ఏదైనా ఉంటే కార్యాలయానికి మళ్ళించబడుతుంది — సాధారణ సహాయకుడిలా ఎప్పుడూ సమాధానం ఇవ్వదు.</p>
+        <div class="tags"><span class="badge badge-farmer">రైతు</span><span class="badge badge-bot">AI బాట్</span></div>
+      </div>
+
+      <div class="info-box red">
+        <strong>WhatsApp విధానం (RULE 8):</strong> Meta WhatsApp Business API లో సాధారణ AI చాట్‌బాట్లను నిషేధిస్తుంది. నిర్మాణాత్మక వ్యాపార-పని బాట్లు అనుమతించబడతాయి. సరిహద్దు స్పష్టంగా ఉండాలి — శీతల గిడ్డంగి కార్యకలాపాలకు వెలుపల ఏదైనా మళ్ళించబడుతుంది, సమాధానం ఇవ్వబడదు.
+      </div>
+
+      <h2>పరిధిలో ఉన్నవి</h2>
+      <div class="card">
+        <table class="db-table">
+          <thead><tr><th>సందేశం</th><th>పరిధిలో ఎందుకు</th></tr></thead>
+          <tbody>
+            <tr><td>"నా లాట్ స్థితి" / "నా మిర్చి ఎక్కడుంది?"</td><td>నేరుగా శీతల గిడ్డంగి విచారణ</td></tr>
+            <tr><td>"నాకు 100 బస్తాల తేజా వేయాలి"</td><td>ఇన్‌వార్డ్ కార్యకలాపం</td></tr>
+            <tr><td>"నా లాట్ విడుదల చేయాలి"</td><td>అవుట్‌వార్డ్ కార్యకలాపం</td></tr>
+            <tr><td>"ఈరోజు తేజా ధర?" / "334 రేటు ఎంత?"</td><td>✅ పరిధిలో — <em>ఇక్కడ నిల్వ ఉన్న</em> ఉత్పత్తి ధర, విడుదల నిర్ణయానికి సహాయం</td></tr>
+            <tr><td>"నిల్వ రుసుము ఎంత?"</td><td>సొంత లాట్‌పై ఆర్థిక విచారణ</td></tr>
+            <tr><td>"నా బాకీ" / "అడ్వాన్స్ ఎంత?"</td><td>సొంత ఖాతాపై లెడ్జర్ విచారణ</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-box green">
+        <strong>మార్కెట్ ధర పరిధిలో ఉంది</strong> ఎందుకంటే రైతు ఈ శీతల గిడ్డంగిలో కూర్చున్న ఉత్పత్తి విలువ గురించి అడుగుతున్నాడు — విడుదల నిర్ణయం చేసుకోవడానికి. ఇది శీతల గిడ్డంగి వ్యాపార సంప్రదింపు, సాధారణ మార్కెట్ విచారణ కాదు.
+      </div>
+
+      <h2>పరిధి వెలుపల ఉన్నవి</h2>
+      <div class="card">
+        <table class="db-table">
+          <thead><tr><th>సందేశం</th><th>పరిధి వెలుపల ఎందుకు</th><th>బాట్ స్పందన</th></tr></thead>
+          <tbody>
+            <tr><td>"రేపు వాతావరణం ఎలా?"</td><td>శీతల గిడ్డంగికి సంబంధం లేదు</td><td>కార్యాలయానికి మళ్ళిస్తుంది</td></tr>
+            <tr><td>"కొనుగోలుదారు కనుగొనడంలో సహాయం చేయండి"</td><td>దళారీ, నిల్వ కాదు</td><td>కార్యాలయానికి మళ్ళిస్తుంది</td></tr>
+            <tr><td>"హైదరాబాద్ మార్కెట్ ధర ఎంత?"</td><td>వేరే మార్కెట్, నిల్వ ఉత్పత్తి గురించి కాదు</td><td>నిల్వ ఉత్పత్తికి గుంటూరు రేట్లు మాత్రమే చూపుతుంది</td></tr>
+            <tr><td>"పంట వ్యాధి గురించి చెప్పండి"</td><td>వ్యవసాయ సలహా, నిల్వ కాదు</td><td>కార్యాలయానికి మళ్ళిస్తుంది</td></tr>
+            <tr><td>అసంబద్ధ చాట్ లేదా సాధారణ ప్రశ్నలు</td><td>శీతల గిడ్డంగి కార్యకలాపం కాదు</td><td>కార్యాలయానికి మళ్ళిస్తుంది</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>పరిధి వెలుపల సంభాషణ ఉదాహరణలు</h2>
+      <div class="wa-scene">
+        <div class="wa-phone">
+          <div class="wa-header">
+            <div class="wa-avatar">CT</div>
+            <div class="wa-header-info">
+              <div class="wa-header-name">ChilliTech స్టోరేజ్</div>
+              <div class="wa-header-sub">వ్యాపార అకౌంట్</div>
+            </div>
+          </div>
+          <div class="wa-body">
+            <div class="wa-msg out">
+              <div class="wa-bubble">నా మిర్చి కోసం కొనుగోలుదారు కనుగొనడంలో సహాయం చేయగలరా?</div>
+              <div class="wa-time">10:00 AM ✓✓</div>
+            </div>
+            <div class="wa-msg in">
+              <div class="wa-sender">ChilliTech స్టోరేజ్</div>
+              <div class="wa-bubble">నేను మీ నిల్వ లాట్లు, బాకీ, మీ ఉత్పత్తి మార్కెట్ ధరలు మరియు విడుదల అభ్యర్థనలలో సహాయం చేయగలను — కానీ కొనుగోలుదారులను కనుగొనడంలో కాదు.<br><br>దానికి దయచేసి నేరుగా కార్యాలయాన్ని సంప్రదించండి. 🙏</div>
+              <div class="wa-time">10:00 AM</div>
+            </div>
+            <div class="wa-msg out">
+              <div class="wa-bubble">రేపు వాతావరణం ఎలా ఉంటుంది?</div>
+              <div class="wa-time">10:05 AM ✓✓</div>
+            </div>
+            <div class="wa-msg in">
+              <div class="wa-sender">ChilliTech స్టోరేజ్</div>
+              <div class="wa-bubble">నేను శీతల గిడ్డంగి కార్యకలాపాలు మాత్రమే నిర్వహిస్తాను. ఇతర విషయాలకు దయచేసి కార్యాలయాన్ని సంప్రదించండి. 🙏</div>
+              <div class="wa-time">10:05 AM</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── రైతు సహాయ కార్డ్ ─── -->
+    <section id="ref-farmer">
+      <div class="page-header">
+        <h1>రైతు — సహాయ కార్డ్</h1>
+        <p class="subtitle">రైతులు ఏమి చేయగలరు, ఎలా చేయాలి. కొత్త రైతుకు సిస్టమ్ వివరించడానికి ఉపయోగించండి.</p>
+      </div>
+
+      <div class="role-card farmer">
+        <h3>🌾 రైతుగా, మీరు చేయగలిగేవి:</h3>
+        <ul>
+          <li class="can">✅ <strong>లాట్ స్థితి తనిఖీ</strong> — "లాట్ స్థితి" లేదా "నా మిర్చి ఎక్కడుంది" అని మెసేజ్ చేయండి</li>
+          <li class="can">✅ <strong>బాకీ తనిఖీ</strong> — "నా బాకీ" లేదా "అడ్వాన్స్ ఎంత" అని మెసేజ్ చేయండి</li>
+          <li class="can">✅ <strong>ఇన్‌వార్డ్ (డిపాజిట్) అభ్యర్థన</strong> — "నాకు 100 బస్తాల తేజా వేయాలి" అని మెసేజ్ చేయండి</li>
+          <li class="can">✅ <strong>అవుట్‌వార్డ్ (ఉపసంహరణ) అభ్యర్థన</strong> — "నా లాట్ [లాట్ ID] విడుదల చేయాలి" అని మెసేజ్ చేయండి</li>
+          <li class="can">✅ <strong>రసీదు పొందవచ్చు</strong> — ప్రతి నిర్ధారిత చర్య తర్వాత స్వయంచాలకంగా పంపబడుతుంది</li>
+          <li class="cannot">❌ మీరు స్వయంగా లాట్ విడుదల చేయలేరు — ఆపరేటర్ ఎల్లప్పుడూ నిర్ధారించాలి</li>
+          <li class="cannot">❌ ఇతర రైతుల సమాచారం చూడలేరు</li>
+        </ul>
+      </div>
+
+      <h2>సిస్టమ్‌ను ఎలా సంప్రదించాలి</h2>
+      <div class="card">
+        <p><strong>WhatsApp మాత్రమే.</strong> వ్యాపార WhatsApp నంబర్‌కు సందేశం పంపండి. ఇంగ్లీషు లేదా తెలుగులో రాయవచ్చు, లేదా వాయిస్ నోట్ పంపవచ్చు. సిస్టమ్ కొన్ని సెకన్లలో స్పందిస్తుంది.</p>
+        <p style="margin-top:0.5rem"><strong>సిస్టమ్ అర్థం చేసుకోకపోతే:</strong> ఆపరేటర్ నేరుగా మీకు సంప్రదిస్తారు. మీరు ఎప్పుడైనా కార్యాలయాన్ని కూడా ఫోన్ చేయవచ్చు.</p>
+      </div>
+
+      <h2>మీ లాట్ ID — జాగ్రత్తగా ఉంచుకోండి</h2>
+      <div class="info-box blue">
+        మీరు ఉత్పత్తి డిపాజిట్ చేసిన ప్రతిసారీ మీకు <strong>లాట్ ID</strong> వస్తుంది (ఉదా. <code>GNT1-20260606-0001</code>). ఇది మీ రసీదు నంబర్. ఈ ID జాగ్రత్తగా ఉంచుకోండి — ఉపసంహరణ అభ్యర్థించేటప్పుడు లేదా ఆ డిపాజిట్ గురించి అడిగేటప్పుడు అవసరమవుతుంది.
+      </div>
+
+      <h2>మీరు పంపగలిగే WhatsApp సందేశాలు (ఉదాహరణలు)</h2>
+      <div class="card">
+        <table class="db-table">
+          <thead><tr><th>మీరు చెప్పగలిగేది…</th><th>సిస్టమ్ చేసేది…</th></tr></thead>
+          <tbody>
+            <tr><td>"నా లాట్ స్థితి" / "నా మిర్చి ఎక్కడుంది?"</td><td>పరిమాణం, చాంబర్, ఈరోజు బాకీ, నికర బాకీతో మీ యాక్టివ్ లాట్లు చూపిస్తుంది</td></tr>
+            <tr><td>"నా బాకీ" / "అడ్వాన్స్ ఎంత?"</td><td>అదే స్నాప్‌షాట్ — అడ్వాన్స్ + బాకీ + మీకు చెల్లించాల్సినది</td></tr>
+            <tr><td>"తేజా ధర" / "ఈరోజు తేజా రేటు?"</td><td>ఈరోజు తేజా ధర పరిధి (ఇంకా నమోదు కాకపోతే తేదీతో తాజా)</td></tr>
+            <tr><td>"334 ధర" / "Guntur Sannam రేటు?"</td><td>ఆ రకం ధర పరిధి చూపిస్తుంది</td></tr>
+            <tr><td>"నాకు 100 బస్తాల తేజా వేయాలి"</td><td>అభ్యర్థన నమోదు చేస్తుంది — ఆపరేటర్ నిర్ధారించి చాంబర్ నిర్ణయిస్తాడు</td></tr>
+            <tr><td>"నా లాట్ విడుదల చేయాలి" / "అమ్మాలనుకుంటున్నాను"</td><td>స్వీకరిస్తుంది మరియు బాకీ చూపిస్తుంది — ఆపరేటర్ వివరాలు నిర్ధారించడానికి ఫోన్ చేస్తాడు</td></tr>
+            <tr><td>"నా లాట్ నుండి 300 బస్తాలు అమ్మాలి"</td><td>అదే — ఆపరేటర్ పాక్షిక విడుదల వివరాలు నిర్ధారించడానికి ఫోన్ చేస్తాడు</td></tr>
+            <tr><td>"నా లాట్‌కు నిల్వ రుసుము ఎంత?"</td><td>మీ యాక్టివ్ లాట్(ల)పై ఇప్పటి వరకు బాకీ అయిన రుసుములు చూపిస్తుంది</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-box yellow">
+        <strong>విడుదల అభ్యర్థనల కోసం:</strong> బాట్ మీ సందేశం స్వీకరిస్తుంది మరియు ఆపరేటర్ మీకు ఫోన్ చేస్తారు. దయచేసి ఫోన్ దగ్గర ఉండండి. మీరు మరియు ఆపరేటర్ వివరాలు అంగీకరించిన తర్వాత మాత్రమే విడుదల జరుగుతుంది — ఆ సంభాషణ లేకుండా నిల్వ నుండి ఏదీ బయటకు వెళ్ళదు.
+      </div>
+    </section>
+
+    <!-- ─── పదకోశం ─── -->
+    <section id="ref-glossary">
+      <div class="page-header">
+        <h1>పదకోశం</h1>
+        <p class="subtitle">సిస్టమ్‌లో ఉపయోగించే ముఖ్యమైన పదాలు — మామయ్యకు, ఉద్యోగులకు లేదా రైతులకు వివరించడానికి.</p>
+      </div>
+
+      <div class="card">
+        <table class="db-table">
+          <thead><tr><th>పదం</th><th>అర్థం</th></tr></thead>
+          <tbody>
+            <tr><td><strong>లాట్</strong></td><td>ఒక రైతు ఒకేసారి డిపాజిట్ చేసిన ఉత్పత్తి. ప్రత్యేక లాట్ ID వస్తుంది (ఉదా. GNT1-20260606-0001). ఒక రైతుకు అనేక యాక్టివ్ లాట్లు ఉండవచ్చు.</td></tr>
+            <tr><td><strong>లాట్ ID</strong></td><td>ప్రతి డిపాజిట్‌కు ప్రత్యేక కోడ్. ఫార్మాట్: <code>{సదుపాయ కోడ్}-{తేదీ}-{నంబర్}</code>. రైతు రసీదు నంబర్.</td></tr>
+            <tr><td><strong>ఇన్‌వార్డ్</strong></td><td>ఉత్పత్తి శీతల గిడ్డంగిలో తీసుకువచ్చి డిపాజిట్ చేసినప్పుడు.</td></tr>
+            <tr><td><strong>అవుట్‌వార్డ్</strong></td><td>ఉత్పత్తి శీతల గిడ్డంగి నుండి తీసుకువెళ్ళినప్పుడు (ఉపసంహరణ).</td></tr>
+            <tr><td><strong>పెండింగ్ చర్య</strong></td><td>AI (లేదా రైతు WhatsApp సందేశం) ప్రతిపాదించిన చర్య — ఆపరేటర్ నిర్ధారించే లేదా తిరస్కరించే వరకు వేచి ఉంటుంది. మనిషి అంగీకరించే వరకు ఏదీ జరగదు.</td></tr>
+            <tr><td><strong>అడ్వాన్స్</strong></td><td>డిపాజిట్ సమయంలో ఆపరేటర్ రైతుకు ఇచ్చిన డబ్బు. లెడ్జర్‌లో ట్రాక్ చేయబడుతుంది మరియు అవుట్‌వార్డ్ సమయంలో బాకీల నుండి తీసివేయబడుతుంది.</td></tr>
+            <tr><td><strong>బాకీ (నిల్వ రుసుము)</strong></td><td>రైతు చెల్లించాల్సిన నిల్వ రుసుములు — నిల్వ రోజులు × చార్జ్ రేటు × పరిమాణంగా లెక్కించబడుతుంది.</td></tr>
+            <tr><td><strong>లెడ్జర్</strong></td><td>ప్రతి రైతు ఆర్థిక రికార్డు — ప్రతి అడ్వాన్స్, రుసుము, చెల్లింపు మరియు పూర్తి. Append-only: ఏదీ మాయం చేయబడదు.</td></tr>
+            <tr><td><strong>ఆడిట్ లాగ్</strong></td><td>సిస్టమ్‌లోని ప్రతి చర్య యొక్క శాశ్వత రికార్డు — ఎవరు చేశారు, ఎప్పుడు, ఎవరి తరపున, ఏమి మారింది.</td></tr>
+            <tr><td><strong>సర్దుబాటు</strong></td><td>ఇప్పటికే ఉన్న రికార్డులో దిద్దుబాటు (బరువు, లెడ్జర్ నమోదు). ఎల్లప్పుడూ వ్రాసిన కారణం అవసరం. శాశ్వతంగా లాగ్ చేయబడుతుంది.</td></tr>
+            <tr><td><strong>ప్రాక్సీ చర్య</strong></td><td>ఉద్యోగి లేదా యజమాని రైతు తరపున చర్య నిర్వహించినప్పుడు (ఉదా. రైతు నేరుగా వచ్చినప్పుడు ఇన్‌వార్డ్ నమోదు).</td></tr>
+            <tr><td><strong>చాంబర్</strong></td><td>ఉత్పత్తి నిల్వ చేయబడే శీతల గిడ్డంగి విభాగం. ప్రతి లాట్ ఒక చాంబర్‌కు నిర్ణయించబడుతుంది.</td></tr>
+            <tr><td><strong>Tenant</strong></td><td>ChilliTech యొక్క కస్టమర్ — ఒక శీతల గిడ్డంగి వ్యాపారం. tenant_001 = మామయ్య వ్యాపారం. అన్ని డేటా tenant వారీగా కచ్చితంగా వేరు చేయబడుతుంది.</td></tr>
+            <tr><td><strong>సదుపాయ కోడ్</strong></td><td>నిల్వ స్థానానికి చిన్న కోడ్ (ఉదా. GNT1 = గుంటూరు సదుపాయం 1). లాట్ IDs లో ఉపయోగించబడుతుంది. ఒక tenant కు అనేక సదుపాయాలు ఉండవచ్చు.</td></tr>
+            <tr><td><strong>AI నమ్మకం</strong></td><td>రైతు సందేశాన్ని AI సరిగ్గా అర్థం చేసుకుందని ఎంత నిశ్చయంగా ఉంది. తక్కువ నమ్మకం → మానవ సమీక్ష క్యూ లోకి వెళ్తుంది, పెండింగ్ చర్య సృష్టించదు.</td></tr>
+            <tr><td><strong>24-గంటల విండో</strong></td><td>రైతు చివరి సందేశం నుండి 24 గంటలలోపు WhatsApp ఉచిత సందేశాలు అనుమతిస్తుంది. బయట, పూర్వ-ఆమోదిత టెంప్లేట్ సందేశాలు మాత్రమే పంపవచ్చు.</td></tr>
+            <tr><td><strong>మార్కెట్ ధర</strong></td><td>ఉద్యోగి ప్రతి ఉదయం గుంటూరు మార్కెట్ రేట్ల నుండి నమోదు చేసే రోజువారీ వస్తువు రకం వారీ ధర పరిధి. రైతులు నిల్వ ఉత్పత్తి నిల్వ చేయాలా విడుదల చేయాలా అని నిర్ణయించుకోవడానికి WhatsApp ద్వారా విచారించవచ్చు.</td></tr>
+            <tr><td><strong>ధర చరిత్ర</strong></td><td>ప్రతి రోజువారీ ధర నమోదు శాశ్వతంగా నిల్వ అవుతుంది. కాలక్రమేణా కాలానుగుణ ధర నమూనాలను గుర్తించడానికి ఉపయోగపడే రికార్డు (Phase 2 analytics).</td></tr>
+            <tr><td><strong>పాక్షిక విడుదల / పాక్షిక అవుట్‌వార్డ్</strong></td><td>నిల్వ లాట్‌లో కొంత భాగం మాత్రమే విడుదల. రైతు ఉద్దేశం మెసేజ్ చేస్తాడు, ఉద్యోగి పరిమాణం మరియు సమయం నిర్ధారించడానికి ఫోన్ చేస్తాడు, తర్వాత ప్రాక్సీ చర్యగా నమోదు చేస్తాడు. మిగిలిన పరిమాణం అదే లాట్ ID లో "పాక్షికం" స్థితితో నిల్వలో ఉంటుంది.</td></tr>
+            <tr><td><strong>విడుదల అభ్యర్థన</strong></td><td>రైతు తన నిల్వ ఉత్పత్తి పూర్తిగా లేదా పాక్షికంగా విడుదల చేయాలని WhatsApp సంకేతం. వివరాలు నిర్ధారించడానికి ఉద్యోగి ఫోన్ కాల్‌ను ప్రేరేపిస్తుంది — నేరుగా చర్య కాదు.</td></tr>
+            <tr><td><strong>రన్నింగ్ స్టేట్‌మెంట్</strong></td><td>ఉద్యోగి రైతు పూర్తి చరిత్ర వీక్షణ — రెండు సమాంతర రన్నింగ్ టోటల్‌లు: ఇన్వెంటరీ కదలికలు (kg లో / kg బయట / బాకీ) మరియు ఆర్థిక నమోదులు (అడ్వాన్సులు / రుసుములు / పూర్తిళ్ళు / నికర చెల్లించాల్సినది). ఏ అవుట్‌వార్డ్ నిర్ధారించే ముందు సూచన వీక్షణ.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  function show(id) {
+    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    event.target.classList.add('active');
+    window.scrollTo(0, 0);
+  }
+</script>
+</body>
+</html>

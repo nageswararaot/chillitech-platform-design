@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChilliTech — ఉద్యోగి ఫ్లోలు</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+           background: #f0f2f5; color: #1a1a2e; font-size: 15px; line-height: 1.6; }
+    .shell { display: flex; min-height: 100vh; }
+    .sidebar { width: 260px; flex-shrink: 0; background: #1a1a2e; color: #c9d1d9;
+               position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 0 0 2rem; }
+    .sidebar-brand { padding: 1.2rem 1.2rem 1rem; border-bottom: 1px solid #30363d;
+                     font-weight: 700; font-size: 1rem; color: #fff; }
+    .sidebar-brand span { color: #58a6ff; }
+    .sidebar-section { padding: 0.8rem 1.2rem 0.2rem; font-size: 0.7rem;
+                       text-transform: uppercase; letter-spacing: 0.1em; color: #6e7681; }
+    .sidebar a { display: block; padding: 0.45rem 1.2rem 0.45rem 1.5rem;
+                 color: #c9d1d9; text-decoration: none; font-size: 0.88rem;
+                 border-left: 3px solid transparent; transition: all 0.15s; }
+    .sidebar a:hover, .sidebar a.active { background: #21262d; color: #fff; border-left-color: #58a6ff; }
+    .sidebar a.sub { padding-left: 2.2rem; font-size: 0.83rem; color: #8b949e; }
+    .sidebar a.sub:hover, .sidebar a.sub.active { color: #c9d1d9; }
+    .main { flex: 1; padding: 2rem 2.5rem; max-width: 900px; }
+    section { display: none; }
+    section.active { display: block; }
+    h1 { font-size: 1.6rem; font-weight: 700; color: #1a1a2e; margin-bottom: 0.4rem; }
+    h2 { font-size: 1.25rem; font-weight: 600; color: #1a1a2e; margin: 2rem 0 0.8rem; }
+    h3 { font-size: 1rem; font-weight: 600; color: #444; margin: 1.5rem 0 0.5rem; }
+    p  { color: #444; margin-bottom: 0.8rem; }
+    .subtitle { color: #6e7681; font-size: 0.92rem; margin-bottom: 1.5rem; }
+    .card { background: #fff; border-radius: 10px; padding: 1.4rem 1.6rem;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 1.4rem; }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .badge { display: inline-block; padding: 0.2rem 0.7rem; border-radius: 20px;
+             font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; }
+    .badge-farmer   { background: #dbeafe; color: #1d4ed8; }
+    .badge-employee { background: #fef3c7; color: #92400e; }
+    .badge-owner    { background: #f3e8ff; color: #6b21a8; }
+    .badge-bot      { background: #d1fae5; color: #065f46; }
+    .role-card { border-radius: 10px; padding: 1.4rem 1.6rem; margin-bottom: 1rem; }
+    .role-card.employee { background: #fffbeb; border-left: 4px solid #f59e0b; }
+    .role-card h3 { margin-top: 0; }
+    .role-card ul { padding-left: 1.2rem; color: #444; }
+    .role-card ul li { margin-bottom: 0.3rem; font-size: 0.9rem; }
+    .role-card .cannot { color: #dc2626; }
+    .role-card .can    { color: #16a34a; }
+    .wa-phone { width: 340px; border-radius: 24px; overflow: hidden;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.18); border: 2px solid #ddd; background: #e5ddd5; }
+    .wa-header { background: #075e54; color: #fff; padding: 0.8rem 1rem;
+                 display: flex; align-items: center; gap: 0.7rem; }
+    .wa-avatar { width: 38px; height: 38px; border-radius: 50%; background: #128c7e;
+                 display: flex; align-items: center; justify-content: center;
+                 font-weight: 700; font-size: 1rem; color: #fff; }
+    .wa-header-info { flex: 1; }
+    .wa-header-name { font-weight: 600; font-size: 0.95rem; }
+    .wa-header-sub  { font-size: 0.72rem; opacity: 0.85; }
+    .wa-body { padding: 0.8rem 0.6rem; min-height: 180px; }
+    .wa-msg { margin-bottom: 0.5rem; display: flex; flex-direction: column; }
+    .wa-msg.out { align-items: flex-end; }
+    .wa-msg.in  { align-items: flex-start; }
+    .wa-bubble { max-width: 80%; padding: 0.55rem 0.8rem; border-radius: 8px;
+                 font-size: 0.84rem; line-height: 1.45; }
+    .wa-msg.out .wa-bubble { background: #dcf8c6; border-radius: 8px 0 8px 8px; }
+    .wa-msg.in  .wa-bubble { background: #fff;    border-radius: 0 8px 8px 8px; }
+    .wa-time { font-size: 0.68rem; color: #999; margin-top: 0.15rem; padding: 0 0.2rem; }
+    .wa-system-note { text-align: center; margin: 0.8rem 0; font-size: 0.75rem;
+                      color: #666; font-style: italic;
+                      background: rgba(255,255,255,0.6); border-radius: 8px; padding: 0.3rem 0.6rem; }
+    .wa-sender { font-size: 0.72rem; font-weight: 600; margin-bottom: 0.1rem; }
+    .wa-msg.in .wa-sender { color: #128c7e; }
+    .flow-steps { display: flex; flex-direction: column; gap: 0; margin: 1rem 0 1.5rem; }
+    .flow-step { display: flex; align-items: flex-start; gap: 1rem;
+                 padding: 0.8rem 1rem; background: #fff; border-radius: 8px;
+                 border-left: 4px solid #e5e7eb; margin-bottom: 0.15rem;
+                 box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .flow-step.farmer   { border-left-color: #3b82f6; }
+    .flow-step.bot      { border-left-color: #10b981; }
+    .flow-step.employee { border-left-color: #f59e0b; }
+    .flow-step.system   { border-left-color: #94a3b8; }
+    .step-num { width: 26px; height: 26px; border-radius: 50%; background: #f1f5f9; color: #475569;
+                display: flex; align-items: center; justify-content: center;
+                font-size: 0.78rem; font-weight: 700; flex-shrink: 0; margin-top: 0.1rem; }
+    .step-body { flex: 1; }
+    .step-title { font-weight: 600; font-size: 0.9rem; color: #1a1a2e; }
+    .step-desc  { font-size: 0.84rem; color: #555; margin-top: 0.1rem; }
+    .step-note  { font-size: 0.78rem; color: #ef4444; margin-top: 0.2rem; font-style: italic; }
+    .step-note.green { color: #16a34a; }
+    .dashboard-frame { background: #f8fafc; border-radius: 12px; overflow: hidden;
+                       border: 1px solid #e2e8f0; margin: 1rem 0 2rem;
+                       box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+    .db-topbar { background: #1a1a2e; color: #fff; padding: 0.7rem 1.2rem;
+                 display: flex; align-items: center; gap: 0.8rem; font-size: 0.85rem; }
+    .db-topbar-brand  { font-weight: 700; color: #58a6ff; }
+    .db-topbar-tenant { color: #8b949e; font-size: 0.78rem; }
+    .db-topbar-role   { margin-left: auto; }
+    .db-body { display: flex; min-height: 320px; }
+    .db-sidenav { width: 140px; background: #fff; border-right: 1px solid #e2e8f0; padding: 0.8rem 0; }
+    .db-nav-item { padding: 0.5rem 1rem; font-size: 0.82rem; color: #64748b; cursor: pointer;
+                   border-left: 3px solid transparent; }
+    .db-nav-item.active { background: #eff6ff; color: #1d4ed8; border-left-color: #3b82f6; font-weight: 600; }
+    .db-content { flex: 1; padding: 1.2rem; }
+    .db-section-title { font-weight: 700; font-size: 0.95rem; color: #1a1a2e; margin-bottom: 0.8rem; }
+    .db-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .db-table th { background: #f1f5f9; text-align: left; padding: 0.4rem 0.6rem;
+                   font-size: 0.76rem; color: #64748b; text-transform: uppercase; }
+    .db-table td { padding: 0.45rem 0.6rem; border-bottom: 1px solid #f1f5f9; color: #334155; }
+    .db-table tr:last-child td { border-bottom: none; }
+    .status-pill { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 20px;
+                   font-size: 0.72rem; font-weight: 600; }
+    .s-stored   { background: #d1fae5; color: #065f46; }
+    .s-pending  { background: #fef3c7; color: #92400e; }
+    .s-released { background: #f1f5f9; color: #475569; }
+    .s-partial  { background: #e0f2fe; color: #0369a1; }
+    .pending-card { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px;
+                    padding: 1rem 1.1rem; margin-bottom: 0.8rem; }
+    .pending-card-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; }
+    .pending-icon  { font-size: 1.2rem; }
+    .pending-title { font-weight: 600; font-size: 0.9rem; color: #92400e; }
+    .pending-meta  { font-size: 0.78rem; color: #78716c; }
+    .pending-detail { font-size: 0.85rem; color: #44403c; margin-bottom: 0.6rem;
+                      background: #fff; border-radius: 6px; padding: 0.5rem 0.7rem; }
+    .pending-actions { display: flex; gap: 0.5rem; }
+    .btn { padding: 0.35rem 0.9rem; border-radius: 6px; font-size: 0.82rem;
+           font-weight: 600; border: none; cursor: pointer; }
+    .btn-confirm { background: #16a34a; color: #fff; }
+    .btn-reject  { background: #fff; color: #dc2626; border: 1px solid #dc2626; }
+    .btn-view    { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .info-box { border-radius: 8px; padding: 0.9rem 1.1rem; margin: 1rem 0;
+                font-size: 0.88rem; line-height: 1.5; }
+    .info-box.blue   { background: #eff6ff; border-left: 4px solid #3b82f6; color: #1e40af; }
+    .info-box.yellow { background: #fffbeb; border-left: 4px solid #f59e0b; color: #92400e; }
+    .info-box.green  { background: #f0fdf4; border-left: 4px solid #16a34a; color: #166534; }
+    .info-box.red    { background: #fef2f2; border-left: 4px solid #ef4444; color: #991b1b; }
+    .info-box strong { font-weight: 700; }
+    .page-header { background: #fff; border-radius: 10px; padding: 1.4rem 1.6rem;
+                   margin-bottom: 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .page-header .tags { display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap; }
+    @media (max-width: 700px) {
+      .sidebar { display: none; }
+      .main { padding: 1rem; }
+      .wa-phone { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <nav class="sidebar">
+    <div class="sidebar-brand">🌶 <span>ChilliTech</span></div>
+    <div style="padding:0.5rem 1.2rem;font-size:0.72rem;color:#f59e0b;background:#1e2a1e;border-bottom:1px solid #30363d">👷 ఉద్యోగి ఫ్లోలు — Telugu</div>
+
+    <div class="sidebar-section">ఉద్యోగి ఫ్లోలు</div>
+    <a href="#" onclick="show('e-pending')" class="active sub">↳ చర్యలు నిర్ధారించు/తిరస్కరించు</a>
+    <a href="#" onclick="show('e-proxy')" class="sub">↳ రైతు తరపున ప్రాక్సీ ఇన్‌వార్డ్</a>
+    <a href="#" onclick="show('e-price')" class="sub">↳ రోజువారీ ధర నమోదు</a>
+    <a href="#" onclick="show('e-ledger')" class="sub">↳ రైతు రన్నింగ్ స్టేట్‌మెంట్</a>
+    <a href="#" onclick="show('e-lowconf')" class="sub">↳ తక్కువ నమ్మకం సమీక్ష</a>
+    <a href="#" onclick="show('e-loans')" class="sub">↳ పంట రుణాలు (క్రాప్ ఫైనాన్స్)</a>
+
+    <div class="sidebar-section">డాష్‌బోర్డ్ స్క్రీన్లు</div>
+    <a href="#" onclick="show('d-lots')">లాట్ జాబితా</a>
+    <a href="#" onclick="show('d-queue')">పెండింగ్ క్యూ</a>
+    <a href="#" onclick="show('d-farmer')">రైతు ప్రొఫైల్</a>
+    <a href="#" onclick="show('d-fillrate')">పంట వారీగా నింపు రేటు</a>
+
+    <div class="sidebar-section">సంప్రదింపు</div>
+    <a href="#" onclick="show('ref-employee')">ఉద్యోగి సహాయ కార్డ్</a>
+  </nav>
+
+  <main class="main">
+
+    <!-- ─── ఉద్యోగి: పెండింగ్ చర్యలు ─── -->
+    <section id="e-pending" class="active">
+      <div class="page-header">
+        <h1>ఉద్యోగి ఫ్లో — AI చర్యలు నిర్ధారించు లేదా తిరస్కరించు</h1>
+        <p class="subtitle">అత్యంత ముఖ్యమైన రోజువారీ పని. అన్ని AI-ప్రతిపాదిత చర్యలు ఆపరేటర్ నిర్ణయం తీసుకునే వరకు క్యూలో ఉంటాయి.</p>
+        <div class="tags"><span class="badge badge-employee">ఉద్యోగి</span><span class="badge badge-bot">AI బాట్</span></div>
+      </div>
+
+      <div class="info-box yellow">
+        <strong>ఇదే సిస్టమ్ హృదయం.</strong> రైతు ప్రతిసారీ ఇన్‌వార్డ్ లేదా అవుట్‌వార్డ్ అభ్యర్థన పంపినప్పుడు, అది "పెండింగ్ చర్య"గా ఇక్కడ వస్తుంది. ఉద్యోగి వివరాలు సమీక్షించి, లోపాలు తనిఖీ చేసి, నిర్ధారించు లేదా తిరస్కరించు. ఈ దశ లేకుండా ఏదీ జరగదు.
+      </div>
+
+      <h2>నిర్ధారించడానికి రెండు మార్గాలు — WhatsApp లేదా డాష్‌బోర్డ్</h2>
+      <div class="card-grid">
+        <div class="card">
+          <h3>📱 WhatsApp ద్వారా (త్వరిత)</h3>
+          <p style="font-size:0.87rem">సులభమైన, స్పష్టమైన చర్యలకు (అధిక నమ్మకం), ఉద్యోగికి WhatsApp నోటిఫికేషన్ వస్తుంది. వారు <strong>YES</strong> లేదా <strong>NO</strong> అని రిప్లై చేస్తారు. రొటీన్ ఇన్‌వార్డ్‌లకు వేగవంతమైన మార్గం.</p>
+        </div>
+        <div class="card">
+          <h3>🖥 డాష్‌బోర్డ్ ద్వారా (పూర్తి సమీక్ష)</h3>
+          <p style="font-size:0.87rem">సంక్లిష్టమైన వాటికి — పాక్షిక ఉపసంహరణలు, ఆర్థిక సర్దుబాట్లు, అస్పష్ట సందేశాలు, లేదా తక్కువ నమ్మకం పార్సులు — ఉద్యోగి డాష్‌బోర్డ్ క్యూలోకి వెళ్తాడు.</p>
+        </div>
+      </div>
+
+      <h2>ఉద్యోగికి WhatsApp నోటిఫికేషన్</h2>
+      <div class="wa-phone" style="margin:1rem 0 2rem">
+        <div class="wa-header">
+          <div class="wa-avatar">CT</div>
+          <div class="wa-header-info">
+            <div class="wa-header-name">ChilliTech — ఆపరేటర్</div>
+            <div class="wa-header-sub">అంతర్గత నోటిఫికేషన్లు</div>
+          </div>
+        </div>
+        <div class="wa-body">
+          <div class="wa-msg in">
+            <div class="wa-sender">ChilliTech సిస్టమ్</div>
+            <div class="wa-bubble">🔔 <strong>నిర్ధారించాల్సిన కొత్త చర్య</strong><br><br>రైతు: <strong>రాజు కుమార్</strong><br>అభ్యర్థన: ఇన్‌వార్డ్<br>రకం: Teja (S17)<br>పరిమాణం: 200 బస్తాలు<br><br>నిర్ధారించడానికి <strong>YES</strong> లేదా తిరస్కరించడానికి <strong>NO</strong> అని రిప్లై చేయండి.<br>లేదా వివరాలకు డాష్‌బోర్డ్ తెరవండి.</div>
+            <div class="wa-time">10:02 AM</div>
+          </div>
+          <div class="wa-msg out">
+            <div class="wa-bubble">YES</div>
+            <div class="wa-time">10:13 AM ✓✓</div>
+          </div>
+          <div class="wa-msg in">
+            <div class="wa-sender">ChilliTech సిస్టమ్</div>
+            <div class="wa-bubble">✅ రాజు కుమార్ ఇన్‌వార్డ్ నిర్ధారించబడింది.<br>పూర్తి చేయడానికి డాష్‌బోర్డ్‌లో బరువు మరియు చాంబర్ నమోదు చేయండి.</div>
+            <div class="wa-time">10:13 AM</div>
+          </div>
+        </div>
+      </div>
+
+      <h2>డాష్‌బోర్డ్ పెండింగ్ క్యూ</h2>
+      <div class="dashboard-frame">
+        <div class="db-topbar">
+          <span class="db-topbar-brand">ChilliTech</span>
+          <span class="db-topbar-tenant">tenant_001 · GNT1</span>
+          <span class="db-topbar-role"><span class="badge badge-employee">ఉద్యోగి</span> సురేశ్</span>
+        </div>
+        <div class="db-body">
+          <div class="db-sidenav">
+            <div class="db-nav-item">లాట్లు</div>
+            <div class="db-nav-item active">⏳ పెండింగ్ (2)</div>
+            <div class="db-nav-item">రైతులు</div>
+            <div class="db-nav-item">లెడ్జర్</div>
+          </div>
+          <div class="db-content">
+            <div class="db-section-title">పెండింగ్ చర్యలు — నిర్ధారణ కోసం వేచి ఉన్నాయి</div>
+
+            <div class="pending-card">
+              <div class="pending-card-header">
+                <span class="pending-icon">📦</span>
+                <div>
+                  <div class="pending-title">ఇన్‌వార్డ్ అభ్యర్థన</div>
+                  <div class="pending-meta">రాజు కుమార్ · +91 98XXX XXXXX · 10:02 AM · AI నమ్మకం: అధికం</div>
+                </div>
+              </div>
+              <div class="pending-detail">
+                <strong>రైతు సందేశం:</strong> "నాకు 200 బస్తాల తేజా వేయాలి"<br>
+                <strong>AI విశ్లేషణ:</strong> ఇన్‌వార్డ్ · Teja (S17) · 200 బస్తాలు<br>
+                <strong>స్థూల బరువు:</strong> <em>భౌతిక తూకం తర్వాత నమోదు చేయాలి</em><br>
+                <strong>చాంబర్:</strong> <em>నిర్ధారించేటప్పుడు నిర్ణయించండి</em>
+              </div>
+              <div class="pending-actions">
+                <button class="btn btn-confirm">✔ నిర్ధారించు</button>
+                <button class="btn btn-reject">✗ తిరస్కరించు</button>
+                <button class="btn btn-view">సందేశం చూడండి</button>
+              </div>
+            </div>
+
+            <div class="pending-card">
+              <div class="pending-card-header">
+                <span class="pending-icon">🚚</span>
+                <div>
+                  <div class="pending-title">అవుట్‌వార్డ్ అభ్యర్థన</div>
+                  <div class="pending-meta">వెంకట్ రెడ్డి · +91 97XXX XXXXX · 9:30 AM · AI నమ్మకం: అధికం</div>
+                </div>
+              </div>
+              <div class="pending-detail">
+                <strong>లాట్:</strong> GNT1-20260606-0001 · Teja (S17) · 975 kg · చాంబర్ C2<br>
+                <strong>నిల్వ బాకీ:</strong> ₹685 &nbsp;|&nbsp; <strong>తీసుకున్న అడ్వాన్స్:</strong> ₹5,000 &nbsp;|&nbsp; <strong>రైతుకు చెల్లించాల్సినది:</strong> ₹4,315
+              </div>
+              <div class="pending-actions">
+                <button class="btn btn-confirm">✔ విడుదల నిర్ధారించు</button>
+                <button class="btn btn-reject">✗ తిరస్కరించు</button>
+                <button class="btn btn-view">పూర్తి లెడ్జర్</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box yellow">
+        <strong>గడువు:</strong> నిర్ధారించకపోతే లేదా తిరస్కరించకపోతే పెండింగ్ చర్యలు <strong>24 గంటల తర్వాత</strong> గడువు ముగుస్తాయి. రైతుకు నేరుగా కార్యాలయాన్ని సంప్రదించమని నోటీసు పంపబడుతుంది.
+      </div>
+    </section>
+
+    <!-- ─── ఉద్యోగి: ప్రాక్సీ ఇన్‌వార్డ్ ─── -->
+    <section id="e-proxy">
+      <div class="page-header">
+        <h1>ఉద్యోగి ఫ్లో — రైతు తరపున ప్రాక్సీ ఇన్‌వార్డ్</h1>
+        <p class="subtitle">ఉద్యోగి రైతు తరపున నేరుగా డాష్‌బోర్డ్ నుండి ఇన్‌వార్డ్ నమోదు చేయవచ్చు (ఉదా. రైతు నేరుగా వచ్చినప్పుడు, లేదా కార్యాలయాన్ని ఫోన్ చేసినప్పుడు).</p>
+        <div class="tags"><span class="badge badge-employee">ఉద్యోగి</span></div>
+      </div>
+
+      <div class="info-box blue">
+        <strong>ప్రాక్సీ విధానం:</strong> ఉద్యోగి రైతు తరపున వ్యవహరించినప్పుడు, ఆడిట్ జాబితా రెండింటినీ నమోదు చేస్తుంది — "ఉద్యోగి సురేశ్ రైతు రాజు కుమార్ తరపున ఇన్‌వార్డ్ నమోదు చేశాడు." వివాదంలో ఇది అందరినీ రక్షిస్తుంది.
+      </div>
+
+      <div class="flow-steps">
+        <div class="flow-step employee">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">ఉద్యోగి డాష్‌బోర్డ్‌లో "కొత్త ఇన్‌వార్డ్" ఎంచుకుంటాడు</div>
+            <div class="step-desc">రైతుని వెతికి లేదా ఎంచుకుంటాడు. రకం, బస్తాల సంఖ్య, స్థూల బరువు, తారా బరువు, చాంబర్ నమోదు చేస్తాడు.</div>
+          </div>
+        </div>
+        <div class="flow-step system">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">సిస్టమ్ పెండింగ్ చర్య సృష్టిస్తుంది (ఉద్యోగి-ప్రారంభిత)</div>
+            <div class="step-desc">అదే నిర్ధారణ ఫ్లో — ఉద్యోగి-ప్రారంభిత చర్య కూడా ఆడిట్ జాబితా స్పష్టత కోసం "పెండింగ్"గా కనిపిస్తుంది. యజమాని కూడా నిర్ధారించవచ్చు.</div>
+          </div>
+        </div>
+        <div class="flow-step employee">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">ఉద్యోగి (లేదా యజమాని) నిర్ధారిస్తాడు</div>
+            <div class="step-desc">ఉద్యోగి-ప్రారంభిత ఇన్‌వార్డ్‌లకు, అదే ఉద్యోగి వెంటనే నిర్ధారించవచ్చు (రొటీన్ కార్యకలాపాలకు రెండో వ్యక్తి అవసరం లేదు). యజమాని కోరుకుంటే పరిమితం చేయవచ్చు.</div>
+          </div>
+        </div>
+        <div class="flow-step system">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <div class="step-title">లాట్ సృష్టించబడింది, రైతుకు WhatsApp రసీదు పంపబడింది</div>
+            <div class="step-desc">ఉద్యోగి ప్రారంభించినప్పటికీ రైతు తమ లాట్ నిర్ధారణ WhatsApp లో అందుకుంటాడు.</div>
+            <div class="step-note green">✅ ఆడిట్ జాబితా: "సురేశ్ (ఉద్యోగి) రాజు కుమార్ తరపున"</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── ఉద్యోగి: ధర నమోదు ─── -->
+    <section id="e-price">
+      <div class="page-header">
+        <h1>ఉద్యోగి ఫ్లో — రోజువారీ మార్కెట్ ధర నమోదు</h1>
+        <p class="subtitle">ఉద్యోగి ప్రతి ఉదయం వస్తువు వారీగా ఈరోజు ధర పరిధి నమోదు చేస్తాడు. సుమారు 2 నిమిషాలు. రైతులు WhatsApp ద్వారా ప్రస్తుత ధరలు విచారించగలరు.</p>
+        <div class="tags"><span class="badge badge-employee">ఉద్యోగి</span></div>
+      </div>
+
+      <div class="info-box blue">
+        <strong>మాన్యువల్ నమోదు ఎందుకు?</strong> ఉద్యోగి ప్రతి ఉదయం గుంటూరు మార్కెట్ నుండి ధరలు తెలుసుకుంటాడు — మామయ్య ప్రస్తుతం ధరలు తెలుసుకునే విధంగానే. ఆ జ్ఞానాన్ని స్క్రేపర్ నిర్మించే బదులు సిస్టమ్‌లో నమోదు చేస్తాం. అన్ని చారిత్రక నమోదులు భవిష్యత్ కాలానుగుణ విశ్లేషణ కోసం శాశ్వతంగా ఉంచబడతాయి (Phase 2).
+      </div>
+
+      <h2>డాష్‌బోర్డ్ — ధర నమోదు స్క్రీన్</h2>
+      <div class="dashboard-frame">
+        <div class="db-topbar">
+          <span class="db-topbar-brand">ChilliTech</span>
+          <span class="db-topbar-tenant">tenant_001 · GNT1</span>
+          <span class="db-topbar-role"><span class="badge badge-employee">ఉద్యోగి</span> సురేశ్</span>
+        </div>
+        <div class="db-body">
+          <div class="db-sidenav">
+            <div class="db-nav-item">లాట్లు</div>
+            <div class="db-nav-item">పెండింగ్</div>
+            <div class="db-nav-item">రైతులు</div>
+            <div class="db-nav-item active">📊 ధరలు</div>
+          </div>
+          <div class="db-content">
+            <div class="db-section-title">మార్కెట్ ధరలు — 06 జూన్ 2026</div>
+            <div style="font-size:0.82rem;color:#64748b;margin-bottom:1rem">ప్రతి రకానికి ఈరోజు గుంటూరు మార్కెట్ ధర పరిధి నమోదు చేయండి. రైతులు WhatsApp ద్వారా ఇది విచారించగలరు.</div>
+
+            <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;margin-bottom:1rem">
+              <table style="width:100%;border-collapse:collapse;font-size:0.84rem">
+                <thead>
+                  <tr style="background:#f8fafc">
+                    <th style="padding:0.5rem 0.8rem;text-align:left;color:#64748b;font-size:0.76rem;text-transform:uppercase">రకం</th>
+                    <th style="padding:0.5rem 0.8rem;text-align:left;color:#64748b;font-size:0.76rem;text-transform:uppercase">తక్కువ (₹/kg)</th>
+                    <th style="padding:0.5rem 0.8rem;text-align:left;color:#64748b;font-size:0.76rem;text-transform:uppercase">ఎక్కువ (₹/kg)</th>
+                    <th style="padding:0.5rem 0.8rem;text-align:left;color:#64748b;font-size:0.76rem;text-transform:uppercase">చివరి నమోదు</th>
+                    <th style="padding:0.5rem 0.8rem"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="border-top:1px solid #f1f5f9">
+                    <td style="padding:0.6rem 0.8rem;font-weight:600">Teja (S17)</td>
+                    <td style="padding:0.6rem 0.8rem"><input type="number" value="180" style="width:70px;padding:0.3rem 0.5rem;border:1px solid #e2e8f0;border-radius:4px;font-size:0.84rem"></td>
+                    <td style="padding:0.6rem 0.8rem"><input type="number" value="210" style="width:70px;padding:0.3rem 0.5rem;border:1px solid #e2e8f0;border-radius:4px;font-size:0.84rem"></td>
+                    <td style="padding:0.6rem 0.8rem;color:#94a3b8;font-size:0.8rem">05 జూన్ · ₹175–205</td>
+                    <td style="padding:0.6rem 0.8rem"><button class="btn btn-confirm" style="font-size:0.75rem;padding:0.25rem 0.6rem">సేవ్</button></td>
+                  </tr>
+                  <tr style="border-top:1px solid #f1f5f9">
+                    <td style="padding:0.6rem 0.8rem;font-weight:600">334</td>
+                    <td style="padding:0.6rem 0.8rem"><input type="number" placeholder="–" style="width:70px;padding:0.3rem 0.5rem;border:1px solid #e2e8f0;border-radius:4px;font-size:0.84rem"></td>
+                    <td style="padding:0.6rem 0.8rem"><input type="number" placeholder="–" style="width:70px;padding:0.3rem 0.5rem;border:1px solid #e2e8f0;border-radius:4px;font-size:0.84rem"></td>
+                    <td style="padding:0.6rem 0.8rem;color:#94a3b8;font-size:0.8rem">05 జూన్ · ₹155–185</td>
+                    <td style="padding:0.6rem 0.8rem"><button class="btn btn-confirm" style="font-size:0.75rem;padding:0.25rem 0.6rem">సేవ్</button></td>
+                  </tr>
+                  <tr style="border-top:1px solid #f1f5f9">
+                    <td style="padding:0.6rem 0.8rem;font-weight:600">Guntur Sannam</td>
+                    <td style="padding:0.6rem 0.8rem"><input type="number" placeholder="–" style="width:70px;padding:0.3rem 0.5rem;border:1px solid #e2e8f0;border-radius:4px;font-size:0.84rem"></td>
+                    <td style="padding:0.6rem 0.8rem"><input type="number" placeholder="–" style="width:70px;padding:0.3rem 0.5rem;border:1px solid #e2e8f0;border-radius:4px;font-size:0.84rem"></td>
+                    <td style="padding:0.6rem 0.8rem;color:#94a3b8;font-size:0.8rem">03 జూన్ · ₹140–165</td>
+                    <td style="padding:0.6rem 0.8rem"><button class="btn btn-confirm" style="font-size:0.75rem;padding:0.25rem 0.6rem">సేవ్</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="font-size:0.78rem;color:#94a3b8">అన్ని ధర నమోదులు తేదీ మరియు నమోదు చేసిన వ్యక్తితో నిల్వ అవుతాయి. చరిత్ర ఎప్పుడూ తొలగించబడదు — భవిష్యత్ కాలానుగుణ విశ్లేషణ కోసం ఉపయోగిస్తారు.</div>
+
+            <div style="margin-top:1.2rem">
+              <div class="db-section-title">ధర చరిత్ర — Teja (S17) చివరి 7 రోజులు</div>
+              <table class="db-table" style="margin-top:0.5rem">
+                <thead><tr><th>తేదీ</th><th>తక్కువ (₹/kg)</th><th>ఎక్కువ (₹/kg)</th><th>నమోదు చేసినవారు</th></tr></thead>
+                <tbody>
+                  <tr><td><strong>06 జూన్ 2026</strong></td><td>₹180</td><td>₹210</td><td>సురేశ్</td></tr>
+                  <tr><td>05 జూన్ 2026</td><td>₹175</td><td>₹205</td><td>సురేశ్</td></tr>
+                  <tr><td>04 జూన్ 2026</td><td>₹170</td><td>₹200</td><td>సురేశ్</td></tr>
+                  <tr><td>03 జూన్ 2026</td><td>₹168</td><td>₹198</td><td>యజమాని</td></tr>
+                  <tr><td>02 జూన్ 2026 (సెలవు)</td><td colspan="2" style="color:#94a3b8;font-style:italic">నమోదు చేయలేదు — బాట్ 01 జూన్ "తేదీ నాటికి" లేబుల్‌తో చూపిస్తుంది</td><td>—</td></tr>
+                  <tr><td>01 జూన్ 2026</td><td>₹165</td><td>₹195</td><td>సురేశ్</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── ఉద్యోగి: రన్నింగ్ స్టేట్‌మెంట్ ─── -->
+    <section id="e-ledger">
+      <div class="page-header">
+        <h1>ఉద్యోగి ఫ్లో — రైతు రన్నింగ్ స్టేట్‌మెంట్</h1>
+        <p class="subtitle">ఇన్‌వార్డ్/అవుట్‌వార్డ్ సంఘటనల పూర్తి చరిత్ర రన్నింగ్ ఇన్వెంటరీ బాకీతో, ఆర్థిక లెడ్జర్‌తో పాటు — రైతు వారీగా ఒకే వీక్షణలో.</p>
+        <div class="tags"><span class="badge badge-employee">ఉద్యోగి</span></div>
+      </div>
+
+      <div class="info-box blue">
+        <strong>సమాంతరంగా రెండు రన్నింగ్ బాకీలు:</strong> పరిమాణం బాకీ (బస్తాలు/kg డిపాజిట్ → ఉపసంహరించిన → మిగిలినవి) ఆర్థిక బాకీతో పాటు నడుస్తుంది (అడ్వాన్సులు → రుసుములు → చెల్లింపులు → నికరం). ఉద్యోగి రెండు చరిత్రలు కలిసి చూస్తాడు — ఏ అవుట్‌వార్డ్ నిర్ధారించే లేదా బాకీలు పూర్తి చేసే ముందు అవసరం.
+      </div>
+
+      <h2>రైతు స్టేట్‌మెంట్ డాష్‌బోర్డ్ స్క్రీన్</h2>
+      <div class="dashboard-frame">
+        <div class="db-topbar">
+          <span class="db-topbar-brand">ChilliTech</span>
+          <span class="db-topbar-tenant">tenant_001 · GNT1</span>
+          <span class="db-topbar-role"><span class="badge badge-employee">ఉద్యోగి</span> సురేశ్</span>
+        </div>
+        <div class="db-body">
+          <div class="db-sidenav">
+            <div class="db-nav-item">లాట్లు</div>
+            <div class="db-nav-item">పెండింగ్</div>
+            <div class="db-nav-item active">రైతులు</div>
+            <div class="db-nav-item">📊 ధరలు</div>
+          </div>
+          <div class="db-content">
+            <div class="db-section-title">రాజు కుమార్ &nbsp;<span class="badge badge-farmer">యాక్టివ్</span></div>
+            <div style="font-size:0.82rem;color:#64748b;margin-bottom:0.8rem">+91 98XXX XXXXX · నరసారావుపేట · జనవరి 2024 నుండి &nbsp;·&nbsp; <span style="color:#16a34a">✔ అంగీకారం 01 జన్వరి 2024</span></div>
+
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.6rem;margin-bottom:1.2rem">
+              <div style="background:#eff6ff;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.2rem;font-weight:700;color:#1d4ed8">525 kg</div>
+                <div style="font-size:0.72rem;color:#555">ప్రస్తుతం నిల్వలో</div>
+              </div>
+              <div style="background:#fef3c7;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.2rem;font-weight:700;color:#d97706">₹353</div>
+                <div style="font-size:0.72rem;color:#555">నిల్వ బాకీ (మిగిలిన లాట్)</div>
+              </div>
+              <div style="background:#f0fdf4;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.2rem;font-weight:700;color:#16a34a">₹2,541</div>
+                <div style="font-size:0.72rem;color:#555">రైతుకు చెల్లించాల్సినది</div>
+              </div>
+              <div style="background:#faf5ff;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.2rem;font-weight:700;color:#6b21a8">1</div>
+                <div style="font-size:0.72rem;color:#555">యాక్టివ్ లాట్లు</div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:0.5rem;margin-bottom:1rem">
+              <button class="btn btn-confirm" style="font-size:0.8rem">కొత్త ఇన్‌వార్డ్ (ప్రాక్సీ)</button>
+              <button class="btn btn-view" style="font-size:0.8rem">WhatsApp పంపు</button>
+            </div>
+
+            <div class="db-section-title">లాట్ GNT1-20260606-0001 — Teja (S17) · చాంబర్ C2</div>
+
+            <div style="font-size:0.78rem;font-weight:600;text-transform:uppercase;color:#64748b;margin:0.8rem 0 0.3rem;letter-spacing:0.05em">📦 ఇన్వెంటరీ చరిత్ర — రన్నింగ్ పరిమాణం బాకీ</div>
+            <div style="overflow-x:auto">
+              <table style="width:100%;border-collapse:collapse;font-size:0.82rem;min-width:560px">
+                <thead>
+                  <tr style="background:#f8fafc">
+                    <th style="padding:0.4rem 0.6rem;text-align:left;color:#64748b;font-size:0.74rem;text-transform:uppercase">తేదీ</th>
+                    <th style="padding:0.4rem 0.6rem;text-align:left;color:#64748b;font-size:0.74rem;text-transform:uppercase">సంఘటన</th>
+                    <th style="padding:0.4rem 0.6rem;text-align:right;color:#16a34a;font-size:0.74rem;text-transform:uppercase">లో (kg)</th>
+                    <th style="padding:0.4rem 0.6rem;text-align:right;color:#dc2626;font-size:0.74rem;text-transform:uppercase">బయట (kg)</th>
+                    <th style="padding:0.4rem 0.6rem;text-align:right;color:#64748b;font-size:0.74rem;text-transform:uppercase">బాకీ (kg)</th>
+                    <th style="padding:0.4rem 0.6rem;text-align:left;color:#64748b;font-size:0.74rem;text-transform:uppercase">ఎవరు</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="border-top:1px solid #f1f5f9">
+                    <td style="padding:0.45rem 0.6rem">06 జూన్</td>
+                    <td style="padding:0.45rem 0.6rem">ఇన్‌వార్డ్ — 200 బస్తాలు</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;color:#16a34a;font-weight:600">+975</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;color:#94a3b8">—</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;font-weight:700">975</td>
+                    <td style="padding:0.45rem 0.6rem;color:#64748b;font-size:0.78rem">సురేశ్ (ప్రాక్సీ)</td>
+                  </tr>
+                  <tr style="border-top:1px solid #f1f5f9;background:#fef9f0">
+                    <td style="padding:0.45rem 0.6rem">20 జూన్</td>
+                    <td style="padding:0.45rem 0.6rem">పాక్షిక అవుట్‌వార్డ్ — 300 బస్తాలు<br><span style="font-size:0.76rem;color:#94a3b8">ఫోన్ కాల్ ద్వారా అంగీకరించారు · సురేశ్</span></td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;color:#94a3b8">—</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;color:#dc2626;font-weight:600">−450</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;font-weight:700">525</td>
+                    <td style="padding:0.45rem 0.6rem;color:#64748b;font-size:0.78rem">సురేశ్ (ప్రాక్సీ)</td>
+                  </tr>
+                  <tr style="border-top:1px solid #f1f5f9;background:#f0fdf4">
+                    <td style="padding:0.45rem 0.6rem;font-weight:600;color:#16a34a">ఈరోజు</td>
+                    <td style="padding:0.45rem 0.6rem;font-style:italic;color:#94a3b8">నిల్వలో — ఇంకా కదలికలు లేవు</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;color:#94a3b8">—</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;color:#94a3b8">—</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;font-weight:700;color:#16a34a">525</td>
+                    <td style="padding:0.45rem 0.6rem"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div style="font-size:0.78rem;font-weight:600;text-transform:uppercase;color:#64748b;margin:1.2rem 0 0.3rem;letter-spacing:0.05em">💰 ఆర్థిక చరిత్ర — రన్నింగ్ బాకీ</div>
+            <div style="overflow-x:auto">
+              <table style="width:100%;border-collapse:collapse;font-size:0.82rem;min-width:560px">
+                <thead>
+                  <tr style="background:#f8fafc">
+                    <th style="padding:0.4rem 0.6rem;text-align:left;color:#64748b;font-size:0.74rem;text-transform:uppercase">తేదీ</th>
+                    <th style="padding:0.4rem 0.6rem;text-align:left;color:#64748b;font-size:0.74rem;text-transform:uppercase">నమోదు రకం</th>
+                    <th style="padding:0.4rem 0.6rem;text-align:left;color:#64748b;font-size:0.74rem;text-transform:uppercase">లాట్</th>
+                    <th style="padding:0.4rem 0.6rem;text-align:right;color:#64748b;font-size:0.74rem;text-transform:uppercase">మొత్తం</th>
+                    <th style="padding:0.4rem 0.6rem;text-align:right;color:#64748b;font-size:0.74rem;text-transform:uppercase">రన్నింగ్ బాకీ</th>
+                    <th style="padding:0.4rem 0.6rem;text-align:left;color:#64748b;font-size:0.74rem;text-transform:uppercase">వివరాలు</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="border-top:1px solid #f1f5f9">
+                    <td style="padding:0.45rem 0.6rem">06 జూన్</td>
+                    <td style="padding:0.45rem 0.6rem">ఇచ్చిన అడ్వాన్స్</td>
+                    <td style="padding:0.45rem 0.6rem;font-size:0.78rem">-0001</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;color:#dc2626">−₹5,000</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;font-weight:600">₹5,000 రైతుకు రావాల్సింది</td>
+                    <td style="padding:0.45rem 0.6rem;font-size:0.78rem;color:#64748b">ఇన్‌వార్డ్ సమయంలో నగదు</td>
+                  </tr>
+                  <tr style="border-top:1px solid #f1f5f9">
+                    <td style="padding:0.45rem 0.6rem">10 జూన్</td>
+                    <td style="padding:0.45rem 0.6rem">నిల్వ రుసుము</td>
+                    <td style="padding:0.45rem 0.6rem;font-size:0.78rem">-0001</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;color:#d97706">+₹245</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;font-weight:600">₹4,755 రైతుకు రావాల్సింది</td>
+                    <td style="padding:0.45rem 0.6rem;font-size:0.78rem;color:#64748b">4 రోజులు × పూర్తి లాట్</td>
+                  </tr>
+                  <tr style="border-top:1px solid #f1f5f9">
+                    <td style="padding:0.45rem 0.6rem">14 జూన్</td>
+                    <td style="padding:0.45rem 0.6rem">నిల్వ రుసుము</td>
+                    <td style="padding:0.45rem 0.6rem;font-size:0.78rem">-0001</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;color:#d97706">+₹245</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;font-weight:600">₹4,510 రైతుకు రావాల్సింది</td>
+                    <td style="padding:0.45rem 0.6rem;font-size:0.78rem;color:#64748b">4 రోజులు × పూర్తి లాట్</td>
+                  </tr>
+                  <tr style="border-top:1px solid #f1f5f9;background:#fef9f0">
+                    <td style="padding:0.45rem 0.6rem">20 జూన్</td>
+                    <td style="padding:0.45rem 0.6rem">పాక్షిక అవుట్‌వార్డ్ పూర్తి</td>
+                    <td style="padding:0.45rem 0.6rem;font-size:0.78rem">-0001</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;color:#d97706">+₹211</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;font-weight:600">₹4,299 రైతుకు రావాల్సింది</td>
+                    <td style="padding:0.45rem 0.6rem;font-size:0.78rem;color:#64748b">విడుదలైన 450 kg పై రుసుము</td>
+                  </tr>
+                  <tr style="border-top:1px solid #f1f5f9;background:#fef9f0">
+                    <td style="padding:0.45rem 0.6rem">20 జూన్</td>
+                    <td style="padding:0.45rem 0.6rem">అడ్వాన్స్ పాక్షిక పూర్తి</td>
+                    <td style="padding:0.45rem 0.6rem;font-size:0.78rem">-0001</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;color:#16a34a">−₹1,534</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;font-weight:600">₹2,765 రైతుకు రావాల్సింది</td>
+                    <td style="padding:0.45rem 0.6rem;font-size:0.78rem;color:#64748b">450 kg పై దామాషా అడ్వాన్స్</td>
+                  </tr>
+                  <tr style="border-top:1px solid #f1f5f9;background:#f0fdf4">
+                    <td style="padding:0.45rem 0.6rem;font-weight:600;color:#16a34a">ఈరోజు</td>
+                    <td style="padding:0.45rem 0.6rem">నిల్వ రుసుము (వడ్డీ)</td>
+                    <td style="padding:0.45rem 0.6rem;font-size:0.78rem">-0001</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;color:#d97706">+₹224</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;font-weight:700;color:#16a34a">₹2,541 రైతుకు రావాల్సింది</td>
+                    <td style="padding:0.45rem 0.6rem;font-size:0.78rem;color:#64748b">మిగిలిన 525 kg, 8 రోజులు</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="font-size:0.78rem;color:#94a3b8;margin-top:0.5rem">అన్ని నమోదులు append-only. దిద్దుబాట్లు రివర్సల్ నమోదులుగా కనిపిస్తాయి — ఏదీ నిశ్శబ్దంగా తొలగించబడదు.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box green">
+        <strong>ఏ అవుట్‌వార్డ్ నిర్ధారించే ముందు:</strong> ఉద్యోగి బాకీలు ధృవీకరించడానికి, ఇన్వెంటరీ బాకీ తనిఖీ చేయడానికి మరియు ఏ అసాధారణతలైనా గుర్తించడానికి ఈ స్క్రీన్ సమీక్షిస్తాడు — నిర్ధారించు క్లిక్ చేసే ముందు. ఇది రైతు స్థితికి ఏకైక నమ్మకమైన మూలం.
+      </div>
+    </section>
+
+    <!-- ─── ఉద్యోగి: తక్కువ నమ్మకం ─── -->
+    <section id="e-lowconf">
+      <div class="page-header">
+        <h1>ఉద్యోగి ఫ్లో — తక్కువ నమ్మకం సమీక్ష క్యూ</h1>
+        <p class="subtitle">AI రైతు ఏమి అన్నాడో అర్థం చేసుకోలేకపోయినప్పుడు, సందేశం పెండింగ్ చర్య సృష్టించడానికి బదులు మానవ సమీక్ష క్యూలోకి వెళ్తుంది.</p>
+        <div class="tags"><span class="badge badge-bot">AI బాట్</span><span class="badge badge-employee">ఉద్యోగి</span></div>
+      </div>
+
+      <div class="info-box red">
+        <strong>ఇది ఎందుకు ముఖ్యమో:</strong> గ్రామీణ తెలుగులో పంట పరిభాషతో వాయిస్ నోట్లు తరచుగా అస్పష్టంగా ఉంటాయి. నమ్మకం స్కోర్ పరిమితి కంటే తక్కువగా ఉంటే, సిస్టమ్ ఎప్పుడూ అంచనా వేయదు — సందేశాన్ని మనిషికి పంపుతుంది. "తక్కువ నమ్మకం → సమీక్ష" అనేది కఠినమైన నియమం.
+      </div>
+
+      <div class="flow-steps">
+        <div class="flow-step farmer">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">రైతు అస్పష్టమైన వాయిస్ నోట్ పంపుతాడు</div>
+            <div class="step-desc">ఉదా. శబ్దం ఎక్కువగా ఉన్న రికార్డింగ్, తెలుగు/ఇంగ్లీషు మిక్స్, అసంపూర్ణ సమాచారం ("కొన్ని బస్తాలు తీయండి").</div>
+          </div>
+        </div>
+        <div class="flow-step bot">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">AI ట్రాన్స్‌క్రైబ్ చేసి విశ్లేషిస్తుంది — తక్కువ నమ్మకం</div>
+            <div class="step-desc">AI అన్ని వివరాలు విశ్వసనీయంగా తీయలేకపోయింది. నమ్మకం స్కోర్ పరిమితి కంటే తక్కువ.</div>
+          </div>
+        </div>
+        <div class="flow-step bot">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">బాట్ రైతుకు మనిషి ఫాలో అప్ చేస్తారని చెప్తుంది</div>
+            <div class="step-desc">"సరిగ్గా అర్థం కాలేదు. మా సిబ్బంది త్వరలో మీకు ఫోన్ చేసి వివరాలు నిర్ధారిస్తారు."</div>
+          </div>
+        </div>
+        <div class="flow-step system">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <div class="step-title">సందేశం ఉద్యోగి సమీక్ష క్యూలో కనిపిస్తుంది</div>
+            <div class="step-desc">ఉద్యోగి అసలు సందేశం (వాయిస్/టెక్స్ట్), AI యొక్క ఉత్తమ అంచనా పార్స్ మరియు నమ్మకం స్కోర్ చూస్తాడు. వారు సరైన చర్య మాన్యువల్‌గా సృష్టించవచ్చు.</div>
+          </div>
+        </div>
+        <div class="flow-step employee">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <div class="step-title">ఉద్యోగి రైతుకు సంప్రదించి (WA లేదా ఫోన్), సరైన వివరాలు నమోదు చేస్తాడు</div>
+            <div class="step-desc">మాన్యువల్ ప్రాక్సీ చర్యగా కొనసాగుతుంది. పూర్తి ఆడిట్ జాబితా నిల్వ అవుతుంది.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── ఉద్యోగి: పంట రుణాలు ─── -->
+    <section id="e-loans">
+      <div class="page-header">
+        <h1>ఉద్యోగి ఫ్లో — పంట రుణాలు (క్రాప్ ఫైనాన్స్)</h1>
+        <p class="subtitle">కొందరు ఆపరేటర్లు రైతులకు తదుపరి పంట సీజన్ కోసం డబ్బు అప్పు ఇస్తారు — కోల్డ్ స్టోరేజ్‌లో రైతు నిల్వ సెక్యూరిటీగా ఉంటుంది. ఈ లావాదేవీలు ఉద్యోగి డాష్‌బోర్డ్ నుండి నమోదు చేస్తారు — WhatsApp ట్రిగ్గర్ లేదు.</p>
+        <div class="tags"><span class="badge badge-employee">ఉద్యోగి</span><span class="badge badge-owner">యజమాని</span></div>
+      </div>
+
+      <div class="info-box blue">
+        <strong>ఎలా పని చేస్తుంది:</strong> రైతు ఫోన్ చేస్తాడు లేదా కార్యాలయానికి వస్తాడు. ఉద్యోగి రైతు ప్రొఫైల్ తెరిచి <strong>రుణాలు</strong> ట్యాబ్‌కు వెళ్ళి లావాదేవీ నమోదు చేస్తాడు — కొత్త రుణం వేయడం, వడ్డీ చార్జ్ చేయడం లేదా చెల్లింపు స్వీకరించడం. ఉద్యోగే ఇక్కడ నిర్ణయాధికారి — AI పార్సింగ్ లేదు, నిర్ధారణ దశ లేదు. బాకీ బాలెన్స్ మరియు సెక్యూరిటీ స్థితి వెంటనే అప్‌డేట్ అవుతాయి.
+      </div>
+
+      <div class="info-box red">
+        <strong>అనుమతి అవసరం:</strong> యజమాని <code>can_manage_loans</code> (రుణాలు నిర్వహించడం) అనుమతి ఇవ్వాలి — డిఫాల్ట్‌గా ఆఫ్. రుణ చరిత్ర చూడడానికి <code>can_view_loan_financials</code> అవసరం — ఆర్థిక విజిబిలిటీ ఉంటే డిఫాల్ట్‌గా ఆన్.
+      </div>
+
+      <!-- రైతు ప్రొఫైల్: రుణాలు ట్యాబ్ -->
+      <div class="dashboard-frame" style="margin-bottom:1.5rem">
+        <div class="db-topbar">
+          <span class="db-topbar-brand">ChilliTech</span>
+          <span class="db-topbar-tenant">tenant_001 · GNT1</span>
+          <span class="db-topbar-role"><span class="badge badge-employee">ఉద్యోగి</span></span>
+        </div>
+        <div class="db-body">
+          <div class="db-sidenav">
+            <div class="db-nav-item">లాట్లు</div>
+            <div class="db-nav-item">పెండింగ్</div>
+            <div class="db-nav-item active">రైతులు</div>
+            <div class="db-nav-item">ధరలు</div>
+          </div>
+          <div class="db-content">
+            <div class="db-section-title">రైతు: రాజు కుమార్ &nbsp;<span style="font-weight:400;color:#888;font-size:0.82rem">+91 98765 43210</span></div>
+
+            <!-- రైతు ప్రొఫైల్ సబ్-ట్యాబ్లు -->
+            <div style="display:flex;gap:0;border-bottom:2px solid #e5e7eb;margin-bottom:1rem">
+              <div style="padding:0.4rem 1rem;font-size:0.82rem;color:#888;cursor:pointer">లాట్లు &amp; నిల్వ</div>
+              <div style="padding:0.4rem 1rem;font-size:0.82rem;color:#888;cursor:pointer">లెడ్జర్</div>
+              <div style="padding:0.4rem 1rem;font-size:0.82rem;color:#1d4ed8;border-bottom:2px solid #1d4ed8;margin-bottom:-2px;font-weight:600;cursor:pointer">రుణాలు</div>
+            </div>
+
+            <!-- రుణ సారాంశ కార్డులు -->
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem;margin-bottom:1rem">
+              <div style="background:#eff6ff;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.3rem;font-weight:700;color:#1d4ed8">₹45,000</div>
+                <div style="font-size:0.72rem;color:#555">బాకీ బాలెన్స్</div>
+              </div>
+              <div style="background:#f0fdf4;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.3rem;font-weight:700;color:#16a34a">₹63,000</div>
+                <div style="font-size:0.72rem;color:#555">నిల్వ సెక్యూరిటీ విలువ (75%)</div>
+              </div>
+              <div style="background:#f0fdf4;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.3rem;font-weight:700;color:#16a34a">✔ సురక్షితం</div>
+                <div style="font-size:0.72rem;color:#555">సెక్యూరిటీ స్థితి (నేరుగా)</div>
+              </div>
+            </div>
+
+            <!-- యాక్టివ్ రుణాలు -->
+            <div class="db-section-title">యాక్టివ్ రుణాలు</div>
+            <table class="db-table" style="margin-bottom:1rem">
+              <thead><tr><th>రుణ ID</th><th>వేసిన తేదీ</th><th>వడ్డీ రేటు</th><th>బాకీ</th><th>సెక్యూరిటీ లాట్లు</th><th>స్థితి</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>LN-001</td>
+                  <td>15 మార్చి 2026</td>
+                  <td>18%/సం.</td>
+                  <td>₹45,000</td>
+                  <td>GNT1-20260315-0009, 0010</td>
+                  <td><span class="status-pill" style="background:#dcfce7;color:#166534">సురక్షితం</span></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- లావాదేవీ చరిత్ర -->
+            <div class="db-section-title">లావాదేవీ చరిత్ర — LN-001</div>
+            <table class="db-table" style="margin-bottom:1rem">
+              <thead><tr><th>తేదీ</th><th>రకం</th><th>మొత్తం</th><th>రన్నింగ్ బాలెన్స్</th><th>నమోదు చేసినవారు</th><th>నోట్స్</th></tr></thead>
+              <tbody>
+                <tr><td>15 మార్చి 2026</td><td>రుణం వేశారు</td><td style="color:#dc2626">+₹50,000</td><td>₹50,000</td><td>సురేశ్</td><td>ఖరీఫ్ సీజన్ పంట అడ్వాన్స్</td></tr>
+                <tr><td>01 ఏప్రిల్ 2026</td><td>వడ్డీ చార్జ్</td><td style="color:#dc2626">+₹750</td><td>₹50,750</td><td>సురేశ్</td><td>మార్చి వడ్డీ @ 18%</td></tr>
+                <tr><td>20 ఏప్రిల్ 2026</td><td>పాక్షిక చెల్లింపు</td><td style="color:#16a34a">−₹6,500</td><td>₹44,250</td><td>సురేశ్</td><td>నగదు స్వీకరించారు</td></tr>
+                <tr><td>01 మే 2026</td><td>వడ్డీ చార్జ్</td><td style="color:#dc2626">+₹663</td><td>₹44,913</td><td>సురేశ్</td><td>ఏప్రిల్ వడ్డీ</td></tr>
+                <tr><td>15 మే 2026</td><td>పాక్షిక చెల్లింపు</td><td style="color:#16a34a">−₹913</td><td>₹44,000</td><td>సురేశ్</td><td>—</td></tr>
+                <tr><td>01 జూన్ 2026</td><td>వడ్డీ చార్జ్</td><td style="color:#dc2626">+₹1,000</td><td>₹45,000</td><td>సురేశ్</td><td>మే వడ్డీ</td></tr>
+              </tbody>
+            </table>
+
+            <!-- కొత్త లావాదేవీ నమోదు ఫారం -->
+            <div class="db-section-title">కొత్త లావాదేవీ నమోదు చేయి</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0.6rem;align-items:end;margin-bottom:0.8rem">
+              <div>
+                <label style="font-size:0.75rem;color:#555;display:block;margin-bottom:0.25rem">లావాదేవీ రకం</label>
+                <select style="width:100%;padding:0.35rem 0.5rem;border:1px solid #d1d5db;border-radius:5px;font-size:0.82rem">
+                  <option>రుణం వేయడం</option>
+                  <option>వడ్డీ చార్జ్</option>
+                  <option selected>పాక్షిక చెల్లింపు</option>
+                  <option>పూర్తి చెల్లింపు</option>
+                  <option>సర్దుబాటు</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:0.75rem;color:#555;display:block;margin-bottom:0.25rem">మొత్తం (₹)</label>
+                <input type="text" placeholder="ఉదా. 5000" style="width:100%;padding:0.35rem 0.5rem;border:1px solid #d1d5db;border-radius:5px;font-size:0.82rem"/>
+              </div>
+              <div>
+                <label style="font-size:0.75rem;color:#555;display:block;margin-bottom:0.25rem">తేదీ</label>
+                <input type="text" placeholder="DD MMM YYYY" style="width:100%;padding:0.35rem 0.5rem;border:1px solid #d1d5db;border-radius:5px;font-size:0.82rem"/>
+              </div>
+              <div>
+                <label style="font-size:0.75rem;color:#555;display:block;margin-bottom:0.25rem">నోట్స్</label>
+                <input type="text" placeholder="ఐచ్ఛికం" style="width:100%;padding:0.35rem 0.5rem;border:1px solid #d1d5db;border-radius:5px;font-size:0.82rem"/>
+              </div>
+            </div>
+            <button class="btn btn-confirm">లావాదేవీ సేవ్ చేయి</button>
+          </div>
+        </div>
+      </div>
+
+      <h2 style="margin-top:1.5rem">సెక్యూరిటీ అంచనా — రిస్క్ లేబుల్ ఎలా లెక్కిస్తారు</h2>
+      <div class="info-box" style="background:#fafafa;border-color:#d1d5db">
+        <p style="margin:0 0 0.5rem 0"><strong>సూత్రం (నేరుగా లెక్కిస్తారు, నిల్వ చేయరు):</strong></p>
+        <code style="display:block;background:#f3f4f6;padding:0.6rem;border-radius:5px;font-size:0.82rem;line-height:1.6">
+          సెక్యూరిటీ విలువ = సెక్యూరిటీ లాట్ల నికర బరువు మొత్తం<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; × ఆ రోజు మార్కెట్ ధర<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; × సెక్యూరిటీ ఫ్యాక్టర్ (ఉదా. 0.75 — టెనెంట్ వారీగా కాన్ఫిగ్)<br><br>
+          సురక్షితం &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ సెక్యూరిటీ విలువ ≥ బాకీ బాలెన్స్<br>
+          పాక్షికంగా సురక్షితం → 0 &lt; సెక్యూరిటీ విలువ &lt; బాకీ బాలెన్స్<br>
+          అసురక్షితం &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ నిల్వ నమోదైన లాట్లు లేవు
+        </code>
+        <p style="margin:0.6rem 0 0 0;font-size:0.82rem;color:#555">సెక్యూరిటీ ఫ్యాక్టర్ ధర హెచ్చుతగ్గులు మరియు అమ్మకపు ఖర్చులకు జాగ్రత్త మార్జిన్. ఇది టెనెంట్ కాన్ఫిగ్ విలువ — యజమాని మార్చవచ్చు. మార్చిన వెంటనే అన్ని రుణాల లేబుల్స్ అప్‌డేట్ అవుతాయి.</p>
+      </div>
+    </section>
+
+    <!-- ─── డాష్‌బోర్డ్: లాట్ జాబితా ─── -->
+    <section id="d-lots">
+      <div class="page-header">
+        <h1>డాష్‌బోర్డ్ — లాట్ జాబితా</h1>
+        <p class="subtitle">స్థితి, చాంబర్ మరియు రైతుతో అన్ని యాక్టివ్ మరియు ఇటీవల విడుదలైన లాట్లు.</p>
+      </div>
+
+      <div class="dashboard-frame">
+        <div class="db-topbar">
+          <span class="db-topbar-brand">ChilliTech</span>
+          <span class="db-topbar-tenant">tenant_001 · GNT1</span>
+        </div>
+        <div class="db-body">
+          <div class="db-sidenav">
+            <div class="db-nav-item active">లాట్లు</div>
+            <div class="db-nav-item">పెండింగ్</div>
+            <div class="db-nav-item">రైతులు</div>
+          </div>
+          <div class="db-content">
+            <div class="db-section-title">యాక్టివ్ లాట్లు</div>
+            <table class="db-table">
+              <thead><tr><th>లాట్ ID</th><th>రైతు</th><th>రకం</th><th>నికర బరువు (kg)</th><th>చాంబర్</th><th>నుండి</th><th>స్థితి</th></tr></thead>
+              <tbody>
+                <tr><td><strong>GNT1-20260606-0001</strong></td><td>రాజు కుమార్</td><td>Teja (S17)</td><td>975</td><td>C2</td><td>06 జూన్</td><td><span class="status-pill s-stored">నిల్వలో</span></td></tr>
+                <tr><td><strong>GNT1-20260605-0047</strong></td><td>వెంకట్ రెడ్డి</td><td>334</td><td>1,240</td><td>C1</td><td>05 జూన్</td><td><span class="status-pill s-stored">నిల్వలో</span></td></tr>
+                <tr><td><strong>GNT1-20260603-0044</strong></td><td>శ్రీనివాస్ రావు</td><td>Teja (S17)</td><td>620</td><td>C3</td><td>03 జూన్</td><td><span class="status-pill s-partial">పాక్షికం</span></td></tr>
+                <tr><td><strong>GNT1-20260530-0039</strong></td><td>మోహన్ దాస్</td><td>Guntur Sannam</td><td>480</td><td>C4</td><td>30 మే</td><td><span class="status-pill s-stored">నిల్వలో</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── డాష్‌బోర్డ్: పెండింగ్ క్యూ ─── -->
+    <section id="d-queue">
+      <div class="page-header">
+        <h1>డాష్‌బోర్డ్ — పెండింగ్ క్యూ</h1>
+        <p class="subtitle">ఆపరేటర్ నిర్ధారణ కోసం వేచి ఉన్న అన్ని AI-ప్రతిపాదిత చర్యలు. రోజువారీ కార్యకలాపాలలో అత్యధికంగా ఉపయోగించే స్క్రీన్.</p>
+      </div>
+
+      <div class="info-box yellow">
+        <strong>రోజువారీ రొటీన్:</strong> ఉద్యోగి ప్రతి ఉదయం మొదట ఈ క్యూను క్లియర్ చేస్తాడు. 24 గంటల కంటే పాత చర్య స్వయంచాలకంగా గడువు ముగుస్తుంది — రైతుకు కార్యాలయాన్ని ఫోన్ చేయమని నోటీసు పంపబడుతుంది.
+      </div>
+
+      <div class="dashboard-frame">
+        <div class="db-topbar">
+          <span class="db-topbar-brand">ChilliTech</span>
+          <span class="db-topbar-tenant">tenant_001 · GNT1</span>
+        </div>
+        <div class="db-body">
+          <div class="db-sidenav">
+            <div class="db-nav-item">లాట్లు</div>
+            <div class="db-nav-item active">⏳ పెండింగ్ (3)</div>
+            <div class="db-nav-item">రైతులు</div>
+          </div>
+          <div class="db-content">
+            <div class="db-section-title">పెండింగ్ చర్యలు</div>
+
+            <div class="pending-card">
+              <div class="pending-card-header">
+                <span class="pending-icon">📦</span>
+                <div>
+                  <div class="pending-title">ఇన్‌వార్డ్ అభ్యర్థన</div>
+                  <div class="pending-meta">రాజు కుమార్ · 10:02 AM · AI నమ్మకం: <strong style="color:#16a34a">అధికం</strong></div>
+                </div>
+              </div>
+              <div class="pending-detail">
+                <strong>రైతు చెప్పింది:</strong> "నాకు 200 బస్తాల తేజా వేయాలి"<br>
+                <strong>AI విశ్లేషణ:</strong> ఇన్‌వార్డ్ · Teja (S17) · 200 బస్తాలు<br>
+                <em>నిర్ధారించేటప్పుడు స్థూల బరువు నమోదు చేసి చాంబర్ నిర్ణయించండి.</em>
+              </div>
+              <div class="pending-actions">
+                <button class="btn btn-confirm">✔ నిర్ధారించు + వివరాలు నమోదు</button>
+                <button class="btn btn-reject">✗ తిరస్కరించు</button>
+              </div>
+            </div>
+
+            <div class="pending-card">
+              <div class="pending-card-header">
+                <span class="pending-icon">🚚</span>
+                <div>
+                  <div class="pending-title">అవుట్‌వార్డ్ అభ్యర్థన</div>
+                  <div class="pending-meta">వెంకట్ రెడ్డి · 9:30 AM · AI నమ్మకం: <strong style="color:#16a34a">అధికం</strong></div>
+                </div>
+              </div>
+              <div class="pending-detail">
+                <strong>లాట్:</strong> GNT1-20260605-0047 · 334 · 1,240 kg · చాంబర్ C1<br>
+                <strong>నిల్వ బాకీ:</strong> ₹930 &nbsp;|&nbsp; <strong>అడ్వాన్స్:</strong> ₹8,000 &nbsp;|&nbsp; <strong>రైతుకు నికరం:</strong> ₹7,070
+              </div>
+              <div class="pending-actions">
+                <button class="btn btn-confirm">✔ విడుదల నిర్ధారించు</button>
+                <button class="btn btn-reject">✗ తిరస్కరించు</button>
+                <button class="btn btn-view">పూర్తి లెడ్జర్</button>
+              </div>
+            </div>
+
+            <div class="pending-card" style="background:#fef2f2;border-color:#fca5a5">
+              <div class="pending-card-header">
+                <span class="pending-icon">⚠️</span>
+                <div>
+                  <div class="pending-title" style="color:#991b1b">సమీక్ష అవసరం — తక్కువ నమ్మకం</div>
+                  <div class="pending-meta">అజ్ఞాత రైతు · 8:45 AM · AI నమ్మకం: <strong style="color:#dc2626">తక్కువ</strong></div>
+                </div>
+              </div>
+              <div class="pending-detail" style="background:#fff1f2">
+                <strong>వాయిస్ నోట్ (ట్రాన్స్‌క్రిప్ట్):</strong> "…కొన్ని బస్తాలు తీయండి… ముప్పై లేదా నలభై… పెద్ద చాంబర్ నుండి…"<br>
+                <strong>AI ఉత్తమ అంచనా:</strong> అవుట్‌వార్డ్ · పరిమాణం అస్పష్టం · లాట్ తెలియదు<br>
+                <em style="color:#dc2626">పెండింగ్ చర్య సృష్టించలేరు — మానవ సమీక్ష అవసరం.</em>
+              </div>
+              <div class="pending-actions">
+                <button class="btn btn-view">వాయిస్ నోట్ వినండి</button>
+                <button class="btn btn-confirm">మాన్యువల్‌గా చర్య సృష్టించు</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── డాష్‌బోర్డ్: రైతు ప్రొఫైల్ ─── -->
+    <section id="d-farmer">
+      <div class="page-header">
+        <h1>డాష్‌బోర్డ్ — రైతు ప్రొఫైల్</h1>
+        <p class="subtitle">రైతు లాట్లు, లెడ్జర్ మరియు సంప్రదింపు వివరాల పూర్తి వీక్షణ.</p>
+      </div>
+
+      <div class="dashboard-frame">
+        <div class="db-topbar">
+          <span class="db-topbar-brand">ChilliTech</span>
+          <span class="db-topbar-tenant">tenant_001</span>
+        </div>
+        <div class="db-body">
+          <div class="db-sidenav">
+            <div class="db-nav-item active">రైతులు</div>
+          </div>
+          <div class="db-content">
+            <div class="db-section-title">రాజు కుమార్ &nbsp;<span class="badge badge-farmer">యాక్టివ్</span></div>
+            <div style="font-size:0.82rem;color:#64748b;margin-bottom:1rem">
+              📱 +91 98XXX XXXXX &nbsp;·&nbsp; 🏘 నరసారావుపేట &nbsp;·&nbsp; జనవరి 2024 నుండి &nbsp;·&nbsp;
+              <span style="color:#16a34a">✔ అంగీకారం 01 జనవరి 2024</span>
+            </div>
+            <div style="display:flex;gap:0.5rem;margin-bottom:1rem">
+              <button class="btn btn-view">WhatsApp పంపు</button>
+              <button class="btn btn-confirm">కొత్త ఇన్‌వార్డ్ (ప్రాక్సీ)</button>
+            </div>
+            <div class="db-section-title">యాక్టివ్ లాట్లు</div>
+            <table class="db-table" style="margin-bottom:1rem">
+              <thead><tr><th>లాట్ ID</th><th>రకం</th><th>నికర బరువు</th><th>చాంబర్</th><th>నుండి</th><th>స్థితి</th></tr></thead>
+              <tbody>
+                <tr><td>GNT1-20260606-0001</td><td>Teja (S17)</td><td>975 kg</td><td>C2</td><td>06 జూన్</td><td><span class="status-pill s-stored">నిల్వలో</span></td></tr>
+              </tbody>
+            </table>
+            <div class="db-section-title">లెడ్జర్</div>
+            <table class="db-table">
+              <thead><tr><th>తేదీ</th><th>రకం</th><th>మొత్తం</th><th>వివరాలు</th></tr></thead>
+              <tbody>
+                <tr><td>06 జూన్ 2026</td><td>ఇచ్చిన అడ్వాన్స్</td><td style="color:#dc2626">₹5,000</td><td>ఇన్‌వార్డ్ సమయంలో నగదు అడ్వాన్స్</td></tr>
+                <tr><td>10 జూన్ 2026</td><td>నిల్వ రుసుము</td><td style="color:#dc2626">₹245</td><td>స్వయంచాలకంగా లెక్కించబడింది</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── డాష్‌బోర్డ్: పంట వారీగా నింపు రేటు ─── -->
+    <section id="d-fillrate">
+      <div class="page-header">
+        <h1>డాష్‌బోర్డ్ — పంట వారీగా నింపు రేటు</h1>
+        <p class="subtitle">అన్ని సౌకర్యాలలో ప్రస్తుత నిల్వ ఆక్యుపెన్సీ, పంట రకం మరియు చాంబర్ వారీగా. చాంబర్ నిర్ణయించడానికి ముందు ఇక్కడ చూడండి.</p>
+        <div class="tags"><span class="badge badge-employee">ఉద్యోగి</span><span class="badge badge-owner">యజమాని</span></div>
+      </div>
+
+      <div class="info-box blue">
+        <strong>ఉద్యోగికి ఎందుకు ఉపయోగకరం:</strong> కొత్త ఇన్‌వార్డ్ కోసం చాంబర్ నిర్ణయించేముందు ఏ చాంబర్‌లో స్థలం ఉందో తెలుసుకోవాలి. నింపు రేటు వ్యూ అందుకే ఉంది — ఆ రోజు లాట్ రికార్డుల నుండి నేరుగా లెక్కిస్తారు. కాన్ఫిగ్ మార్పులు (సామర్థ్యం, లక్ష్య %, అంగీకరించే పంటలు) యజమాని మాత్రమే చేయగలరు.
+      </div>
+
+      <div class="dashboard-frame">
+        <div class="db-topbar">
+          <span class="db-topbar-brand">ChilliTech</span>
+          <span class="db-topbar-tenant">tenant_001 · GNT1</span>
+          <span class="db-topbar-role"><span class="badge badge-employee">ఉద్యోగి</span></span>
+        </div>
+        <div class="db-body">
+          <div class="db-sidenav">
+            <div class="db-nav-item">లాట్లు</div>
+            <div class="db-nav-item active">అవలోకనం</div>
+            <div class="db-nav-item">రైతులు</div>
+            <div class="db-nav-item">ధరలు</div>
+          </div>
+          <div class="db-content">
+            <div class="db-section-title">నింపు రేటు — GNT1 · 07 జూన్ 2026</div>
+
+            <!-- మొత్తం బార్ -->
+            <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;padding:1rem;margin-bottom:1.2rem">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.4rem">
+                <span style="font-weight:600;font-size:0.9rem">మొత్తం ఆక్యుపెన్సీ</span>
+                <span style="font-size:0.82rem;color:#555">3,240 / 5,000 క్వింటాళ్ళు &nbsp;·&nbsp; <strong style="color:#d97706">64.8%</strong> &nbsp;·&nbsp; లక్ష్యం: 85%</span>
+              </div>
+              <div style="background:#e5e7eb;border-radius:4px;height:14px;overflow:hidden">
+                <div style="width:64.8%;background:#22c55e;height:100%;border-radius:4px"></div>
+              </div>
+              <div style="font-size:0.72rem;color:#888;margin-top:0.3rem">🟢 లక్ష్యానికి దిగువన — 1,760 క్వింటాళ్ళు headroom మిగిలింది</div>
+            </div>
+
+            <!-- పంట వారీగా -->
+            <div class="db-section-title">పంట రకం వారీగా</div>
+            <table class="db-table" style="margin-bottom:1rem">
+              <thead><tr><th>పంట</th><th>లాట్లు</th><th>నిల్వ (క్విం.)</th><th>నింపు బార్</th><th>స్థితి</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>ఎర్ర మిర్చి (తేజా S17)</td><td>28</td><td>1,980</td>
+                  <td><div style="background:#e5e7eb;border-radius:3px;height:10px;width:100px;overflow:hidden"><div style="width:46.6%;background:#22c55e;height:100%;border-radius:3px"></div></div></td>
+                  <td><span class="status-pill" style="background:#dcfce7;color:#166534;font-size:0.7rem">దిగువన</span></td>
+                </tr>
+                <tr>
+                  <td>ఎర్ర మిర్చి (సన్నం)</td><td>14</td><td>890</td>
+                  <td><div style="background:#e5e7eb;border-radius:3px;height:10px;width:100px;overflow:hidden"><div style="width:20.9%;background:#22c55e;height:100%;border-radius:3px"></div></div></td>
+                  <td><span class="status-pill" style="background:#dcfce7;color:#166534;font-size:0.7rem">దిగువన</span></td>
+                </tr>
+                <tr>
+                  <td>పొడి మిర్చి</td><td>6</td><td>370</td>
+                  <td><div style="background:#e5e7eb;border-radius:3px;height:10px;width:100px;overflow:hidden"><div style="width:8.7%;background:#22c55e;height:100%;border-radius:3px"></div></div></td>
+                  <td><span class="status-pill" style="background:#dcfce7;color:#166534;font-size:0.7rem">దిగువన</span></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- చాంబర్ వారీగా -->
+            <div class="db-section-title">చాంబర్ వారీగా — ఇన్‌వార్డ్ కోసం చాంబర్ నిర్ణయించడానికి</div>
+            <table class="db-table">
+              <thead><tr><th>చాంబర్</th><th>సామర్థ్యం</th><th>ఉపయోగించినది</th><th>నింపు %</th><th>స్థితి</th></tr></thead>
+              <tbody>
+                <tr><td>C1</td><td>1,200</td><td>1,100</td><td>91.7%</td><td><span class="status-pill" style="background:#fef9c3;color:#854d0e;font-size:0.7rem">లక్ష్యం దగ్గర</span></td></tr>
+                <tr><td>C2</td><td>1,200</td><td>880</td><td>73.3%</td><td><span class="status-pill" style="background:#dcfce7;color:#166534;font-size:0.7rem">స్థలం ఉంది</span></td></tr>
+                <tr><td>C3</td><td>1,600</td><td>1,260</td><td>78.8%</td><td><span class="status-pill" style="background:#dcfce7;color:#166534;font-size:0.7rem">స్థలం ఉంది</span></td></tr>
+                <tr><td>C4 (వేర్పాటు)</td><td>1,000</td><td>0</td><td>0%</td><td><span class="status-pill" style="background:#f1f5f9;color:#64748b;font-size:0.7rem">ఖాళీ</span></td></tr>
+              </tbody>
+            </table>
+
+            <div style="margin-top:0.8rem;font-size:0.78rem;color:#888;border-top:1px solid #e5e7eb;padding-top:0.6rem">
+              🟢 స్థలం ఉంది &nbsp;|&nbsp; 🟡 లక్ష్యం దగ్గర (≥85%) &nbsp;|&nbsp; 🔴 సామర్థ్యం మించింది — యజమానికి చెప్పండి
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── ఉద్యోగి సహాయ కార్డ్ ─── -->
+    <section id="ref-employee">
+      <div class="page-header">
+        <h1>ఉద్యోగి — సహాయ కార్డ్</h1>
+        <p class="subtitle">ఉద్యోగులు రోజువారీ ఏమి చేస్తారు, ప్రతి పరిస్థితిని ఎలా నిర్వహించాలి. భారత-ఆధారిత ఆపరేటర్ కోసం.</p>
+      </div>
+
+      <div class="role-card employee">
+        <h3>👷 ఉద్యోగిగా, మీ రోజువారీ పనులు:</h3>
+        <ul>
+          <li class="can">✅ <strong>పెండింగ్ క్యూ తనిఖీ</strong> ప్రతి ఉదయం — AI-ప్రతిపాదిత చర్యలను నిర్ధారించు లేదా తిరస్కరించు</li>
+          <li class="can">✅ <strong>WhatsApp లో YES/NO</strong> సులభమైన ఇన్‌వార్డ్/అవుట్‌వార్డ్ నోటిఫికేషన్లకు రిప్లై చేయి</li>
+          <li class="can">✅ <strong>సమీక్ష క్యూ నిర్వహించు</strong> — AI స్పష్టంగా పార్స్ చేయలేని వాయిస్ నోట్లు లేదా సందేశాలు</li>
+          <li class="can">✅ <strong>నేరుగా ఇన్‌వార్డ్ నమోదు</strong> (ప్రాక్సీ) — రైతు నేరుగా వచ్చినప్పుడు లేదా ఫోన్ చేసినప్పుడు</li>
+          <li class="can">✅ <strong>రైతు బాకీలు మరియు లాట్ వివరాలు చూడండి</strong> ఏ రైతు కోసమైనా</li>
+          <li class="cannot">❌ నిర్ధారిత రికార్డు మార్చలేరు — సర్దుబాట్లు చేయడానికి యజమాని మాత్రమే (లేదా మీకు అనుమతి ఇస్తే)</li>
+          <li class="cannot">❌ నిల్వ రుసుము రేట్లు లేదా సిస్టమ్ కాన్ఫిగ్ మార్చలేరు</li>
+        </ul>
+      </div>
+
+      <h2>ఉదయం రొటీన్</h2>
+      <div class="flow-steps">
+        <div class="flow-step employee">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">డాష్‌బోర్డ్ తెరవండి → పెండింగ్ క్యూ</div>
+            <div class="step-desc">రాత్రిపూట WhatsApp సందేశాలు పెండింగ్ చర్యలు సృష్టించాయో తనిఖీ చేయండి.</div>
+          </div>
+        </div>
+        <div class="flow-step employee">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">ప్రతి పెండింగ్ చర్యను నిర్ధారించు, తిరస్కరించు లేదా ఫ్లాగ్ చేయి</div>
+            <div class="step-desc">ఇన్‌వార్డ్‌లకు: బరువు నమోదు చేసి చాంబర్ నిర్ణయించండి. అవుట్‌వార్డ్‌లకు: విడుదల నిర్ధారించే ముందు బాకీలు ధృవీకరించండి.</div>
+          </div>
+        </div>
+        <div class="flow-step employee">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">సమీక్ష క్యూ నిర్వహించండి</div>
+            <div class="step-desc">అస్పష్ట సందేశాలు ఉన్న రైతులను సంప్రదించి, సరైన చర్య మాన్యువల్‌గా నమోదు చేయండి.</div>
+          </div>
+        </div>
+        <div class="flow-step employee">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <div class="step-title">నేరుగా వచ్చిన రైతులను నమోదు చేయండి</div>
+            <div class="step-desc">ముందుగా మెసేజ్ చేయకుండా నిల్వకు వచ్చిన రైతులకు "కొత్త ఇన్‌వార్డ్ (ప్రాక్సీ)" ఉపయోగించండి.</div>
+          </div>
+        </div>
+      </div>
+
+      <h2>సందేహంగా ఉన్నప్పుడు</h2>
+      <div class="info-box yellow">
+        <strong>సందేహంగా ఉన్నప్పుడు, తిరస్కరించి రైతుకు నేరుగా సంప్రదించండి.</strong> పెండింగ్ చర్యను తిరస్కరించి రైతుని మళ్ళీ WhatsApp ద్వారా నిర్ధారించమని అడగడం తప్పుగా నిర్ధారించడం కంటే ఎల్లప్పుడూ సురక్షితం. ఆడిట్ జాబితా ప్రతి తిరస్కరణను కూడా నమోదు చేస్తుంది.
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  function show(id) {
+    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    event.target.classList.add('active');
+    window.scrollTo(0, 0);
+  }
+</script>
+</body>
+</html>
