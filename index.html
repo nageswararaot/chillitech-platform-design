@@ -1,0 +1,2462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChilliTech — Role Flows & System Requirements</title>
+  <style>
+    /* ── Reset & base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+           background: #f0f2f5; color: #1a1a2e; font-size: 15px; line-height: 1.6; }
+
+    /* ── Layout ── */
+    .shell { display: flex; min-height: 100vh; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 260px; flex-shrink: 0;
+      background: #1a1a2e; color: #c9d1d9;
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
+      padding: 0 0 2rem;
+    }
+    .sidebar-brand {
+      padding: 1.2rem 1.2rem 1rem;
+      border-bottom: 1px solid #30363d;
+      font-weight: 700; font-size: 1rem; color: #fff;
+    }
+    .sidebar-brand span { color: #58a6ff; }
+    .sidebar-section { padding: 0.8rem 1.2rem 0.2rem; font-size: 0.7rem;
+                       text-transform: uppercase; letter-spacing: 0.1em; color: #6e7681; }
+    .sidebar a {
+      display: block; padding: 0.45rem 1.2rem 0.45rem 1.5rem;
+      color: #c9d1d9; text-decoration: none; font-size: 0.88rem;
+      border-left: 3px solid transparent; transition: all 0.15s;
+    }
+    .sidebar a:hover, .sidebar a.active {
+      background: #21262d; color: #fff; border-left-color: #58a6ff;
+    }
+    .sidebar a.sub { padding-left: 2.2rem; font-size: 0.83rem; color: #8b949e; }
+    .sidebar a.sub:hover, .sidebar a.sub.active { color: #c9d1d9; }
+
+    /* ── Main content ── */
+    .main { flex: 1; padding: 2rem 2.5rem; max-width: 900px; }
+    section { display: none; }
+    section.active { display: block; }
+
+    /* ── Typography ── */
+    h1 { font-size: 1.6rem; font-weight: 700; color: #1a1a2e; margin-bottom: 0.4rem; }
+    h2 { font-size: 1.25rem; font-weight: 600; color: #1a1a2e; margin: 2rem 0 0.8rem; }
+    h3 { font-size: 1rem; font-weight: 600; color: #444; margin: 1.5rem 0 0.5rem; }
+    p  { color: #444; margin-bottom: 0.8rem; }
+    .subtitle { color: #6e7681; font-size: 0.92rem; margin-bottom: 1.5rem; }
+
+    /* ── Cards ── */
+    .card {
+      background: #fff; border-radius: 10px; padding: 1.4rem 1.6rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 1.4rem;
+    }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+
+    /* ── Role badges ── */
+    .badge {
+      display: inline-block; padding: 0.2rem 0.7rem; border-radius: 20px;
+      font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .badge-farmer  { background: #dbeafe; color: #1d4ed8; }
+    .badge-employee{ background: #fef3c7; color: #92400e; }
+    .badge-owner   { background: #f3e8ff; color: #6b21a8; }
+    .badge-bot     { background: #d1fae5; color: #065f46; }
+    .badge-system  { background: #f1f5f9; color: #475569; }
+
+    /* ── Role summary cards ── */
+    .role-card { border-radius: 10px; padding: 1.4rem 1.6rem; margin-bottom: 1rem; }
+    .role-card.farmer   { background: #eff6ff; border-left: 4px solid #3b82f6; }
+    .role-card.employee { background: #fffbeb; border-left: 4px solid #f59e0b; }
+    .role-card.owner    { background: #faf5ff; border-left: 4px solid #8b5cf6; }
+    .role-card h3 { margin-top: 0; }
+    .role-card ul { padding-left: 1.2rem; color: #444; }
+    .role-card ul li { margin-bottom: 0.3rem; font-size: 0.9rem; }
+    .role-card .cannot { color: #dc2626; }
+    .role-card .can    { color: #16a34a; }
+
+    /* ── WhatsApp mockup ── */
+    .wa-scene { margin: 1.2rem 0 2rem; }
+    .wa-scene-label {
+      font-size: 0.78rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.08em; color: #6e7681; margin-bottom: 0.5rem;
+    }
+    .wa-phone {
+      width: 340px; border-radius: 24px; overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      border: 2px solid #ddd; background: #e5ddd5;
+    }
+    .wa-header {
+      background: #075e54; color: #fff; padding: 0.8rem 1rem;
+      display: flex; align-items: center; gap: 0.7rem;
+    }
+    .wa-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: #128c7e; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 1rem; color: #fff;
+    }
+    .wa-header-info { flex: 1; }
+    .wa-header-name { font-weight: 600; font-size: 0.95rem; }
+    .wa-header-sub  { font-size: 0.72rem; opacity: 0.85; }
+    .wa-body { padding: 0.8rem 0.6rem; min-height: 200px; }
+    .wa-msg { margin-bottom: 0.5rem; display: flex; flex-direction: column; }
+    .wa-msg.out { align-items: flex-end; }
+    .wa-msg.in  { align-items: flex-start; }
+    .wa-bubble {
+      max-width: 80%; padding: 0.55rem 0.8rem; border-radius: 8px;
+      font-size: 0.84rem; line-height: 1.45; position: relative;
+    }
+    .wa-msg.out .wa-bubble { background: #dcf8c6; border-radius: 8px 0 8px 8px; }
+    .wa-msg.in  .wa-bubble { background: #fff;    border-radius: 0 8px 8px 8px; }
+    .wa-time { font-size: 0.68rem; color: #999; margin-top: 0.15rem; padding: 0 0.2rem; }
+    .wa-system-note {
+      text-align: center; margin: 0.8rem 0; font-size: 0.75rem;
+      color: #666; font-style: italic;
+      background: rgba(255,255,255,0.6); border-radius: 8px; padding: 0.3rem 0.6rem;
+    }
+    .wa-sender { font-size: 0.72rem; font-weight: 600; margin-bottom: 0.1rem; }
+    .wa-msg.in .wa-sender { color: #128c7e; }
+
+    /* ── Multi-phone layout ── */
+    .wa-pair { display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap; margin-bottom: 2rem; }
+    .wa-pair .wa-phone { flex-shrink: 0; }
+    .wa-pair-divider {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding-top: 3rem; color: #999; font-size: 1.5rem;
+    }
+    .wa-pair-divider span { font-size: 0.75rem; color: #aaa; margin-top: 0.3rem; text-align: center; }
+
+    /* ── Flow arrows ── */
+    .flow-steps { display: flex; flex-direction: column; gap: 0; margin: 1rem 0 1.5rem; }
+    .flow-step {
+      display: flex; align-items: flex-start; gap: 1rem;
+      padding: 0.8rem 1rem; background: #fff; border-radius: 8px;
+      border-left: 4px solid #e5e7eb; margin-bottom: 0.15rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .flow-step.farmer   { border-left-color: #3b82f6; }
+    .flow-step.bot      { border-left-color: #10b981; }
+    .flow-step.employee { border-left-color: #f59e0b; }
+    .flow-step.owner    { border-left-color: #8b5cf6; }
+    .flow-step.system   { border-left-color: #94a3b8; }
+    .step-num {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: #f1f5f9; color: #475569;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.78rem; font-weight: 700; flex-shrink: 0; margin-top: 0.1rem;
+    }
+    .step-body { flex: 1; }
+    .step-title { font-weight: 600; font-size: 0.9rem; color: #1a1a2e; }
+    .step-desc  { font-size: 0.84rem; color: #555; margin-top: 0.1rem; }
+    .step-note  { font-size: 0.78rem; color: #ef4444; margin-top: 0.2rem; font-style: italic; }
+    .step-note.green { color: #16a34a; }
+
+    /* ── Dashboard mockup ── */
+    .dashboard-frame {
+      background: #f8fafc; border-radius: 12px; overflow: hidden;
+      border: 1px solid #e2e8f0; margin: 1rem 0 2rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+    .db-topbar {
+      background: #1a1a2e; color: #fff; padding: 0.7rem 1.2rem;
+      display: flex; align-items: center; gap: 0.8rem; font-size: 0.85rem;
+    }
+    .db-topbar-brand { font-weight: 700; color: #58a6ff; }
+    .db-topbar-tenant { color: #8b949e; font-size: 0.78rem; }
+    .db-topbar-role   { margin-left: auto; }
+    .db-body { display: flex; min-height: 320px; }
+    .db-sidenav {
+      width: 140px; background: #fff; border-right: 1px solid #e2e8f0;
+      padding: 0.8rem 0;
+    }
+    .db-nav-item {
+      padding: 0.5rem 1rem; font-size: 0.82rem; color: #64748b; cursor: pointer;
+      border-left: 3px solid transparent;
+    }
+    .db-nav-item.active { background: #eff6ff; color: #1d4ed8; border-left-color: #3b82f6; font-weight: 600; }
+    .db-content { flex: 1; padding: 1.2rem; }
+    .db-section-title { font-weight: 700; font-size: 0.95rem; color: #1a1a2e; margin-bottom: 0.8rem; }
+    .db-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .db-table th { background: #f1f5f9; text-align: left; padding: 0.4rem 0.6rem;
+                   font-size: 0.76rem; color: #64748b; text-transform: uppercase; }
+    .db-table td { padding: 0.45rem 0.6rem; border-bottom: 1px solid #f1f5f9; color: #334155; }
+    .db-table tr:last-child td { border-bottom: none; }
+    .status-pill {
+      display: inline-block; padding: 0.15rem 0.5rem; border-radius: 20px;
+      font-size: 0.72rem; font-weight: 600;
+    }
+    .s-stored    { background: #d1fae5; color: #065f46; }
+    .s-pending   { background: #fef3c7; color: #92400e; }
+    .s-released  { background: #f1f5f9; color: #475569; }
+    .s-partial   { background: #e0f2fe; color: #0369a1; }
+
+    /* Pending action card */
+    .pending-card {
+      background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px;
+      padding: 1rem 1.1rem; margin-bottom: 0.8rem;
+    }
+    .pending-card-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; }
+    .pending-icon { font-size: 1.2rem; }
+    .pending-title { font-weight: 600; font-size: 0.9rem; color: #92400e; }
+    .pending-meta { font-size: 0.78rem; color: #78716c; }
+    .pending-detail { font-size: 0.85rem; color: #44403c; margin-bottom: 0.6rem;
+                      background: #fff; border-radius: 6px; padding: 0.5rem 0.7rem; }
+    .pending-actions { display: flex; gap: 0.5rem; }
+    .btn {
+      padding: 0.35rem 0.9rem; border-radius: 6px; font-size: 0.82rem;
+      font-weight: 600; border: none; cursor: pointer;
+    }
+    .btn-confirm { background: #16a34a; color: #fff; }
+    .btn-reject  { background: #fff; color: #dc2626; border: 1px solid #dc2626; }
+    .btn-view    { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+
+    /* ── Info boxes ── */
+    .info-box {
+      border-radius: 8px; padding: 0.9rem 1.1rem; margin: 1rem 0;
+      font-size: 0.88rem; line-height: 1.5;
+    }
+    .info-box.blue   { background: #eff6ff; border-left: 4px solid #3b82f6; color: #1e40af; }
+    .info-box.yellow { background: #fffbeb; border-left: 4px solid #f59e0b; color: #92400e; }
+    .info-box.green  { background: #f0fdf4; border-left: 4px solid #16a34a; color: #166534; }
+    .info-box.red    { background: #fef2f2; border-left: 4px solid #ef4444; color: #991b1b; }
+    .info-box strong { font-weight: 700; }
+
+    /* ── Permission table ── */
+    .perm-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 1rem 0; }
+    .perm-table th { padding: 0.5rem 0.8rem; background: #f8fafc; color: #475569;
+                     font-size: 0.78rem; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; }
+    .perm-table td { padding: 0.5rem 0.8rem; border-bottom: 1px solid #f1f5f9; }
+    .perm-table tr:last-child td { border-bottom: none; }
+    .check { color: #16a34a; font-size: 1rem; }
+    .cross { color: #dc2626; font-size: 1rem; }
+    .conf  { color: #d97706; font-size: 0.85rem; }
+
+    /* ── Page header ── */
+    .page-header {
+      background: #fff; border-radius: 10px; padding: 1.4rem 1.6rem;
+      margin-bottom: 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .page-header .tags { display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap; }
+
+    /* ── Responsive ── */
+    @media (max-width: 700px) {
+      .sidebar { display: none; }
+      .main { padding: 1rem; }
+      .wa-phone { width: 100%; }
+      .wa-pair { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ════════════════════ SIDEBAR ════════════════════ -->
+  <nav class="sidebar">
+    <div class="sidebar-brand">🌶 <span>ChilliTech</span></div>
+
+    <div class="sidebar-section">Overview</div>
+    <a href="#" onclick="show('overview')" class="active">System Overview</a>
+    <a href="#" onclick="show('roles')">Roles at a Glance</a>
+
+    <div class="sidebar-section">Farmer Flows</div>
+    <a href="#" onclick="show('f-inward')" class="sub">↳ Inward (deposit)</a>
+    <a href="#" onclick="show('f-status')" class="sub">↳ Lot status / balance</a>
+    <a href="#" onclick="show('f-price')" class="sub">↳ Market price query</a>
+    <a href="#" onclick="show('f-release')" class="sub">↳ Release request (full/partial)</a>
+    <a href="#" onclick="show('f-outward')" class="sub">↳ Outward (full — confirmed)</a>
+    <a href="#" onclick="show('f-scope')" class="sub">↳ In-scope vs out-of-scope</a>
+
+    <div class="sidebar-section">Employee Flows</div>
+    <a href="#" onclick="show('e-pending')" class="sub">↳ Confirm/reject actions</a>
+    <a href="#" onclick="show('e-proxy')" class="sub">↳ Proxy inward for farmer</a>
+    <a href="#" onclick="show('e-price')" class="sub">↳ Daily price entry</a>
+    <a href="#" onclick="show('e-ledger')" class="sub">↳ Farmer running statement</a>
+    <a href="#" onclick="show('e-lowconf')" class="sub">↳ Low-confidence review</a>
+    <a href="#" onclick="show('e-loans')" class="sub">↳ Crop finance (loans)</a>
+
+    <div class="sidebar-section">Owner Flows</div>
+    <a href="#" onclick="show('o-overview')" class="sub">↳ Dashboard overview</a>
+    <a href="#" onclick="show('o-perms')" class="sub">↳ Employee permissions</a>
+    <a href="#" onclick="show('o-audit')" class="sub">↳ Audit log</a>
+    <a href="#" onclick="show('o-loans')" class="sub">↳ Loan portfolio & risk</a>
+    <a href="#" onclick="show('o-capacity')" class="sub">↳ Capacity & accepted products</a>
+
+    <div class="sidebar-section">Dashboard Screens</div>
+    <a href="#" onclick="show('d-lots')">Lot list</a>
+    <a href="#" onclick="show('d-queue')">Pending queue</a>
+    <a href="#" onclick="show('d-farmer')">Farmer profile</a>
+    <a href="#" onclick="show('d-fillrate')">Fill rate by product</a>
+
+    <div class="sidebar-section">Reference</div>
+    <a href="#" onclick="show('ref-farmer')">Farmer help card</a>
+    <a href="#" onclick="show('ref-employee')">Employee help card</a>
+    <a href="#" onclick="show('ref-owner')">Owner help card</a>
+    <a href="#" onclick="show('ref-glossary')">Glossary</a>
+  </nav>
+
+  <!-- ════════════════════ MAIN ════════════════════ -->
+  <main class="main">
+
+    <!-- ─── OVERVIEW ─── -->
+    <section id="overview" class="active">
+      <div class="page-header">
+        <h1>ChilliTech Platform</h1>
+        <p class="subtitle">Role flows, screen mockups, and system requirements — for review before development begins.</p>
+        <div class="tags">
+          <span class="badge badge-farmer">Farmer</span>
+          <span class="badge badge-employee">Employee</span>
+          <span class="badge badge-owner">Owner</span>
+          <span class="badge badge-bot">AI Bot</span>
+        </div>
+      </div>
+
+      <div class="info-box blue">
+        <strong>How to read this document:</strong> Use the left sidebar to navigate between role flows, dashboard screen mockups, and reference cards. WhatsApp flows show the actual message conversation. Dashboard screens show what operators see in the web panel.
+      </div>
+
+      <h2>What this system does</h2>
+      <p>ChilliTech digitizes the daily operations of a cold storage business. Farmers interact entirely through <strong>WhatsApp</strong> — in Telugu or English, by text or voice note. Operators (employees and owners) manage the business through a <strong>web dashboard</strong>, and also receive WhatsApp confirmations for quick actions.</p>
+
+      <div class="card-grid">
+        <div class="card">
+          <h3>📦 Inward</h3>
+          <p style="font-size:0.88rem">Farmer deposits produce. System registers the lot, records weight, assigns a chamber, and sends a confirmation with a lot ID.</p>
+        </div>
+        <div class="card">
+          <h3>🚚 Outward</h3>
+          <p style="font-size:0.88rem">Farmer requests withdrawal. System calculates dues, operator confirms, lot is released, and a receipt is sent.</p>
+        </div>
+        <div class="card">
+          <h3>📋 Receipts</h3>
+          <p style="font-size:0.88rem">A structured WhatsApp confirmation is sent after every inward and outward. Full PDF receipts in a later phase.</p>
+        </div>
+        <div class="card">
+          <h3>💰 Ledger</h3>
+          <p style="font-size:0.88rem">Advances, dues, and payments are tracked per farmer. All entries are append-only — nothing is ever silently erased.</p>
+        </div>
+      </div>
+
+      <h2>The golden rule</h2>
+      <div class="info-box yellow">
+        <strong>The AI proposes. A human confirms.</strong> No inward, outward, or financial action happens automatically. The AI reads the farmer's message and creates a <em>pending action</em>. An operator must confirm it before anything changes in the system. This is non-negotiable — a wrong release means real chilli leaving the gate wrongly.
+      </div>
+
+      <h2>How tenant_001 is set up</h2>
+      <div class="card">
+        <table class="db-table">
+          <tr><th>Field</th><th>Value (placeholder — to be confirmed with uncle)</th></tr>
+          <tr><td>Business name</td><td>[Uncle's business name]</td></tr>
+          <tr><td>Location</td><td>Guntur, Andhra Pradesh</td></tr>
+          <tr><td>Facility code</td><td>GNT1</td></tr>
+          <tr><td>Commodity</td><td>Red chilli (varieties: Teja S17, 334, Guntur Sannam)</td></tr>
+          <tr><td>Charge rate</td><td>₹[X] per quintal per month (confirm with uncle)</td></tr>
+          <tr><td>Chambers</td><td>C1, C2, C3, C4 (capacity to be filled)</td></tr>
+          <tr><td>Currency</td><td>INR</td></tr>
+          <tr><td>Language (MVP)</td><td>English (Telugu in Phase 2)</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- ─── ROLES AT A GLANCE ─── -->
+    <section id="roles">
+      <div class="page-header">
+        <h1>Roles at a Glance</h1>
+        <p class="subtitle">Three roles, one hierarchy. Each inherits everything from the role below it.</p>
+      </div>
+
+      <div class="info-box blue" style="margin-bottom:1.5rem">
+        <strong>Inheritance:</strong> Owner ⊃ Employee ⊃ Farmer. An owner can do everything an employee can do, and an employee can do everything a farmer can do — plus more.
+      </div>
+
+      <div class="role-card farmer">
+        <h3>🌾 Farmer <span class="badge badge-farmer" style="margin-left:0.5rem">WhatsApp only</span></h3>
+        <p style="font-size:0.88rem;margin-bottom:0.6rem">Interacts entirely via WhatsApp. No login, no app. Authenticated by their phone number.</p>
+        <ul>
+          <li class="can">✅ Ask about their own lot status ("Where is my lot?")</li>
+          <li class="can">✅ Check their own balance / advance taken</li>
+          <li class="can">✅ Request inward (deposit) — AI proposes, operator confirms</li>
+          <li class="can">✅ Request outward (withdrawal) — AI proposes, operator confirms</li>
+          <li class="can">✅ Receive WhatsApp confirmation/receipt after actions</li>
+          <li class="cannot">❌ See other farmers' data</li>
+          <li class="cannot">❌ Directly execute any action — all go through operator confirmation</li>
+          <li class="cannot">❌ Access the web dashboard</li>
+        </ul>
+      </div>
+
+      <div class="role-card employee">
+        <h3>👷 Employee <span class="badge badge-employee" style="margin-left:0.5rem">WhatsApp + Dashboard</span></h3>
+        <p style="font-size:0.88rem;margin-bottom:0.6rem">Manages day-to-day operations. Has a dashboard login. Owner can restrict individual permissions.</p>
+        <ul>
+          <li class="can">✅ Everything a farmer can do, for any farmer</li>
+          <li class="can">✅ Confirm or reject AI-proposed actions (the key daily task)</li>
+          <li class="can">✅ Initiate inward/outward on behalf of a farmer ("proxy")</li>
+          <li class="can">✅ View farmer ledgers and balances</li>
+          <li class="can">✅ View all active lots and chambers</li>
+          <li class="can">✅ Review and resolve ambiguous/low-confidence AI messages</li>
+          <li class="cannot">❌ Make adjustments to weights or financial records (unless owner grants permission)</li>
+          <li class="cannot">❌ Manage other employees</li>
+          <li class="cannot">❌ Change storage charge rates or system config</li>
+        </ul>
+      </div>
+
+      <div class="role-card owner">
+        <h3>👑 Owner <span class="badge badge-owner" style="margin-left:0.5rem">Full access</span></h3>
+        <p style="font-size:0.88rem;margin-bottom:0.6rem">Full control. Can grant or restrict employee permissions. Sees everything.</p>
+        <ul>
+          <li class="can">✅ Everything an employee can do</li>
+          <li class="can">✅ Make adjustments to records (with a logged reason)</li>
+          <li class="can">✅ Manage employees — add, deactivate, set permissions</li>
+          <li class="can">✅ View the full audit trail</li>
+          <li class="can">✅ View all financial records across all farmers</li>
+          <li class="can">✅ Change system config (charge rates, chambers, etc.)</li>
+          <li class="can">✅ Add new farmer consent and manage farmer data</li>
+        </ul>
+      </div>
+
+      <h2>Permission matrix</h2>
+      <div class="card">
+        <table class="perm-table">
+          <thead>
+            <tr>
+              <th>Action</th>
+              <th>Farmer</th>
+              <th>Employee</th>
+              <th>Owner</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Check own lot status / balance</td><td class="check">✔</td><td class="check">✔</td><td class="check">✔</td></tr>
+            <tr><td>Request inward (via WhatsApp)</td><td class="check">✔</td><td class="check">✔</td><td class="check">✔</td></tr>
+            <tr><td>Request outward (via WhatsApp)</td><td class="check">✔</td><td class="check">✔</td><td class="check">✔</td></tr>
+            <tr><td>Confirm / reject AI actions</td><td class="cross">✗</td><td class="check">✔</td><td class="check">✔</td></tr>
+            <tr><td>Initiate inward on behalf of farmer</td><td class="cross">✗</td><td class="check">✔</td><td class="check">✔</td></tr>
+            <tr><td>View any farmer's ledger</td><td class="cross">✗</td><td class="conf">Owner can restrict</td><td class="check">✔</td></tr>
+            <tr><td>Make adjustments (weight / financial)</td><td class="cross">✗</td><td class="conf">Owner can grant</td><td class="check">✔</td></tr>
+            <tr><td>Manage employees</td><td class="cross">✗</td><td class="cross">✗</td><td class="check">✔</td></tr>
+            <tr><td>Change system config / charge rates</td><td class="cross">✗</td><td class="cross">✗</td><td class="check">✔</td></tr>
+            <tr><td>View full audit trail</td><td class="cross">✗</td><td class="cross">✗</td><td class="check">✔</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ─── FARMER: INWARD ─── -->
+    <section id="f-inward">
+      <div class="page-header">
+        <h1>Farmer Flow — Inward (Deposit)</h1>
+        <p class="subtitle">Farmer sends a WhatsApp message requesting to deposit produce. AI parses it, operator confirms, lot is created.</p>
+        <div class="tags"><span class="badge badge-farmer">Farmer</span><span class="badge badge-bot">AI Bot</span><span class="badge badge-employee">Employee</span></div>
+      </div>
+
+      <h2>Step-by-step sequence</h2>
+      <div class="flow-steps">
+        <div class="flow-step farmer">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">Farmer sends a WhatsApp message</div>
+            <div class="step-desc">Text or voice note. English or Telugu. "I want to deposit 200 bags of Teja" or just "200 bags Teja inward".</div>
+          </div>
+        </div>
+        <div class="flow-step bot">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">AI reads and parses the message</div>
+            <div class="step-desc">Claude identifies intent (inward), extracts entities (quantity: 200 bags, variety: Teja). Assigns a confidence score.</div>
+          </div>
+        </div>
+        <div class="flow-step bot">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">Bot replies to farmer — acknowledgement</div>
+            <div class="step-desc">"Got it, Raju! I've noted a deposit request for 200 bags of Teja. An operator will confirm this shortly."</div>
+          </div>
+        </div>
+        <div class="flow-step system">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <div class="step-title">Pending action created in the system</div>
+            <div class="step-desc">A pending action appears in the operator dashboard queue. Nothing has changed in inventory yet.</div>
+            <div class="step-note">⚠ No inventory change happens here. The AI only proposes.</div>
+          </div>
+        </div>
+        <div class="flow-step employee">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <div class="step-title">Operator reviews and confirms (or rejects)</div>
+            <div class="step-desc">Via dashboard or by replying YES to a WhatsApp notification. Operator also enters gross weight, tare, and assigns chamber.</div>
+          </div>
+        </div>
+        <div class="flow-step system">
+          <div class="step-num">6</div>
+          <div class="step-body">
+            <div class="step-title">Lot is created, receipt sent to farmer</div>
+            <div class="step-desc">Lot GNT1-20260606-0001 is registered. Farmer receives a WhatsApp confirmation with lot ID, weight, chamber, and date.</div>
+            <div class="step-note green">✅ Only at this point does inventory change.</div>
+          </div>
+        </div>
+      </div>
+
+      <h2>WhatsApp conversation — Farmer's view</h2>
+      <div class="wa-scene">
+        <div class="wa-scene-label">Farmer's phone</div>
+        <div class="wa-phone">
+          <div class="wa-header">
+            <div class="wa-avatar">CT</div>
+            <div class="wa-header-info">
+              <div class="wa-header-name">ChilliTech Storage</div>
+              <div class="wa-header-sub">Business account</div>
+            </div>
+          </div>
+          <div class="wa-body">
+            <div class="wa-msg out">
+              <div class="wa-bubble">I want to deposit 200 bags Teja</div>
+              <div class="wa-time">10:02 AM ✓✓</div>
+            </div>
+            <div class="wa-msg in">
+              <div class="wa-sender">ChilliTech Storage</div>
+              <div class="wa-bubble">Got it, Raju! I've noted a deposit request:<br><br>📦 <strong>200 bags – Teja (S17)</strong><br><br>An operator will confirm this and let you know your lot details shortly.</div>
+              <div class="wa-time">10:02 AM</div>
+            </div>
+            <div class="wa-system-note">— Operator reviews on dashboard and confirms —</div>
+            <div class="wa-msg in">
+              <div class="wa-sender">ChilliTech Storage</div>
+              <div class="wa-bubble">✅ <strong>Inward confirmed!</strong><br><br>Lot ID: <strong>GNT1-20260606-0001</strong><br>Variety: Teja (S17)<br>Net weight: 195 bags / 975 kg<br>Chamber: <strong>C2</strong><br>Date: 06 Jun 2026<br><br>Keep this lot ID for your records.</div>
+              <div class="wa-time">10:14 AM</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box green">
+        <strong>Key point for uncle:</strong> The farmer gets an immediate acknowledgement ("we've noted it") and a second message once the operator confirms. The farmer always knows the system received their message.
+      </div>
+    </section>
+
+    <!-- ─── FARMER: STATUS ─── -->
+    <section id="f-status">
+      <div class="page-header">
+        <h1>Farmer Flow — Lot Status & Balance (Today)</h1>
+        <p class="subtitle">Read-only queries answered instantly — no confirmation needed. Shows current state only, not full history.</p>
+        <div class="tags"><span class="badge badge-farmer">Farmer</span><span class="badge badge-bot">AI Bot</span></div>
+      </div>
+
+      <div class="info-box blue">
+        <strong>No confirmation needed for read-only queries.</strong> The farmer sees a clean snapshot as of today — lot, quantity, dues accrued, advance, and net balance. Simple and readable on a phone.
+      </div>
+
+      <h2>WhatsApp conversation</h2>
+      <div class="wa-scene">
+        <div class="wa-scene-label">Farmer's phone</div>
+        <div class="wa-phone">
+          <div class="wa-header">
+            <div class="wa-avatar">CT</div>
+            <div class="wa-header-info">
+              <div class="wa-header-name">ChilliTech Storage</div>
+              <div class="wa-header-sub">Business account</div>
+            </div>
+          </div>
+          <div class="wa-body">
+            <div class="wa-msg out">
+              <div class="wa-bubble">My lot status</div>
+              <div class="wa-time">2:15 PM ✓✓</div>
+            </div>
+            <div class="wa-msg in">
+              <div class="wa-sender">ChilliTech Storage</div>
+              <div class="wa-bubble">
+                Hi Raju! Here is your storage summary as of <strong>06 Jun 2026</strong>:<br><br>
+                📦 <strong>Lot GNT1-20260606-0001</strong><br>
+                Teja (S17) · 975 kg · Chamber C2<br>
+                Stored since: 06 Jun 2026 (14 days) ✅<br><br>
+                💰 <strong>Balance today</strong><br>
+                Advance received: ₹5,000<br>
+                Storage charge so far: ₹685<br>
+                <strong>Net payable to you: ₹4,315</strong><br><br>
+                To check market prices, message "price Teja".<br>
+                To release, message "I want to release my lot".
+              </div>
+              <div class="wa-time">2:15 PM</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2>What the farmer sees — and what they don't</h2>
+      <div class="card">
+        <table class="db-table">
+          <thead><tr><th>Farmer asks</th><th>Bot shows</th><th>Confirmation needed?</th></tr></thead>
+          <tbody>
+            <tr><td>"My lot status" / "Where is my chilli?"</td><td>Current lot, chamber, days stored, dues today, net balance</td><td>No ✅</td></tr>
+            <tr><td>"My balance" / "How much advance?"</td><td>Same summary — advance + dues + net</td><td>No ✅</td></tr>
+            <tr><td>"Price Teja" / "Market price today"</td><td>Today's price range (see Market Price flow)</td><td>No ✅</td></tr>
+            <tr><td>"I want to release" / "I want to sell"</td><td>Acknowledgement + operator calls farmer to discuss</td><td>Yes — employee calls, then proxy release</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="info-box blue" style="margin-top:0">
+        <strong>What the farmer does NOT see via WhatsApp:</strong> Full transaction history, other farmers' data, raw ledger entries. The employee sees the full running statement — the farmer sees a clean today-snapshot.
+      </div>
+    </section>
+
+    <!-- ─── FARMER: MARKET PRICE ─── -->
+    <section id="f-price">
+      <div class="page-header">
+        <h1>Farmer Flow — Market Price Query</h1>
+        <p class="subtitle">Farmer asks for today's price range for their commodity — to help decide whether to hold or release their stored lot.</p>
+        <div class="tags"><span class="badge badge-farmer">Farmer</span><span class="badge badge-bot">AI Bot</span></div>
+      </div>
+
+      <div class="info-box green">
+        <strong>Why this is in-scope (not a general market query):</strong> The farmer is asking about the price of produce <em>currently sitting in this cold storage</em>. Helping them decide whether to hold or release is a direct part of the cold storage business relationship. This is different from asking "what's the weather" — it drives a potential outward action.
+      </div>
+
+      <h2>How price data works</h2>
+      <div class="card-grid">
+        <div class="card">
+          <h3>📝 Employee enters price each morning</h3>
+          <p style="font-size:0.87rem">The employee (or owner) enters today's price range per commodity in the dashboard. Takes about 2 minutes. Historical values are stored permanently for future seasonality analysis.</p>
+        </div>
+        <div class="card">
+          <h3>📅 Fallback: latest available price</h3>
+          <p style="font-size:0.87rem">If today's price hasn't been entered yet (or it's a public holiday), the bot shows the most recent available price with an "as of [date]" label — never shows stale data silently.</p>
+        </div>
+        <div class="card">
+          <h3>📈 History stored from day one</h3>
+          <p style="font-size:0.87rem">Every price entry is kept with its date. This builds a price history over time — useful for the operator to spot seasonal patterns (Phase 2 analytics).</p>
+        </div>
+      </div>
+
+      <h2>WhatsApp conversation — today's price available</h2>
+      <div class="wa-scene">
+        <div class="wa-scene-label">Farmer's phone</div>
+        <div class="wa-phone">
+          <div class="wa-header">
+            <div class="wa-avatar">CT</div>
+            <div class="wa-header-info">
+              <div class="wa-header-name">ChilliTech Storage</div>
+              <div class="wa-header-sub">Business account</div>
+            </div>
+          </div>
+          <div class="wa-body">
+            <div class="wa-msg out">
+              <div class="wa-bubble">Price of Teja today?</div>
+              <div class="wa-time">9:10 AM ✓✓</div>
+            </div>
+            <div class="wa-msg in">
+              <div class="wa-sender">ChilliTech Storage</div>
+              <div class="wa-bubble">
+                📊 <strong>Market price — Teja (S17)</strong><br>
+                As of: <strong>06 Jun 2026</strong><br><br>
+                Low: ₹180 / kg<br>
+                High: ₹210 / kg<br>
+                Typical: ₹192–198 / kg<br><br>
+                Source: Guntur market (entered by operator)<br><br>
+                💡 Your lot GNT1-20260606-0001 holds 975 kg.<br>
+                At today's typical price: ~₹1.87–1.93 lakh<br><br>
+                To release your lot, message "I want to release".
+              </div>
+              <div class="wa-time">9:10 AM</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2>WhatsApp conversation — price not yet entered today (fallback)</h2>
+      <div class="wa-scene">
+        <div class="wa-phone">
+          <div class="wa-header">
+            <div class="wa-avatar">CT</div>
+            <div class="wa-header-info">
+              <div class="wa-header-name">ChilliTech Storage</div>
+              <div class="wa-header-sub">Business account</div>
+            </div>
+          </div>
+          <div class="wa-body">
+            <div class="wa-msg out">
+              <div class="wa-bubble">Teja price?</div>
+              <div class="wa-time">7:30 AM ✓✓</div>
+            </div>
+            <div class="wa-msg in">
+              <div class="wa-sender">ChilliTech Storage</div>
+              <div class="wa-bubble">
+                📊 <strong>Market price — Teja (S17)</strong><br>
+                ⚠️ Today's price not yet updated.<br><br>
+                <strong>Last available — 05 Jun 2026:</strong><br>
+                Low: ₹175 / kg &nbsp;·&nbsp; High: ₹205 / kg<br>
+                Typical: ₹188–195 / kg<br><br>
+                Today's price will be updated by the operator shortly. Check again later or contact the office.
+              </div>
+              <div class="wa-time">7:30 AM</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2>What commodities can be queried</h2>
+      <div class="card">
+        <table class="db-table">
+          <thead><tr><th>Farmer message</th><th>Bot responds with</th></tr></thead>
+          <tbody>
+            <tr><td>"Price Teja" / "Teja price today?"</td><td>Teja (S17) price range for today (or latest with date)</td></tr>
+            <tr><td>"334 price" / "What is 334 rate?"</td><td>334 variety price range</td></tr>
+            <tr><td>"Guntur Sannam price"</td><td>Guntur Sannam price range</td></tr>
+            <tr><td>"Chilli price" (no variety)</td><td>Shows prices for all active varieties</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:0.8rem;color:#94a3b8;margin-top:0.5rem">Varieties shown are configured per tenant — RULE 3. Adding a new variety = config change, not code change.</p>
+      </div>
+    </section>
+
+    <!-- ─── FARMER: RELEASE REQUEST ─── -->
+    <section id="f-release">
+      <div class="page-header">
+        <h1>Farmer Flow — Release Request (Full or Partial)</h1>
+        <p class="subtitle">Farmer signals intent to release all or part of their stored lot. An employee calls to align on quantity, price, and date — then processes the release as a proxy action.</p>
+        <div class="tags"><span class="badge badge-farmer">Farmer</span><span class="badge badge-bot">AI Bot</span><span class="badge badge-employee">Employee</span></div>
+      </div>
+
+      <div class="info-box yellow">
+        <strong>Why the phone call step?</strong> Release decisions — especially partial ones — involve agreeing on exact quantity, timing, buyer, and sometimes price. This can't be safely resolved via WhatsApp message alone. The operator calls the farmer to align, then enters the agreed details as a proxy release. This keeps the process accurate and the operator informed.
+      </div>
+
+      <h2>Step-by-step sequence</h2>
+      <div class="flow-steps">
+        <div class="flow-step farmer">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">Farmer signals release intent via WhatsApp</div>
+            <div class="step-desc">"I want to release my lot" / "I want to sell some of my chilli" / "Release 100 bags from GNT1-20260606-0001"</div>
+          </div>
+        </div>
+        <div class="flow-step bot">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">Bot acknowledges and shows current balance</div>
+            <div class="step-desc">Shows lot details, dues so far, net balance. Tells farmer that an operator will call them to confirm the details.</div>
+          </div>
+        </div>
+        <div class="flow-step system">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">Release request appears in employee dashboard queue</div>
+            <div class="step-desc">Flagged as "needs phone call" — not a standard confirm/reject. Employee sees farmer's message and contact number.</div>
+          </div>
+        </div>
+        <div class="flow-step employee">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <div class="step-title">Employee calls the farmer</div>
+            <div class="step-desc">They agree on: full or partial release, exact quantity (if partial), date, any price considerations. Employee notes the agreed details.</div>
+          </div>
+        </div>
+        <div class="flow-step employee">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <div class="step-title">Employee enters the release in dashboard (proxy action)</div>
+            <div class="step-desc">Enters agreed quantity, date, notes. Creates a pending action on behalf of the farmer. Owner or employee confirms.</div>
+            <div class="step-note green">✅ Audit trail: "Employee Suresh on behalf of Farmer Raju Kumar — agreed via phone call on 06 Jun 2026"</div>
+          </div>
+        </div>
+        <div class="flow-step system">
+          <div class="step-num">6</div>
+          <div class="step-body">
+            <div class="step-title">Farmer receives WhatsApp confirmation</div>
+            <div class="step-desc">Release confirmed message with lot ID, quantity released, dues, and net payable. Same message whether full or partial.</div>
+          </div>
+        </div>
+      </div>
+
+      <h2>WhatsApp conversation — farmer's view</h2>
+      <div class="wa-scene">
+        <div class="wa-phone">
+          <div class="wa-header">
+            <div class="wa-avatar">CT</div>
+            <div class="wa-header-info">
+              <div class="wa-header-name">ChilliTech Storage</div>
+              <div class="wa-header-sub">Business account</div>
+            </div>
+          </div>
+          <div class="wa-body">
+            <div class="wa-msg out">
+              <div class="wa-bubble">I want to sell around 300 bags from my lot</div>
+              <div class="wa-time">11:00 AM ✓✓</div>
+            </div>
+            <div class="wa-msg in">
+              <div class="wa-sender">ChilliTech Storage</div>
+              <div class="wa-bubble">
+                Got it, Raju! I've noted your release request.<br><br>
+                📦 <strong>Lot GNT1-20260606-0001</strong><br>
+                Teja (S17) · 975 kg stored · Chamber C2<br><br>
+                💰 Storage due so far: ₹685<br>
+                Advance taken: ₹5,000<br><br>
+                Our team will call you shortly to confirm the quantity, date, and other details. Please keep your phone available. 🙏
+              </div>
+              <div class="wa-time">11:00 AM</div>
+            </div>
+            <div class="wa-system-note">— Employee calls farmer, agrees on 300 bags partial release —</div>
+            <div class="wa-msg in">
+              <div class="wa-sender">ChilliTech Storage</div>
+              <div class="wa-bubble">
+                ✅ <strong>Partial release confirmed!</strong><br><br>
+                Lot: GNT1-20260606-0001<br>
+                Released: <strong>300 bags / 450 kg</strong><br>
+                Remaining in storage: 525 kg (Chamber C2)<br><br>
+                Storage due on released portion: ₹211<br>
+                Advance adjusted: ₹1,534<br>
+                <strong>Net payable to you: ₹1,323</strong><br><br>
+                Date: 06 Jun 2026. Thank you, Raju!
+              </div>
+              <div class="wa-time">11:42 AM</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2>Full vs partial release — what changes</h2>
+      <div class="card">
+        <table class="db-table">
+          <thead><tr><th></th><th>Full release</th><th>Partial release</th></tr></thead>
+          <tbody>
+            <tr><td>Lot status after</td><td><span class="status-pill s-released">Released</span></td><td><span class="status-pill s-partial">Partial</span></td></tr>
+            <tr><td>Remaining in storage</td><td>None — lot closed</td><td>Remaining kg stay in same chamber</td></tr>
+            <tr><td>Dues calculation</td><td>On full lot weight</td><td>Pro-rated on released portion only</td></tr>
+            <tr><td>Advance adjustment</td><td>Full advance settled</td><td>Advance proportionally reduced</td></tr>
+            <tr><td>Farmer can request again?</td><td>No — lot is closed</td><td>Yes — can request further releases from remaining stock</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ─── FARMER: OUTWARD ─── -->
+    <section id="f-outward">
+      <div class="page-header">
+        <h1>Farmer Flow — Outward (Withdrawal)</h1>
+        <p class="subtitle">Farmer requests to withdraw produce. Dues are calculated, operator confirms, lot is released.</p>
+        <div class="tags"><span class="badge badge-farmer">Farmer</span><span class="badge badge-bot">AI Bot</span><span class="badge badge-employee">Employee</span></div>
+      </div>
+
+      <div class="flow-steps">
+        <div class="flow-step farmer">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">Farmer requests withdrawal</div>
+            <div class="step-desc">"I want to take out my lot GNT1-20260606-0001" or "release my chilli".</div>
+          </div>
+        </div>
+        <div class="flow-step bot">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">System calculates dues</div>
+            <div class="step-desc">Storage charges are computed based on days stored × rate × quantity. Net amount (dues minus advance) is shown.</div>
+          </div>
+        </div>
+        <div class="flow-step bot">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">Bot replies with dues summary</div>
+            <div class="step-desc">Farmer sees how much storage is owed before any release happens.</div>
+          </div>
+        </div>
+        <div class="flow-step employee">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <div class="step-title">Operator confirms release on dashboard</div>
+            <div class="step-desc">Operator reviews dues, verifies payment, and confirms the outward. Can also reply YES on WhatsApp.</div>
+            <div class="step-note">⚠ Lot does NOT leave the gate until this step.</div>
+          </div>
+        </div>
+        <div class="flow-step system">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <div class="step-title">Lot released, confirmation sent</div>
+            <div class="step-desc">Lot status changes to "released". Farmer receives WhatsApp confirmation. LedgerEntry recorded.</div>
+            <div class="step-note green">✅ Gate release happens only after this.</div>
+          </div>
+        </div>
+      </div>
+
+      <h2>WhatsApp conversation — Farmer's view</h2>
+      <div class="wa-scene">
+        <div class="wa-phone">
+          <div class="wa-header">
+            <div class="wa-avatar">CT</div>
+            <div class="wa-header-info">
+              <div class="wa-header-name">ChilliTech Storage</div>
+              <div class="wa-header-sub">Business account</div>
+            </div>
+          </div>
+          <div class="wa-body">
+            <div class="wa-msg out">
+              <div class="wa-bubble">I want to release my lot GNT1-20260606-0001</div>
+              <div class="wa-time">9:30 AM ✓✓</div>
+            </div>
+            <div class="wa-msg in">
+              <div class="wa-sender">ChilliTech Storage</div>
+              <div class="wa-bubble">Hi Raju! Here is the summary for lot <strong>GNT1-20260606-0001</strong>:<br><br>📦 Teja (S17) · 975 kg · Chamber C2<br>📅 Stored: 06 Jun – 20 Jun 2026 (14 days)<br><br>💰 <strong>Dues calculation</strong><br>Storage charge: ₹685<br>Advance taken: ₹5,000<br><strong>Amount to receive: ₹4,315</strong><br><br>Sending release request to operator for approval.</div>
+              <div class="wa-time">9:30 AM</div>
+            </div>
+            <div class="wa-system-note">— Operator reviews dues and confirms on dashboard —</div>
+            <div class="wa-msg in">
+              <div class="wa-sender">ChilliTech Storage</div>
+              <div class="wa-bubble">✅ <strong>Lot released!</strong><br><br>Lot: GNT1-20260606-0001<br>Released: 20 Jun 2026<br>Net weight: 975 kg<br><br>Please collect from Chamber C2. Payment of ₹4,315 will be settled as agreed.<br><br>Thank you, Raju!</div>
+              <div class="wa-time">9:44 AM</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── IN-SCOPE vs OUT-OF-SCOPE ─── -->
+    <section id="f-scope">
+      <div class="page-header">
+        <h1>In-scope vs Out-of-scope Messages</h1>
+        <p class="subtitle">The bot handles cold-storage operations only. Anything outside that boundary is redirected — never answered as a general assistant.</p>
+        <div class="tags"><span class="badge badge-farmer">Farmer</span><span class="badge badge-bot">AI Bot</span></div>
+      </div>
+
+      <div class="info-box red">
+        <strong>WhatsApp policy (RULE 8):</strong> Meta bans general-purpose AI chatbots on the WhatsApp Business API. Structured business-task bots are allowed. The boundary must be clear — anything outside cold-storage operations is redirected, not answered.
+      </div>
+
+      <h2>What IS in-scope</h2>
+      <div class="card">
+        <table class="db-table">
+          <thead><tr><th>Message</th><th>Why it's in-scope</th></tr></thead>
+          <tbody>
+            <tr><td>"My lot status" / "Where is my chilli?"</td><td>Direct cold-storage query</td></tr>
+            <tr><td>"I want to deposit 100 bags Teja"</td><td>Inward operation</td></tr>
+            <tr><td>"I want to release my lot"</td><td>Outward operation</td></tr>
+            <tr><td>"Price of Teja today?" / "What is 334 rate?"</td><td>✅ In-scope — price of produce <em>stored here</em>, helps farmer decide on release</td></tr>
+            <tr><td>"How much storage charge?"</td><td>Financial query on their own lot</td></tr>
+            <tr><td>"My balance" / "How much advance?"</td><td>Ledger query on their own account</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-box green">
+        <strong>Market price is IN-scope</strong> because the farmer is asking about the value of produce sitting in this cold storage — to make a release decision. This is a cold-storage business interaction, not a general market query.
+      </div>
+
+      <h2>What is OUT-of-scope</h2>
+      <div class="card">
+        <table class="db-table">
+          <thead><tr><th>Message</th><th>Why it's out-of-scope</th><th>Bot response</th></tr></thead>
+          <tbody>
+            <tr><td>"What's the weather tomorrow?"</td><td>Unrelated to cold storage</td><td>Redirects to office</td></tr>
+            <tr><td>"Can you help me find a buyer?"</td><td>Brokerage, not storage</td><td>Redirects to office</td></tr>
+            <tr><td>"What's the price in Hyderabad market?"</td><td>Different market, not about stored produce</td><td>Shows only Guntur rates for stored produce</td></tr>
+            <tr><td>"Tell me about crop disease"</td><td>Agri advisory, not storage</td><td>Redirects to office</td></tr>
+            <tr><td>Open-ended chat or general questions</td><td>Not a cold-storage operation</td><td>Redirects to office</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Out-of-scope conversation examples</h2>
+      <div class="wa-scene">
+        <div class="wa-phone">
+          <div class="wa-header">
+            <div class="wa-avatar">CT</div>
+            <div class="wa-header-info">
+              <div class="wa-header-name">ChilliTech Storage</div>
+              <div class="wa-header-sub">Business account</div>
+            </div>
+          </div>
+          <div class="wa-body">
+            <div class="wa-msg out">
+              <div class="wa-bubble">Can you help me find a buyer for my chilli?</div>
+              <div class="wa-time">10:00 AM ✓✓</div>
+            </div>
+            <div class="wa-msg in">
+              <div class="wa-sender">ChilliTech Storage</div>
+              <div class="wa-bubble">I can help with your stored lots, balance, market prices for your produce, and release requests — but not with finding buyers.<br><br>Please contact the office directly for that. 🙏</div>
+              <div class="wa-time">10:00 AM</div>
+            </div>
+            <div class="wa-msg out">
+              <div class="wa-bubble">What's the weather tomorrow?</div>
+              <div class="wa-time">10:05 AM ✓✓</div>
+            </div>
+            <div class="wa-msg in">
+              <div class="wa-sender">ChilliTech Storage</div>
+              <div class="wa-bubble">I only handle cold storage operations. For anything else, please contact us at the office. 🙏</div>
+              <div class="wa-time">10:05 AM</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── EMPLOYEE: PENDING ─── -->
+    <section id="e-pending">
+      <div class="page-header">
+        <h1>Employee Flow — Confirm or Reject AI Actions</h1>
+        <p class="subtitle">The most important daily task. All AI-proposed actions sit in a queue until an operator acts on them.</p>
+        <div class="tags"><span class="badge badge-employee">Employee</span><span class="badge badge-bot">AI Bot</span></div>
+      </div>
+
+      <div class="info-box yellow">
+        <strong>This is the heart of the system.</strong> Every time a farmer sends an inward or outward request, it lands here as a "pending action." The employee reviews the details, checks for errors, and either confirms or rejects. Nothing moves without this step.
+      </div>
+
+      <h2>Two ways to confirm — WhatsApp or Dashboard</h2>
+
+      <div class="card-grid">
+        <div class="card">
+          <h3>📱 Via WhatsApp (quick)</h3>
+          <p style="font-size:0.87rem">For simple, clear actions (high confidence), the employee gets a WhatsApp notification. They reply <strong>YES</strong> or <strong>NO</strong>. Fastest path for routine inwards.</p>
+        </div>
+        <div class="card">
+          <h3>🖥 Via Dashboard (full review)</h3>
+          <p style="font-size:0.87rem">For anything complex — partial withdrawals, financial adjustments, ambiguous messages, or low-confidence parses — the employee goes to the dashboard queue.</p>
+        </div>
+      </div>
+
+      <h2>WhatsApp notification to employee</h2>
+      <div class="wa-scene">
+        <div class="wa-phone">
+          <div class="wa-header">
+            <div class="wa-avatar">CT</div>
+            <div class="wa-header-info">
+              <div class="wa-header-name">ChilliTech — Operator</div>
+              <div class="wa-header-sub">Internal notifications</div>
+            </div>
+          </div>
+          <div class="wa-body">
+            <div class="wa-msg in">
+              <div class="wa-sender">ChilliTech System</div>
+              <div class="wa-bubble">🔔 <strong>New action to confirm</strong><br><br>Farmer: <strong>Raju Kumar</strong><br>Request: Inward<br>Variety: Teja (S17)<br>Quantity: 200 bags<br><br>Reply <strong>YES</strong> to confirm or <strong>NO</strong> to reject.<br>Or open dashboard for details.</div>
+              <div class="wa-time">10:02 AM</div>
+            </div>
+            <div class="wa-msg out">
+              <div class="wa-bubble">YES</div>
+              <div class="wa-time">10:13 AM ✓✓</div>
+            </div>
+            <div class="wa-msg in">
+              <div class="wa-sender">ChilliTech System</div>
+              <div class="wa-bubble">✅ Inward confirmed for Raju Kumar.<br>Please enter weight and chamber in the dashboard to complete.</div>
+              <div class="wa-time">10:13 AM</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2>Dashboard pending queue</h2>
+      <div class="dashboard-frame">
+        <div class="db-topbar">
+          <span class="db-topbar-brand">ChilliTech</span>
+          <span class="db-topbar-tenant">tenant_001 · GNT1</span>
+          <span class="db-topbar-role"><span class="badge badge-employee">Employee</span> Suresh</span>
+        </div>
+        <div class="db-body">
+          <div class="db-sidenav">
+            <div class="db-nav-item">Lots</div>
+            <div class="db-nav-item active">⏳ Pending (2)</div>
+            <div class="db-nav-item">Farmers</div>
+            <div class="db-nav-item">Ledger</div>
+          </div>
+          <div class="db-content">
+            <div class="db-section-title">Pending Actions — Awaiting Confirmation</div>
+
+            <div class="pending-card">
+              <div class="pending-card-header">
+                <span class="pending-icon">📦</span>
+                <div>
+                  <div class="pending-title">Inward Request</div>
+                  <div class="pending-meta">Raju Kumar · +91 98XXX XXXXX · 10:02 AM · AI confidence: High</div>
+                </div>
+              </div>
+              <div class="pending-detail">
+                <strong>Farmer message:</strong> "I want to deposit 200 bags Teja"<br>
+                <strong>AI parsed:</strong> Inward · Teja (S17) · 200 bags<br>
+                <strong>Gross weight:</strong> <em>to be entered after physical weighment</em><br>
+                <strong>Chamber:</strong> <em>assign on confirm</em>
+              </div>
+              <div class="pending-actions">
+                <button class="btn btn-confirm">✔ Confirm</button>
+                <button class="btn btn-reject">✗ Reject</button>
+                <button class="btn btn-view">View message</button>
+              </div>
+            </div>
+
+            <div class="pending-card">
+              <div class="pending-card-header">
+                <span class="pending-icon">🚚</span>
+                <div>
+                  <div class="pending-title">Outward Request</div>
+                  <div class="pending-meta">Venkat Reddy · +91 97XXX XXXXX · 9:30 AM · AI confidence: High</div>
+                </div>
+              </div>
+              <div class="pending-detail">
+                <strong>Lot:</strong> GNT1-20260606-0001 · Teja (S17) · 975 kg · Chamber C2<br>
+                <strong>Storage due:</strong> ₹685 &nbsp;|&nbsp; <strong>Advance taken:</strong> ₹5,000 &nbsp;|&nbsp; <strong>Net payable to farmer:</strong> ₹4,315
+              </div>
+              <div class="pending-actions">
+                <button class="btn btn-confirm">✔ Confirm Release</button>
+                <button class="btn btn-reject">✗ Reject</button>
+                <button class="btn btn-view">Full ledger</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box yellow">
+        <strong>Expiry:</strong> Pending actions expire after <strong>24 hours</strong> if not confirmed or rejected. The farmer is notified to contact the office directly.
+      </div>
+    </section>
+
+    <!-- ─── EMPLOYEE: PROXY INWARD ─── -->
+    <section id="e-proxy">
+      <div class="page-header">
+        <h1>Employee Flow — Proxy Inward for a Farmer</h1>
+        <p class="subtitle">Employee can register an inward directly from the dashboard on behalf of a farmer (e.g. farmer arrived in person, or phoned the office).</p>
+        <div class="tags"><span class="badge badge-employee">Employee</span></div>
+      </div>
+
+      <div class="info-box blue">
+        <strong>Proxy pattern:</strong> When an employee acts on a farmer's behalf, the audit trail records both — "Employee Suresh initiated inward on behalf of Farmer Raju Kumar." This protects everyone in a dispute.
+      </div>
+
+      <div class="flow-steps">
+        <div class="flow-step employee">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">Employee selects "New Inward" in dashboard</div>
+            <div class="step-desc">Searches for or selects the farmer. Enters variety, bag count, gross weight, tare, chamber.</div>
+          </div>
+        </div>
+        <div class="flow-step system">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">System creates pending action (employee-initiated)</div>
+            <div class="step-desc">Same confirmation flow — the employee-initiated action still shows as "pending" for audit trail clarity. Owner can also confirm.</div>
+          </div>
+        </div>
+        <div class="flow-step employee">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">Employee (or owner) confirms</div>
+            <div class="step-desc">For employee-initiated inwards, the same employee can confirm immediately (no second person needed for routine ops). Owner can restrict this if desired.</div>
+          </div>
+        </div>
+        <div class="flow-step system">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <div class="step-title">Lot created, WhatsApp receipt sent to farmer</div>
+            <div class="step-desc">Farmer receives their lot confirmation on WhatsApp even though the employee initiated it.</div>
+            <div class="step-note green">✅ Audit trail: "Suresh (employee) on behalf of Raju Kumar"</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── EMPLOYEE: PRICE ENTRY ─── -->
+    <section id="e-price">
+      <div class="page-header">
+        <h1>Employee Flow — Daily Market Price Entry</h1>
+        <p class="subtitle">Employee enters today's price range per commodity each morning. Takes ~2 minutes. Farmers can then query current prices via WhatsApp.</p>
+        <div class="tags"><span class="badge badge-employee">Employee</span></div>
+      </div>
+
+      <div class="info-box blue">
+        <strong>Why manual entry?</strong> The employee gets prices from the Guntur market each morning — the same way the uncle currently knows prices. We capture that knowledge in the system rather than building a scraper. All historic entries are kept permanently for future seasonality analysis (Phase 2).
+      </div>
+
+      <h2>Dashboard — price entry screen</h2>
+      <div class="dashboard-frame">
+        <div class="db-topbar">
+          <span class="db-topbar-brand">ChilliTech</span>
+          <span class="db-topbar-tenant">tenant_001 · GNT1</span>
+          <span class="db-topbar-role"><span class="badge badge-employee">Employee</span> Suresh</span>
+        </div>
+        <div class="db-body">
+          <div class="db-sidenav">
+            <div class="db-nav-item">Lots</div>
+            <div class="db-nav-item">Pending</div>
+            <div class="db-nav-item">Farmers</div>
+            <div class="db-nav-item active">📊 Prices</div>
+          </div>
+          <div class="db-content">
+            <div class="db-section-title">Market Prices — 06 Jun 2026</div>
+            <div style="font-size:0.82rem;color:#64748b;margin-bottom:1rem">Enter today's Guntur market price range for each variety. Farmers can query this via WhatsApp.</div>
+
+            <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;margin-bottom:1rem">
+              <table style="width:100%;border-collapse:collapse;font-size:0.84rem">
+                <thead>
+                  <tr style="background:#f8fafc">
+                    <th style="padding:0.5rem 0.8rem;text-align:left;color:#64748b;font-size:0.76rem;text-transform:uppercase">Variety</th>
+                    <th style="padding:0.5rem 0.8rem;text-align:left;color:#64748b;font-size:0.76rem;text-transform:uppercase">Low (₹/kg)</th>
+                    <th style="padding:0.5rem 0.8rem;text-align:left;color:#64748b;font-size:0.76rem;text-transform:uppercase">High (₹/kg)</th>
+                    <th style="padding:0.5rem 0.8rem;text-align:left;color:#64748b;font-size:0.76rem;text-transform:uppercase">Last entry</th>
+                    <th style="padding:0.5rem 0.8rem"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="border-top:1px solid #f1f5f9">
+                    <td style="padding:0.6rem 0.8rem;font-weight:600">Teja (S17)</td>
+                    <td style="padding:0.6rem 0.8rem"><input type="number" value="180" style="width:70px;padding:0.3rem 0.5rem;border:1px solid #e2e8f0;border-radius:4px;font-size:0.84rem"></td>
+                    <td style="padding:0.6rem 0.8rem"><input type="number" value="210" style="width:70px;padding:0.3rem 0.5rem;border:1px solid #e2e8f0;border-radius:4px;font-size:0.84rem"></td>
+                    <td style="padding:0.6rem 0.8rem;color:#94a3b8;font-size:0.8rem">05 Jun · ₹175–205</td>
+                    <td style="padding:0.6rem 0.8rem"><button class="btn btn-confirm" style="font-size:0.75rem;padding:0.25rem 0.6rem">Save</button></td>
+                  </tr>
+                  <tr style="border-top:1px solid #f1f5f9">
+                    <td style="padding:0.6rem 0.8rem;font-weight:600">334</td>
+                    <td style="padding:0.6rem 0.8rem"><input type="number" placeholder="–" style="width:70px;padding:0.3rem 0.5rem;border:1px solid #e2e8f0;border-radius:4px;font-size:0.84rem"></td>
+                    <td style="padding:0.6rem 0.8rem"><input type="number" placeholder="–" style="width:70px;padding:0.3rem 0.5rem;border:1px solid #e2e8f0;border-radius:4px;font-size:0.84rem"></td>
+                    <td style="padding:0.6rem 0.8rem;color:#94a3b8;font-size:0.8rem">05 Jun · ₹155–185</td>
+                    <td style="padding:0.6rem 0.8rem"><button class="btn btn-confirm" style="font-size:0.75rem;padding:0.25rem 0.6rem">Save</button></td>
+                  </tr>
+                  <tr style="border-top:1px solid #f1f5f9">
+                    <td style="padding:0.6rem 0.8rem;font-weight:600">Guntur Sannam</td>
+                    <td style="padding:0.6rem 0.8rem"><input type="number" placeholder="–" style="width:70px;padding:0.3rem 0.5rem;border:1px solid #e2e8f0;border-radius:4px;font-size:0.84rem"></td>
+                    <td style="padding:0.6rem 0.8rem"><input type="number" placeholder="–" style="width:70px;padding:0.3rem 0.5rem;border:1px solid #e2e8f0;border-radius:4px;font-size:0.84rem"></td>
+                    <td style="padding:0.6rem 0.8rem;color:#94a3b8;font-size:0.8rem">03 Jun · ₹140–165</td>
+                    <td style="padding:0.6rem 0.8rem"><button class="btn btn-confirm" style="font-size:0.75rem;padding:0.25rem 0.6rem">Save</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="font-size:0.78rem;color:#94a3b8">All price entries are stored with date and entered-by. History is never deleted — used for future seasonality analysis.</div>
+
+            <div style="margin-top:1.2rem">
+              <div class="db-section-title">Price history — Teja (S17) last 7 days</div>
+              <table class="db-table" style="margin-top:0.5rem">
+                <thead><tr><th>Date</th><th>Low (₹/kg)</th><th>High (₹/kg)</th><th>Entered by</th></tr></thead>
+                <tbody>
+                  <tr><td><strong>06 Jun 2026</strong></td><td>₹180</td><td>₹210</td><td>Suresh</td></tr>
+                  <tr><td>05 Jun 2026</td><td>₹175</td><td>₹205</td><td>Suresh</td></tr>
+                  <tr><td>04 Jun 2026</td><td>₹170</td><td>₹200</td><td>Suresh</td></tr>
+                  <tr><td>03 Jun 2026</td><td>₹168</td><td>₹198</td><td>Owner</td></tr>
+                  <tr><td>02 Jun 2026 (Holiday)</td><td colspan="2" style="color:#94a3b8;font-style:italic">Not entered — bot shows 01 Jun with "as of" label</td><td>—</td></tr>
+                  <tr><td>01 Jun 2026</td><td>₹165</td><td>₹195</td><td>Suresh</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── EMPLOYEE: RUNNING STATEMENT ─── -->
+    <section id="e-ledger">
+      <div class="page-header">
+        <h1>Employee Flow — Farmer Running Statement</h1>
+        <p class="subtitle">Full history of inward/outward events with running inventory balance, alongside the financial ledger — all in one view per farmer.</p>
+        <div class="tags"><span class="badge badge-employee">Employee</span></div>
+      </div>
+
+      <div class="info-box blue">
+        <strong>Two running balances in sync:</strong> Quantity balance (bags/kg deposited → withdrawn → remaining) runs alongside the financial balance (advances → charges → payments → net). The employee sees both histories together — essential before confirming any outward or settling dues.
+      </div>
+
+      <h2>Farmer statement dashboard screen</h2>
+      <div class="dashboard-frame">
+        <div class="db-topbar">
+          <span class="db-topbar-brand">ChilliTech</span>
+          <span class="db-topbar-tenant">tenant_001 · GNT1</span>
+          <span class="db-topbar-role"><span class="badge badge-employee">Employee</span> Suresh</span>
+        </div>
+        <div class="db-body">
+          <div class="db-sidenav">
+            <div class="db-nav-item">Lots</div>
+            <div class="db-nav-item">Pending</div>
+            <div class="db-nav-item active">Farmers</div>
+            <div class="db-nav-item">📊 Prices</div>
+          </div>
+          <div class="db-content">
+            <div class="db-section-title">Raju Kumar &nbsp;<span class="badge badge-farmer">Active</span></div>
+            <div style="font-size:0.82rem;color:#64748b;margin-bottom:0.8rem">+91 98XXX XXXXX · Narasaraopet · Since Jan 2024 &nbsp;·&nbsp; <span style="color:#16a34a">✔ Consent 01 Jan 2024</span></div>
+
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.6rem;margin-bottom:1.2rem">
+              <div style="background:#eff6ff;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.2rem;font-weight:700;color:#1d4ed8">525 kg</div>
+                <div style="font-size:0.72rem;color:#555">In storage now</div>
+              </div>
+              <div style="background:#fef3c7;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.2rem;font-weight:700;color:#d97706">₹353</div>
+                <div style="font-size:0.72rem;color:#555">Storage due (remaining lot)</div>
+              </div>
+              <div style="background:#f0fdf4;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.2rem;font-weight:700;color:#16a34a">₹2,541</div>
+                <div style="font-size:0.72rem;color:#555">Net payable to farmer</div>
+              </div>
+              <div style="background:#faf5ff;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.2rem;font-weight:700;color:#6b21a8">1</div>
+                <div style="font-size:0.72rem;color:#555">Active lots</div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:0.5rem;margin-bottom:1rem">
+              <button class="btn btn-confirm" style="font-size:0.8rem">New inward (proxy)</button>
+              <button class="btn btn-view" style="font-size:0.8rem">Send WhatsApp</button>
+            </div>
+
+            <div class="db-section-title">Lot GNT1-20260606-0001 — Teja (S17) · Chamber C2</div>
+
+            <div style="font-size:0.78rem;font-weight:600;text-transform:uppercase;color:#64748b;margin:0.8rem 0 0.3rem;letter-spacing:0.05em">📦 Inventory history — running quantity balance</div>
+            <div style="overflow-x:auto">
+              <table style="width:100%;border-collapse:collapse;font-size:0.82rem;min-width:560px">
+                <thead>
+                  <tr style="background:#f8fafc">
+                    <th style="padding:0.4rem 0.6rem;text-align:left;color:#64748b;font-size:0.74rem;text-transform:uppercase">Date</th>
+                    <th style="padding:0.4rem 0.6rem;text-align:left;color:#64748b;font-size:0.74rem;text-transform:uppercase">Event</th>
+                    <th style="padding:0.4rem 0.6rem;text-align:right;color:#16a34a;font-size:0.74rem;text-transform:uppercase">In (kg)</th>
+                    <th style="padding:0.4rem 0.6rem;text-align:right;color:#dc2626;font-size:0.74rem;text-transform:uppercase">Out (kg)</th>
+                    <th style="padding:0.4rem 0.6rem;text-align:right;color:#64748b;font-size:0.74rem;text-transform:uppercase">Balance (kg)</th>
+                    <th style="padding:0.4rem 0.6rem;text-align:left;color:#64748b;font-size:0.74rem;text-transform:uppercase">By</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="border-top:1px solid #f1f5f9">
+                    <td style="padding:0.45rem 0.6rem">06 Jun</td>
+                    <td style="padding:0.45rem 0.6rem">Inward — 200 bags</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;color:#16a34a;font-weight:600">+975</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;color:#94a3b8">—</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;font-weight:700">975</td>
+                    <td style="padding:0.45rem 0.6rem;color:#64748b;font-size:0.78rem">Suresh (proxy)</td>
+                  </tr>
+                  <tr style="border-top:1px solid #f1f5f9;background:#fef9f0">
+                    <td style="padding:0.45rem 0.6rem">20 Jun</td>
+                    <td style="padding:0.45rem 0.6rem">Partial outward — 300 bags<br><span style="font-size:0.76rem;color:#94a3b8">Agreed via phone call · Suresh</span></td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;color:#94a3b8">—</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;color:#dc2626;font-weight:600">−450</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;font-weight:700">525</td>
+                    <td style="padding:0.45rem 0.6rem;color:#64748b;font-size:0.78rem">Suresh (proxy)</td>
+                  </tr>
+                  <tr style="border-top:1px solid #f1f5f9;background:#f0fdf4">
+                    <td style="padding:0.45rem 0.6rem;font-weight:600;color:#16a34a">Today</td>
+                    <td style="padding:0.45rem 0.6rem;font-style:italic;color:#94a3b8">In storage — no further movements</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;color:#94a3b8">—</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;color:#94a3b8">—</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;font-weight:700;color:#16a34a">525</td>
+                    <td style="padding:0.45rem 0.6rem"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div style="font-size:0.78rem;font-weight:600;text-transform:uppercase;color:#64748b;margin:1.2rem 0 0.3rem;letter-spacing:0.05em">💰 Financial history — running balance</div>
+            <div style="overflow-x:auto">
+              <table style="width:100%;border-collapse:collapse;font-size:0.82rem;min-width:560px">
+                <thead>
+                  <tr style="background:#f8fafc">
+                    <th style="padding:0.4rem 0.6rem;text-align:left;color:#64748b;font-size:0.74rem;text-transform:uppercase">Date</th>
+                    <th style="padding:0.4rem 0.6rem;text-align:left;color:#64748b;font-size:0.74rem;text-transform:uppercase">Entry type</th>
+                    <th style="padding:0.4rem 0.6rem;text-align:left;color:#64748b;font-size:0.74rem;text-transform:uppercase">Lot</th>
+                    <th style="padding:0.4rem 0.6rem;text-align:right;color:#64748b;font-size:0.74rem;text-transform:uppercase">Amount</th>
+                    <th style="padding:0.4rem 0.6rem;text-align:right;color:#64748b;font-size:0.74rem;text-transform:uppercase">Running balance</th>
+                    <th style="padding:0.4rem 0.6rem;text-align:left;color:#64748b;font-size:0.74rem;text-transform:uppercase">Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="border-top:1px solid #f1f5f9">
+                    <td style="padding:0.45rem 0.6rem">06 Jun</td>
+                    <td style="padding:0.45rem 0.6rem">Advance given</td>
+                    <td style="padding:0.45rem 0.6rem;font-size:0.78rem">-0001</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;color:#dc2626">−₹5,000</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;font-weight:600">₹5,000 owed to farmer</td>
+                    <td style="padding:0.45rem 0.6rem;font-size:0.78rem;color:#64748b">Cash at inward</td>
+                  </tr>
+                  <tr style="border-top:1px solid #f1f5f9">
+                    <td style="padding:0.45rem 0.6rem">10 Jun</td>
+                    <td style="padding:0.45rem 0.6rem">Storage charge</td>
+                    <td style="padding:0.45rem 0.6rem;font-size:0.78rem">-0001</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;color:#d97706">+₹245</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;font-weight:600">₹4,755 owed to farmer</td>
+                    <td style="padding:0.45rem 0.6rem;font-size:0.78rem;color:#64748b">4 days × full lot</td>
+                  </tr>
+                  <tr style="border-top:1px solid #f1f5f9">
+                    <td style="padding:0.45rem 0.6rem">14 Jun</td>
+                    <td style="padding:0.45rem 0.6rem">Storage charge</td>
+                    <td style="padding:0.45rem 0.6rem;font-size:0.78rem">-0001</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;color:#d97706">+₹245</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;font-weight:600">₹4,510 owed to farmer</td>
+                    <td style="padding:0.45rem 0.6rem;font-size:0.78rem;color:#64748b">4 days × full lot</td>
+                  </tr>
+                  <tr style="border-top:1px solid #f1f5f9;background:#fef9f0">
+                    <td style="padding:0.45rem 0.6rem">20 Jun</td>
+                    <td style="padding:0.45rem 0.6rem">Partial outward settlement</td>
+                    <td style="padding:0.45rem 0.6rem;font-size:0.78rem">-0001</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;color:#d97706">+₹211</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;font-weight:600">₹4,299 owed to farmer</td>
+                    <td style="padding:0.45rem 0.6rem;font-size:0.78rem;color:#64748b">Charge on 450 kg released</td>
+                  </tr>
+                  <tr style="border-top:1px solid #f1f5f9;background:#fef9f0">
+                    <td style="padding:0.45rem 0.6rem">20 Jun</td>
+                    <td style="padding:0.45rem 0.6rem">Advance partial settlement</td>
+                    <td style="padding:0.45rem 0.6rem;font-size:0.78rem">-0001</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;color:#16a34a">−₹1,534</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;font-weight:600">₹2,765 owed to farmer</td>
+                    <td style="padding:0.45rem 0.6rem;font-size:0.78rem;color:#64748b">Pro-rated advance on 450 kg</td>
+                  </tr>
+                  <tr style="border-top:1px solid #f1f5f9;background:#f0fdf4">
+                    <td style="padding:0.45rem 0.6rem;font-weight:600;color:#16a34a">Today</td>
+                    <td style="padding:0.45rem 0.6rem">Storage charge (accrued)</td>
+                    <td style="padding:0.45rem 0.6rem;font-size:0.78rem">-0001</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;color:#d97706">+₹224</td>
+                    <td style="padding:0.45rem 0.6rem;text-align:right;font-weight:700;color:#16a34a">₹2,541 owed to farmer</td>
+                    <td style="padding:0.45rem 0.6rem;font-size:0.78rem;color:#64748b">Remaining 525 kg, 8 days</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="font-size:0.78rem;color:#94a3b8;margin-top:0.5rem">All entries are append-only. Corrections appear as reversal entries — nothing is ever silently overwritten.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box green">
+        <strong>Before confirming any outward:</strong> the employee reviews this screen to verify the dues, check the inventory balance, and spot any anomalies — before clicking Confirm. This is the single source of truth for a farmer's standing.
+      </div>
+    </section>
+
+    <!-- ─── EMPLOYEE: LOW CONFIDENCE ─── -->
+    <section id="e-lowconf">
+      <div class="page-header">
+        <h1>Employee Flow — Low-Confidence Review Queue</h1>
+        <p class="subtitle">When the AI is unsure what a farmer meant, the message goes to a human review queue instead of creating a pending action.</p>
+        <div class="tags"><span class="badge badge-bot">AI Bot</span><span class="badge badge-employee">Employee</span></div>
+      </div>
+
+      <div class="info-box red">
+        <strong>Why this matters:</strong> Voice notes in rural Telugu with crop terminology often have ambiguity. If confidence is below the threshold, the system never guesses — it sends the message to a human. "Low confidence → review" is a hard rule.
+      </div>
+
+      <div class="flow-steps">
+        <div class="flow-step farmer">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">Farmer sends an ambiguous voice note</div>
+            <div class="step-desc">e.g. a noisy recording, mixed Telugu/English, incomplete information ("take out some bags").</div>
+          </div>
+        </div>
+        <div class="flow-step bot">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">AI transcribes and parses — low confidence</div>
+            <div class="step-desc">AI can't reliably extract all entities. Confidence score below threshold.</div>
+          </div>
+        </div>
+        <div class="flow-step bot">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">Bot tells farmer a human will follow up</div>
+            <div class="step-desc">"I didn't quite understand. Our team will contact you shortly to confirm the details."</div>
+          </div>
+        </div>
+        <div class="flow-step system">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <div class="step-title">Message appears in employee review queue</div>
+            <div class="step-desc">Employee sees the original message (voice/text), the AI's best-guess parse, and the confidence score. They can manually create the correct action.</div>
+          </div>
+        </div>
+        <div class="flow-step employee">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <div class="step-title">Employee contacts farmer (WA or phone), enters correct details</div>
+            <div class="step-desc">Proceeds as a manual proxy action. Full audit trail preserved.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── EMPLOYEE: CROP FINANCE (LOANS) ─── -->
+    <section id="e-loans">
+      <div class="page-header">
+        <h1>Employee Flow — Crop Finance (Loans)</h1>
+        <p class="subtitle">Some operators lend money to farmers for the next crop season, secured against their cold storage stock. Employees record these transactions from the farmer profile — there is no WhatsApp trigger for loans.</p>
+        <div class="tags"><span class="badge badge-employee">Employee</span><span class="badge badge-owner">Owner</span></div>
+      </div>
+
+      <div class="info-box blue">
+        <strong>How it works:</strong> The farmer calls or visits the office. The employee opens the farmer's profile, goes to the <strong>Loans</strong> tab, and records the event (new disbursement, interest charge, or repayment). The employee is the human in the loop — no AI parsing, no confirmation step. The outstanding balance and security status update immediately.
+      </div>
+
+      <div class="info-box red">
+        <strong>Permission required:</strong> <code>can_manage_loans</code> must be granted by the owner (default: off). Viewing loan history requires <code>can_view_loan_financials</code> (default: on if financial visibility is on).
+      </div>
+
+      <!-- Farmer profile: Loans tab -->
+      <div class="dashboard-frame" style="margin-bottom:1.5rem">
+        <div class="db-topbar">
+          <span class="db-topbar-brand">ChilliTech</span>
+          <span class="db-topbar-tenant">tenant_001 · GNT1</span>
+          <span class="db-topbar-role"><span class="badge badge-employee">Employee</span></span>
+        </div>
+        <div class="db-body">
+          <div class="db-sidenav">
+            <div class="db-nav-item">Lots</div>
+            <div class="db-nav-item">Pending</div>
+            <div class="db-nav-item active">Farmers</div>
+            <div class="db-nav-item">Prices</div>
+          </div>
+          <div class="db-content">
+            <div class="db-section-title">Farmer: Raju Kumar &nbsp;<span style="font-weight:400;color:#888;font-size:0.82rem">+91 98765 43210</span></div>
+            <!-- Sub-tabs inside farmer profile -->
+            <div style="display:flex;gap:0;border-bottom:2px solid #e5e7eb;margin-bottom:1rem">
+              <div style="padding:0.4rem 1rem;font-size:0.82rem;color:#888;cursor:pointer">Lots &amp; Stock</div>
+              <div style="padding:0.4rem 1rem;font-size:0.82rem;color:#888;cursor:pointer">Ledger</div>
+              <div style="padding:0.4rem 1rem;font-size:0.82rem;color:#1d4ed8;border-bottom:2px solid #1d4ed8;margin-bottom:-2px;font-weight:600;cursor:pointer">Loans</div>
+            </div>
+
+            <!-- Loan summary row -->
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem;margin-bottom:1rem">
+              <div style="background:#eff6ff;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.3rem;font-weight:700;color:#1d4ed8">₹45,000</div>
+                <div style="font-size:0.72rem;color:#555">Outstanding balance</div>
+              </div>
+              <div style="background:#f0fdf4;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.3rem;font-weight:700;color:#16a34a">₹63,000</div>
+                <div style="font-size:0.72rem;color:#555">Stock security value (75%)</div>
+              </div>
+              <div style="background:#f0fdf4;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.3rem;font-weight:700;color:#16a34a">✔ Secured</div>
+                <div style="font-size:0.72rem;color:#555">Security status (live)</div>
+              </div>
+            </div>
+
+            <!-- Loan list -->
+            <div class="db-section-title">Active Loans</div>
+            <table class="db-table" style="margin-bottom:1rem">
+              <thead><tr><th>Loan ID</th><th>Disbursed</th><th>Rate</th><th>Outstanding</th><th>Security lots</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>LN-001</td>
+                  <td>15 Mar 2026</td>
+                  <td>18%/yr</td>
+                  <td>₹45,000</td>
+                  <td>GNT1-20260315-0009, GNT1-20260315-0010</td>
+                  <td><span class="status-pill" style="background:#dcfce7;color:#166534">Secured</span></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Transaction history -->
+            <div class="db-section-title">Transaction History — LN-001</div>
+            <table class="db-table" style="margin-bottom:1rem">
+              <thead><tr><th>Date</th><th>Type</th><th>Amount</th><th>Running balance</th><th>Entered by</th><th>Notes</th></tr></thead>
+              <tbody>
+                <tr><td>15 Mar 2026</td><td>Disbursement</td><td style="color:#dc2626">+₹50,000</td><td>₹50,000</td><td>Suresh</td><td>Crop advance for kharif season</td></tr>
+                <tr><td>01 Apr 2026</td><td>Interest charge</td><td style="color:#dc2626">+₹750</td><td>₹50,750</td><td>Suresh</td><td>March interest @ 18%</td></tr>
+                <tr><td>20 Apr 2026</td><td>Partial repayment</td><td style="color:#16a34a">−₹6,500</td><td>₹44,250</td><td>Suresh</td><td>Cash received</td></tr>
+                <tr><td>01 May 2026</td><td>Interest charge</td><td style="color:#dc2626">+₹663</td><td>₹44,913</td><td>Suresh</td><td>April interest</td></tr>
+                <tr><td>15 May 2026</td><td>Partial repayment</td><td style="color:#16a34a">−₹913</td><td>₹44,000</td><td>Suresh</td><td>—</td></tr>
+                <tr><td>01 Jun 2026</td><td>Interest charge</td><td style="color:#dc2626">+₹1,000</td><td>₹45,000</td><td>Suresh</td><td>May interest</td></tr>
+              </tbody>
+            </table>
+
+            <!-- Entry form -->
+            <div class="db-section-title">Record New Transaction</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0.6rem;align-items:end;margin-bottom:0.8rem">
+              <div>
+                <label style="font-size:0.75rem;color:#555;display:block;margin-bottom:0.25rem">Transaction type</label>
+                <select style="width:100%;padding:0.35rem 0.5rem;border:1px solid #d1d5db;border-radius:5px;font-size:0.82rem">
+                  <option>Disbursement</option>
+                  <option>Interest charge</option>
+                  <option selected>Partial repayment</option>
+                  <option>Full repayment</option>
+                  <option>Adjustment</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:0.75rem;color:#555;display:block;margin-bottom:0.25rem">Amount (₹)</label>
+                <input type="text" placeholder="e.g. 5000" style="width:100%;padding:0.35rem 0.5rem;border:1px solid #d1d5db;border-radius:5px;font-size:0.82rem"/>
+              </div>
+              <div>
+                <label style="font-size:0.75rem;color:#555;display:block;margin-bottom:0.25rem">Date</label>
+                <input type="text" placeholder="DD MMM YYYY" style="width:100%;padding:0.35rem 0.5rem;border:1px solid #d1d5db;border-radius:5px;font-size:0.82rem"/>
+              </div>
+              <div>
+                <label style="font-size:0.75rem;color:#555;display:block;margin-bottom:0.25rem">Notes</label>
+                <input type="text" placeholder="Optional" style="width:100%;padding:0.35rem 0.5rem;border:1px solid #d1d5db;border-radius:5px;font-size:0.82rem"/>
+              </div>
+            </div>
+            <button class="btn btn-confirm">Save transaction</button>
+          </div>
+        </div>
+      </div>
+
+      <h2 style="margin-top:1.5rem">Security assessment — how the risk label is calculated</h2>
+      <div class="info-box" style="background:#fafafa;border-color:#d1d5db">
+        <p style="margin:0 0 0.5rem 0"><strong>Formula (computed live, never stored):</strong></p>
+        <code style="display:block;background:#f3f4f6;padding:0.6rem;border-radius:5px;font-size:0.82rem;line-height:1.6">
+          security_value = SUM(net_weight of pledged active lots)<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; × current_market_price (latest employee entry for that commodity)<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; × security_factor (e.g. 0.75 — configured per tenant)<br><br>
+          Secured &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ security_value ≥ outstanding_balance<br>
+          Partially secured → 0 &lt; security_value &lt; outstanding_balance<br>
+          Unsecured &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ no active pledged stock
+        </code>
+        <p style="margin:0.6rem 0 0 0;font-size:0.82rem;color:#555">The security factor (haircut) accounts for price volatility and selling costs. It is a per-tenant config value — the owner can adjust it. Changing it immediately re-labels all loans in the portfolio view.</p>
+      </div>
+    </section>
+
+    <!-- ─── OWNER: LOAN PORTFOLIO & RISK ─── -->
+    <section id="o-loans">
+      <div class="page-header">
+        <h1>Owner Flow — Loan Portfolio &amp; Risk Summary</h1>
+        <p class="subtitle">The owner sees the full lending book: total outstanding across all farmers, broken down by security status. Drill into any farmer for transaction detail.</p>
+        <div class="tags"><span class="badge badge-owner">Owner</span></div>
+      </div>
+
+      <div class="info-box blue">
+        <strong>Why this view matters:</strong> If market prices drop, loans that were "secured" yesterday become "partially secured" today. The portfolio view shows the current risk posture across all farmers with one query — so the owner knows who to call.
+      </div>
+
+      <div class="dashboard-frame">
+        <div class="db-topbar">
+          <span class="db-topbar-brand">ChilliTech</span>
+          <span class="db-topbar-tenant">tenant_001 · GNT1</span>
+          <span class="db-topbar-role"><span class="badge badge-owner">Owner</span></span>
+        </div>
+        <div class="db-body">
+          <div class="db-sidenav">
+            <div class="db-nav-item">Overview</div>
+            <div class="db-nav-item">Lots</div>
+            <div class="db-nav-item">Farmers</div>
+            <div class="db-nav-item">Ledger</div>
+            <div class="db-nav-item active">Loans</div>
+            <div class="db-nav-item">Staff</div>
+            <div class="db-nav-item">Audit log</div>
+          </div>
+          <div class="db-content">
+            <div class="db-section-title">Loan Portfolio — 07 Jun 2026 (live)</div>
+
+            <!-- Portfolio summary cards -->
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.6rem;margin-bottom:1.2rem">
+              <div style="background:#eff6ff;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.3rem;font-weight:700;color:#1d4ed8">₹2.85L</div>
+                <div style="font-size:0.72rem;color:#555">Total outstanding</div>
+              </div>
+              <div style="background:#f0fdf4;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.3rem;font-weight:700;color:#16a34a">₹1.80L</div>
+                <div style="font-size:0.72rem;color:#555">Secured (stock ≥ balance)</div>
+              </div>
+              <div style="background:#fef3c7;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.3rem;font-weight:700;color:#d97706">₹75,000</div>
+                <div style="font-size:0.72rem;color:#555">Partially secured</div>
+              </div>
+              <div style="background:#fef2f2;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.3rem;font-weight:700;color:#dc2626">₹30,000</div>
+                <div style="font-size:0.72rem;color:#555">Unsecured (no stock)</div>
+              </div>
+            </div>
+
+            <!-- Per-farmer breakdown, sorted by risk -->
+            <div class="db-section-title">By Farmer — sorted by risk ↑</div>
+            <table class="db-table">
+              <thead>
+                <tr>
+                  <th>Farmer</th>
+                  <th>Outstanding</th>
+                  <th>Security value</th>
+                  <th>Coverage</th>
+                  <th>Status</th>
+                  <th>Active lots</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Mohan Das</td>
+                  <td>₹30,000</td>
+                  <td>₹0</td>
+                  <td>0%</td>
+                  <td><span class="status-pill" style="background:#fee2e2;color:#991b1b">Unsecured</span></td>
+                  <td>0 (released)</td>
+                  <td><button class="btn btn-sm" style="font-size:0.72rem;padding:0.2rem 0.5rem">View</button></td>
+                </tr>
+                <tr>
+                  <td>Venkat Reddy</td>
+                  <td>₹75,000</td>
+                  <td>₹42,000</td>
+                  <td>56%</td>
+                  <td><span class="status-pill" style="background:#fef9c3;color:#854d0e">Partially secured</span></td>
+                  <td>2 lots · 560 kg</td>
+                  <td><button class="btn btn-sm" style="font-size:0.72rem;padding:0.2rem 0.5rem">View</button></td>
+                </tr>
+                <tr>
+                  <td>Raju Kumar</td>
+                  <td>₹45,000</td>
+                  <td>₹63,000</td>
+                  <td>140%</td>
+                  <td><span class="status-pill" style="background:#dcfce7;color:#166534">Secured</span></td>
+                  <td>2 lots · 1,120 kg</td>
+                  <td><button class="btn btn-sm" style="font-size:0.72rem;padding:0.2rem 0.5rem">View</button></td>
+                </tr>
+                <tr>
+                  <td>Srinivas Rao</td>
+                  <td>₹1,35,000</td>
+                  <td>₹1,89,000</td>
+                  <td>140%</td>
+                  <td><span class="status-pill" style="background:#dcfce7;color:#166534">Secured</span></td>
+                  <td>3 lots · 3,360 kg</td>
+                  <td><button class="btn btn-sm" style="font-size:0.72rem;padding:0.2rem 0.5rem">View</button></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Config note -->
+            <div style="margin-top:1rem;font-size:0.78rem;color:#888;border-top:1px solid #e5e7eb;padding-top:0.6rem">
+              Security factor: <strong>75%</strong> &nbsp;|&nbsp; Market price used: <strong>₹75/kg (Teja, 07 Jun 2026)</strong> &nbsp;|&nbsp; <a href="#" style="color:#1d4ed8">Change security factor in config →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2 style="margin-top:1.5rem">When a farmer releases stock — what changes</h2>
+      <table class="db-table">
+        <thead><tr><th>Event</th><th>Effect on loans</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Farmer fully releases a pledged lot</td>
+            <td>That lot is no longer in <code>security_lot_ids</code>. Security value drops. Status may shift from Secured → Partially secured or Unsecured. Owner sees this immediately.</td>
+          </tr>
+          <tr>
+            <td>Farmer deposits more stock (inward)</td>
+            <td>Employee can add the new lot to <code>security_lot_ids</code> on the loan. Security value increases.</td>
+          </tr>
+          <tr>
+            <td>Market price falls</td>
+            <td>Security value drops (formula recalculated live). Portfolio view refreshes on next load.</td>
+          </tr>
+          <tr>
+            <td>Farmer repays loan in full</td>
+            <td>Employee records <code>full_repayment</code> transaction. Loan status changes to Closed. Removed from active portfolio.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ─── OWNER: OVERVIEW ─── -->
+    <section id="o-overview">
+      <div class="page-header">
+        <h1>Owner Flow — Dashboard Overview</h1>
+        <p class="subtitle">The owner sees everything — inventory, financials, staff activity, and system config.</p>
+        <div class="tags"><span class="badge badge-owner">Owner</span></div>
+      </div>
+
+      <div class="dashboard-frame">
+        <div class="db-topbar">
+          <span class="db-topbar-brand">ChilliTech</span>
+          <span class="db-topbar-tenant">tenant_001 · GNT1</span>
+          <span class="db-topbar-role"><span class="badge badge-owner">Owner</span></span>
+        </div>
+        <div class="db-body">
+          <div class="db-sidenav">
+            <div class="db-nav-item active">Overview</div>
+            <div class="db-nav-item">Lots</div>
+            <div class="db-nav-item">Farmers</div>
+            <div class="db-nav-item">Ledger</div>
+            <div class="db-nav-item">Staff</div>
+            <div class="db-nav-item">Audit log</div>
+            <div class="db-nav-item">Config</div>
+          </div>
+          <div class="db-content">
+            <div class="db-section-title">Today — 06 Jun 2026</div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.6rem;margin-bottom:1.2rem">
+              <div style="background:#eff6ff;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.4rem;font-weight:700;color:#1d4ed8">48</div>
+                <div style="font-size:0.72rem;color:#555">Active lots</div>
+              </div>
+              <div style="background:#fef3c7;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.4rem;font-weight:700;color:#d97706">3</div>
+                <div style="font-size:0.72rem;color:#555">Pending confirms</div>
+              </div>
+              <div style="background:#f0fdf4;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.4rem;font-weight:700;color:#16a34a">₹1.2L</div>
+                <div style="font-size:0.72rem;color:#555">Advances outstanding</div>
+              </div>
+              <div style="background:#faf5ff;border-radius:8px;padding:0.7rem;text-align:center">
+                <div style="font-size:1.4rem;font-weight:700;color:#6b21a8">12</div>
+                <div style="font-size:0.72rem;color:#555">Farmers active</div>
+              </div>
+            </div>
+            <div class="db-section-title">Recent activity</div>
+            <table class="db-table">
+              <thead><tr><th>Time</th><th>Action</th><th>By</th><th>Farmer</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>10:14 AM</td><td>Inward confirmed</td><td>Suresh</td><td>Raju Kumar</td><td><span class="status-pill s-stored">Stored</span></td></tr>
+                <tr><td>10:02 AM</td><td>Inward requested (WA)</td><td>AI Bot</td><td>Raju Kumar</td><td><span class="status-pill s-pending">Pending</span></td></tr>
+                <tr><td>9:30 AM</td><td>Outward requested (WA)</td><td>AI Bot</td><td>Venkat Reddy</td><td><span class="status-pill s-pending">Pending</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── OWNER: PERMISSIONS ─── -->
+    <section id="o-perms">
+      <div class="page-header">
+        <h1>Owner Flow — Employee Permissions</h1>
+        <p class="subtitle">Owners control exactly what each employee can and cannot do. No code change needed — it's a dashboard setting.</p>
+        <div class="tags"><span class="badge badge-owner">Owner</span></div>
+      </div>
+
+      <div class="info-box blue">
+        <strong>Why this exists:</strong> A trusted senior employee might handle financials; a junior staff member might only confirm inwards. The owner sets this per employee, and can change it at any time.
+      </div>
+
+      <div class="dashboard-frame">
+        <div class="db-topbar">
+          <span class="db-topbar-brand">ChilliTech</span>
+          <span class="db-topbar-tenant">tenant_001</span>
+          <span class="db-topbar-role"><span class="badge badge-owner">Owner</span></span>
+        </div>
+        <div class="db-body">
+          <div class="db-sidenav">
+            <div class="db-nav-item">Overview</div>
+            <div class="db-nav-item active">Staff</div>
+          </div>
+          <div class="db-content">
+            <div class="db-section-title">Employee: Suresh Kumar</div>
+            <table class="perm-table">
+              <thead><tr><th>Permission</th><th>Allowed?</th><th>Notes</th></tr></thead>
+              <tbody>
+                <tr><td>View any farmer's financial records</td><td><span class="check">✔ Yes</span></td><td>Default on</td></tr>
+                <tr><td>Confirm inward on behalf of farmer</td><td><span class="check">✔ Yes</span></td><td>Default on</td></tr>
+                <tr><td>Confirm outward on behalf of farmer</td><td><span class="check">✔ Yes</span></td><td>Default on</td></tr>
+                <tr><td>Make adjustments to records</td><td><span class="cross">✗ No</span></td><td>Default off — owner grant required</td></tr>
+                <tr><td>See all farmers (not just assigned)</td><td><span class="check">✔ Yes</span></td><td>Default on</td></tr>
+                <tr><td>Perform inventory check (stock-take)</td><td><span class="cross">✗ No</span></td><td>Post-MVP feature</td></tr>
+                <tr><td>Manage crop finance loans (enter transactions)</td><td><span class="cross">✗ No</span></td><td>Default off — explicit grant required</td></tr>
+                <tr><td>View loan balances &amp; history</td><td><span class="check">✔ Yes</span></td><td>Follows financial visibility permission</td></tr>
+              </tbody>
+            </table>
+            <div style="margin-top:0.8rem;display:flex;gap:0.5rem">
+              <button class="btn btn-confirm">Save changes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── OWNER: AUDIT LOG ─── -->
+    <section id="o-audit">
+      <div class="page-header">
+        <h1>Owner Flow — Audit Log</h1>
+        <p class="subtitle">Every action on inventory or money is permanently recorded — who did it, when, on whose behalf. Nothing is ever silently erased.</p>
+        <div class="tags"><span class="badge badge-owner">Owner</span></div>
+      </div>
+
+      <div class="info-box green">
+        <strong>Why this matters:</strong> If there's ever a dispute — "you released my lot without my permission" or "the weight was wrong" — the audit log is the record that resolves it. Protects the operator, the employee, and the farmer equally.
+      </div>
+
+      <div class="dashboard-frame">
+        <div class="db-topbar">
+          <span class="db-topbar-brand">ChilliTech</span>
+          <span class="db-topbar-tenant">tenant_001</span>
+          <span class="db-topbar-role"><span class="badge badge-owner">Owner</span></span>
+        </div>
+        <div class="db-body">
+          <div class="db-sidenav">
+            <div class="db-nav-item active">Audit log</div>
+          </div>
+          <div class="db-content">
+            <div class="db-section-title">Audit Log — All Actions</div>
+            <table class="db-table">
+              <thead><tr><th>Time</th><th>Action</th><th>Actor</th><th>On behalf of</th><th>Detail</th></tr></thead>
+              <tbody>
+                <tr><td>10:14 AM</td><td>Inward confirmed</td><td>Suresh (employee)</td><td>Raju Kumar (farmer)</td><td>Lot GNT1-20260606-0001 · 975 kg · C2</td></tr>
+                <tr><td>10:13 AM</td><td>YES reply via WhatsApp</td><td>Suresh (employee)</td><td>—</td><td>Pending action #PA-0041 confirmed</td></tr>
+                <tr><td>10:02 AM</td><td>Inward proposed</td><td>AI Bot</td><td>Raju Kumar (farmer)</td><td>200 bags Teja — confidence: high</td></tr>
+                <tr><td>9:30 AM</td><td>Outward proposed</td><td>AI Bot</td><td>Venkat Reddy (farmer)</td><td>Lot GNT1-20260606-0001 — confidence: high</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── OWNER: CAPACITY & ACCEPTED PRODUCTS ─── -->
+    <section id="o-capacity">
+      <div class="page-header">
+        <h1>Owner Flow — Storage Capacity &amp; Accepted Products</h1>
+        <p class="subtitle">Define the total capacity and target fill rate for each facility, and specify which commodities each facility accepts. These are config values — no code change needed when you update them.</p>
+        <div class="tags"><span class="badge badge-owner">Owner</span></div>
+      </div>
+
+      <div class="info-box blue">
+        <strong>Why per-facility?</strong> Different cold rooms operate at different temperature ranges and are therefore suited to different products — a chilli store, a potato room, a general-purpose vegetable chamber may sit in the same premises. Accepted commodities are configured per facility so the system can validate incoming stock at inward time, and fill rate tracking stays meaningful per product type.
+      </div>
+
+      <!-- Config form -->
+      <div class="dashboard-frame" style="margin-bottom:1.5rem">
+        <div class="db-topbar">
+          <span class="db-topbar-brand">ChilliTech</span>
+          <span class="db-topbar-tenant">tenant_001</span>
+          <span class="db-topbar-role"><span class="badge badge-owner">Owner</span></span>
+        </div>
+        <div class="db-body">
+          <div class="db-sidenav">
+            <div class="db-nav-item">Overview</div>
+            <div class="db-nav-item">Lots</div>
+            <div class="db-nav-item">Farmers</div>
+            <div class="db-nav-item">Ledger</div>
+            <div class="db-nav-item">Loans</div>
+            <div class="db-nav-item">Staff</div>
+            <div class="db-nav-item active">Config</div>
+          </div>
+          <div class="db-content">
+            <div class="db-section-title">Storage Facilities — Capacity &amp; Accepted Products</div>
+
+            <!-- Facility card: GNT1 -->
+            <div style="border:1px solid #e5e7eb;border-radius:8px;padding:1rem;margin-bottom:1rem">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem">
+                <div>
+                  <span style="font-weight:600;font-size:0.95rem">GNT1 — Guntur Main Store</span>
+                  <span style="font-size:0.78rem;color:#888;margin-left:0.5rem">Guntur, AP</span>
+                </div>
+                <span class="status-pill s-stored" style="font-size:0.72rem">Active</span>
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.8rem;margin-bottom:0.8rem">
+                <div>
+                  <label style="font-size:0.75rem;color:#555;display:block;margin-bottom:0.25rem">Total capacity (quintals)</label>
+                  <input type="text" value="5000" style="width:100%;padding:0.35rem 0.5rem;border:1px solid #d1d5db;border-radius:5px;font-size:0.85rem"/>
+                </div>
+                <div>
+                  <label style="font-size:0.75rem;color:#555;display:block;margin-bottom:0.25rem">Target occupancy (%)</label>
+                  <input type="text" value="85" style="width:100%;padding:0.35rem 0.5rem;border:1px solid #d1d5db;border-radius:5px;font-size:0.85rem"/>
+                  <div style="font-size:0.7rem;color:#888;margin-top:0.2rem">Fill rate turns amber above this, green below</div>
+                </div>
+                <div>
+                  <label style="font-size:0.75rem;color:#555;display:block;margin-bottom:0.25rem">Temperature range</label>
+                  <input type="text" value="−2°C to +4°C" style="width:100%;padding:0.35rem 0.5rem;border:1px solid #d1d5db;border-radius:5px;font-size:0.85rem"/>
+                  <div style="font-size:0.7rem;color:#888;margin-top:0.2rem">Reference only, not used in system logic</div>
+                </div>
+              </div>
+
+              <div>
+                <label style="font-size:0.75rem;color:#555;display:block;margin-bottom:0.4rem">Accepted commodities <span style="color:#888">(check all that apply — from your tenant commodity list)</span></label>
+                <div style="display:flex;gap:1.2rem;flex-wrap:wrap">
+                  <label style="font-size:0.82rem;display:flex;align-items:center;gap:0.3rem"><input type="checkbox" checked/> Red Chilli</label>
+                  <label style="font-size:0.82rem;display:flex;align-items:center;gap:0.3rem"><input type="checkbox" checked/> Dry Chilli</label>
+                  <label style="font-size:0.82rem;display:flex;align-items:center;gap:0.3rem"><input type="checkbox"/> Onion</label>
+                  <label style="font-size:0.82rem;display:flex;align-items:center;gap:0.3rem"><input type="checkbox"/> Potato</label>
+                  <label style="font-size:0.82rem;display:flex;align-items:center;gap:0.3rem"><input type="checkbox"/> Ginger</label>
+                </div>
+                <div style="font-size:0.72rem;color:#888;margin-top:0.3rem">Inward for an unchecked commodity at this facility will be rejected. Add new commodities to the tenant catalog first (Config → Commodities).</div>
+              </div>
+
+              <div style="margin-top:0.8rem">
+                <button class="btn btn-confirm">Save GNT1 settings</button>
+              </div>
+            </div>
+
+            <!-- Add facility button -->
+            <div style="font-size:0.82rem;color:#1d4ed8;cursor:pointer">+ Add another facility</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box green">
+        <strong>What the target occupancy does:</strong> it does not cap inwards — the system will still accept stock above the target. It is purely a visual threshold for the fill rate dashboard: green = below target, amber = at or above target, red = above 100% (data error — physical checks needed). The owner can adjust the target at any time; it takes effect immediately in the fill rate view.
+      </div>
+    </section>
+
+    <!-- ─── DASHBOARD: FILL RATE BY PRODUCT ─── -->
+    <section id="d-fillrate">
+      <div class="page-header">
+        <h1>Dashboard — Fill Rate by Product</h1>
+        <p class="subtitle">Current storage occupancy across all facilities, broken down by commodity. Color-coded against each facility's target occupancy. Visible to both owner and employee.</p>
+        <div class="tags"><span class="badge badge-employee">Employee</span><span class="badge badge-owner">Owner</span></div>
+      </div>
+
+      <div class="info-box blue">
+        <strong>How it works:</strong> Fill rate = total active lot net weight ÷ facility total capacity, computed live from the lot table. No separate counter to maintain. Employee uses it to plan chamber assignment; owner uses it to see product mix and capacity headroom.
+      </div>
+
+      <div class="dashboard-frame">
+        <div class="db-topbar">
+          <span class="db-topbar-brand">ChilliTech</span>
+          <span class="db-topbar-tenant">tenant_001 · GNT1</span>
+        </div>
+        <div class="db-body">
+          <div class="db-sidenav">
+            <div class="db-nav-item active">Overview</div>
+            <div class="db-nav-item">Lots</div>
+            <div class="db-nav-item">Farmers</div>
+          </div>
+          <div class="db-content">
+            <div class="db-section-title">Fill Rate — GNT1 (Guntur Main Store) · 07 Jun 2026</div>
+
+            <!-- Overall capacity bar -->
+            <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;padding:1rem;margin-bottom:1.2rem">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.4rem">
+                <span style="font-weight:600;font-size:0.9rem">Overall occupancy</span>
+                <span style="font-size:0.82rem;color:#555">3,240 qtl / 5,000 qtl &nbsp;·&nbsp; <strong style="color:#d97706">64.8%</strong> &nbsp;·&nbsp; Target: 85%</span>
+              </div>
+              <div style="background:#e5e7eb;border-radius:4px;height:14px;overflow:hidden">
+                <div style="width:64.8%;background:#22c55e;height:100%;border-radius:4px"></div>
+              </div>
+              <div style="font-size:0.72rem;color:#888;margin-top:0.3rem">🟢 Below target — 1,760 qtl headroom remaining</div>
+            </div>
+
+            <!-- By commodity -->
+            <div class="db-section-title">Breakdown by commodity</div>
+            <table class="db-table" style="margin-bottom:1rem">
+              <thead>
+                <tr><th>Commodity</th><th>Active lots</th><th>Stored (qtl)</th><th>% of facility</th><th>Fill bar</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Red Chilli (Teja S17)</strong></td>
+                  <td>28 lots</td>
+                  <td>1,980</td>
+                  <td>39.6%</td>
+                  <td>
+                    <div style="background:#e5e7eb;border-radius:3px;height:10px;width:120px;overflow:hidden">
+                      <div style="width:46.6%;background:#22c55e;height:100%;border-radius:3px"></div>
+                    </div>
+                  </td>
+                  <td><span class="status-pill" style="background:#dcfce7;color:#166534;font-size:0.7rem">Below target</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Red Chilli (Guntur Sannam)</strong></td>
+                  <td>14 lots</td>
+                  <td>890</td>
+                  <td>17.8%</td>
+                  <td>
+                    <div style="background:#e5e7eb;border-radius:3px;height:10px;width:120px;overflow:hidden">
+                      <div style="width:20.9%;background:#22c55e;height:100%;border-radius:3px"></div>
+                    </div>
+                  </td>
+                  <td><span class="status-pill" style="background:#dcfce7;color:#166534;font-size:0.7rem">Below target</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Dry Chilli (Mixed)</strong></td>
+                  <td>6 lots</td>
+                  <td>370</td>
+                  <td>7.4%</td>
+                  <td>
+                    <div style="background:#e5e7eb;border-radius:3px;height:10px;width:120px;overflow:hidden">
+                      <div style="width:8.7%;background:#22c55e;height:100%;border-radius:3px"></div>
+                    </div>
+                  </td>
+                  <td><span class="status-pill" style="background:#dcfce7;color:#166534;font-size:0.7rem">Below target</span></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Chamber-level breakdown -->
+            <div class="db-section-title">By chamber</div>
+            <table class="db-table">
+              <thead>
+                <tr><th>Chamber</th><th>Capacity (qtl)</th><th>Used (qtl)</th><th>Fill %</th><th>Commodities stored</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>C1</td><td>1,200</td><td>1,100</td><td>91.7%</td>
+                  <td>Red Chilli (Teja)</td>
+                  <td><span class="status-pill" style="background:#fef9c3;color:#854d0e;font-size:0.7rem">At target</span></td>
+                </tr>
+                <tr>
+                  <td>C2</td><td>1,200</td><td>880</td><td>73.3%</td>
+                  <td>Red Chilli (Teja, Sannam)</td>
+                  <td><span class="status-pill" style="background:#dcfce7;color:#166534;font-size:0.7rem">Below target</span></td>
+                </tr>
+                <tr>
+                  <td>C3</td><td>1,600</td><td>1,260</td><td>78.8%</td>
+                  <td>Red Chilli (Sannam), Dry Chilli</td>
+                  <td><span class="status-pill" style="background:#dcfce7;color:#166534;font-size:0.7rem">Below target</span></td>
+                </tr>
+                <tr>
+                  <td>C4 (Quarantine)</td><td>1,000</td><td>0</td><td>0%</td>
+                  <td>—</td>
+                  <td><span class="status-pill" style="background:#f1f5f9;color:#64748b;font-size:0.7rem">Empty</span></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div style="margin-top:0.8rem;font-size:0.78rem;color:#888;border-top:1px solid #e5e7eb;padding-top:0.6rem">
+              🟢 Below target &nbsp;|&nbsp; 🟡 At or above target (≥85%) &nbsp;|&nbsp; 🔴 Over capacity (>100%) — physical recount needed &nbsp;|&nbsp; Fill computed live from active lot weights.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── DASHBOARD: LOT LIST ─── -->
+    <section id="d-lots">
+      <div class="page-header">
+        <h1>Dashboard — Lot List</h1>
+        <p class="subtitle">All active and recently released lots, with status, chamber, and farmer.</p>
+      </div>
+
+      <div class="dashboard-frame">
+        <div class="db-topbar">
+          <span class="db-topbar-brand">ChilliTech</span>
+          <span class="db-topbar-tenant">tenant_001 · GNT1</span>
+        </div>
+        <div class="db-body">
+          <div class="db-sidenav">
+            <div class="db-nav-item active">Lots</div>
+            <div class="db-nav-item">Pending</div>
+            <div class="db-nav-item">Farmers</div>
+          </div>
+          <div class="db-content">
+            <div class="db-section-title">Active Lots</div>
+            <table class="db-table">
+              <thead><tr><th>Lot ID</th><th>Farmer</th><th>Variety</th><th>Net Wt (kg)</th><th>Chamber</th><th>Since</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td><strong>GNT1-20260606-0001</strong></td><td>Raju Kumar</td><td>Teja (S17)</td><td>975</td><td>C2</td><td>06 Jun</td><td><span class="status-pill s-stored">Stored</span></td></tr>
+                <tr><td><strong>GNT1-20260605-0047</strong></td><td>Venkat Reddy</td><td>334</td><td>1,240</td><td>C1</td><td>05 Jun</td><td><span class="status-pill s-stored">Stored</span></td></tr>
+                <tr><td><strong>GNT1-20260603-0044</strong></td><td>Srinivas Rao</td><td>Teja (S17)</td><td>620</td><td>C3</td><td>03 Jun</td><td><span class="status-pill s-partial">Partial</span></td></tr>
+                <tr><td><strong>GNT1-20260530-0039</strong></td><td>Mohan Das</td><td>Guntur Sannam</td><td>480</td><td>C4</td><td>30 May</td><td><span class="status-pill s-stored">Stored</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── DASHBOARD: PENDING QUEUE ─── -->
+    <section id="d-queue">
+      <div class="page-header">
+        <h1>Dashboard — Pending Queue</h1>
+        <p class="subtitle">All AI-proposed actions waiting for operator confirmation. This is the most-used screen in daily operations.</p>
+      </div>
+
+      <div class="info-box yellow">
+        <strong>Daily routine:</strong> The first thing an employee does each morning is clear this queue. Any action older than 24 hours expires automatically — the farmer is notified to call the office.
+      </div>
+
+      <div class="dashboard-frame">
+        <div class="db-topbar">
+          <span class="db-topbar-brand">ChilliTech</span>
+          <span class="db-topbar-tenant">tenant_001 · GNT1</span>
+        </div>
+        <div class="db-body">
+          <div class="db-sidenav">
+            <div class="db-nav-item">Lots</div>
+            <div class="db-nav-item active">⏳ Pending (3)</div>
+            <div class="db-nav-item">Farmers</div>
+          </div>
+          <div class="db-content">
+            <div class="db-section-title">Pending Actions</div>
+
+            <div class="pending-card">
+              <div class="pending-card-header">
+                <span class="pending-icon">📦</span>
+                <div>
+                  <div class="pending-title">Inward Request</div>
+                  <div class="pending-meta">Raju Kumar · 10:02 AM · AI confidence: <strong style="color:#16a34a">High</strong></div>
+                </div>
+              </div>
+              <div class="pending-detail">
+                <strong>Farmer said:</strong> "I want to deposit 200 bags Teja"<br>
+                <strong>AI parsed:</strong> Inward · Teja (S17) · 200 bags<br>
+                <em>Enter gross weight and assign chamber when confirming.</em>
+              </div>
+              <div class="pending-actions">
+                <button class="btn btn-confirm">✔ Confirm + enter details</button>
+                <button class="btn btn-reject">✗ Reject</button>
+              </div>
+            </div>
+
+            <div class="pending-card">
+              <div class="pending-card-header">
+                <span class="pending-icon">🚚</span>
+                <div>
+                  <div class="pending-title">Outward Request</div>
+                  <div class="pending-meta">Venkat Reddy · 9:30 AM · AI confidence: <strong style="color:#16a34a">High</strong></div>
+                </div>
+              </div>
+              <div class="pending-detail">
+                <strong>Lot:</strong> GNT1-20260605-0047 · 334 · 1,240 kg · Chamber C1<br>
+                <strong>Storage due:</strong> ₹930 &nbsp;|&nbsp; <strong>Advance:</strong> ₹8,000 &nbsp;|&nbsp; <strong>Net to farmer:</strong> ₹7,070
+              </div>
+              <div class="pending-actions">
+                <button class="btn btn-confirm">✔ Confirm Release</button>
+                <button class="btn btn-reject">✗ Reject</button>
+                <button class="btn btn-view">Full ledger</button>
+              </div>
+            </div>
+
+            <div class="pending-card" style="background:#fef2f2;border-color:#fca5a5">
+              <div class="pending-card-header">
+                <span class="pending-icon">⚠️</span>
+                <div>
+                  <div class="pending-title" style="color:#991b1b">Review Required — Low Confidence</div>
+                  <div class="pending-meta">Unknown farmer · 8:45 AM · AI confidence: <strong style="color:#dc2626">Low</strong></div>
+                </div>
+              </div>
+              <div class="pending-detail" style="background:#fff1f2">
+                <strong>Voice note (transcribed):</strong> "…take out some bags… thirty or forty… from the big chamber…"<br>
+                <strong>AI best guess:</strong> Outward · quantity unclear · lot unknown<br>
+                <em style="color:#dc2626">Cannot create pending action — human review required.</em>
+              </div>
+              <div class="pending-actions">
+                <button class="btn btn-view">Listen to voice note</button>
+                <button class="btn btn-confirm">Create action manually</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── DASHBOARD: FARMER PROFILE ─── -->
+    <section id="d-farmer">
+      <div class="page-header">
+        <h1>Dashboard — Farmer Profile</h1>
+        <p class="subtitle">Full view of a farmer's lots, ledger, and contact details.</p>
+      </div>
+
+      <div class="dashboard-frame">
+        <div class="db-topbar">
+          <span class="db-topbar-brand">ChilliTech</span>
+          <span class="db-topbar-tenant">tenant_001</span>
+        </div>
+        <div class="db-body">
+          <div class="db-sidenav">
+            <div class="db-nav-item active">Farmers</div>
+          </div>
+          <div class="db-content">
+            <div class="db-section-title">Raju Kumar &nbsp;<span class="badge badge-farmer">Active</span></div>
+            <div style="font-size:0.82rem;color:#64748b;margin-bottom:1rem">
+              📱 +91 98XXX XXXXX &nbsp;·&nbsp; 🏘 Narasaraopet &nbsp;·&nbsp; Since Jan 2024 &nbsp;·&nbsp;
+              <span style="color:#16a34a">✔ Consent given 01 Jan 2024</span>
+            </div>
+            <div style="display:flex;gap:0.5rem;margin-bottom:1rem">
+              <button class="btn btn-view">Send WhatsApp</button>
+              <button class="btn btn-confirm">New inward (proxy)</button>
+            </div>
+            <div class="db-section-title">Active lots</div>
+            <table class="db-table" style="margin-bottom:1rem">
+              <thead><tr><th>Lot ID</th><th>Variety</th><th>Net Wt</th><th>Chamber</th><th>Since</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>GNT1-20260606-0001</td><td>Teja (S17)</td><td>975 kg</td><td>C2</td><td>06 Jun</td><td><span class="status-pill s-stored">Stored</span></td></tr>
+              </tbody>
+            </table>
+            <div class="db-section-title">Ledger</div>
+            <table class="db-table">
+              <thead><tr><th>Date</th><th>Type</th><th>Amount</th><th>Notes</th></tr></thead>
+              <tbody>
+                <tr><td>06 Jun 2026</td><td>Advance given</td><td style="color:#dc2626">₹5,000</td><td>Cash advance at inward</td></tr>
+                <tr><td>10 Jun 2026</td><td>Storage charge</td><td style="color:#dc2626">₹245</td><td>Auto-calculated</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── REF: FARMER ─── -->
+    <section id="ref-farmer">
+      <div class="page-header">
+        <h1>Farmer — Help Card</h1>
+        <p class="subtitle">What farmers can do, and how. Use this to explain the system to a new farmer.</p>
+      </div>
+
+      <div class="role-card farmer">
+        <h3>🌾 As a Farmer, you can:</h3>
+        <ul>
+          <li class="can">✅ <strong>Check your lot status</strong> — message "lot status" or "where is my chilli"</li>
+          <li class="can">✅ <strong>Check your balance</strong> — message "my balance" or "how much advance"</li>
+          <li class="can">✅ <strong>Request inward (deposit)</strong> — message "I want to deposit 100 bags Teja"</li>
+          <li class="can">✅ <strong>Request outward (withdrawal)</strong> — message "I want to release lot [lot ID]"</li>
+          <li class="can">✅ <strong>Get a receipt</strong> — sent automatically after every confirmed action</li>
+          <li class="cannot">❌ You cannot release your own lot — an operator must always confirm</li>
+          <li class="cannot">❌ You cannot see other farmers' information</li>
+        </ul>
+      </div>
+
+      <h2>How to reach the system</h2>
+      <div class="card">
+        <p><strong>WhatsApp only.</strong> Send a message to the business WhatsApp number. You can write in English or Telugu, or send a voice note. The system will reply within seconds.</p>
+        <p style="margin-top:0.5rem"><strong>If the system doesn't understand:</strong> An operator will contact you directly. You can also call the office at any time.</p>
+      </div>
+
+      <h2>Your lot ID — keep it safe</h2>
+      <div class="info-box blue">
+        Every time you deposit produce, you get a <strong>Lot ID</strong> (e.g. <code>GNT1-20260606-0001</code>). This is your receipt number. Keep this ID — you'll need it when requesting a withdrawal or asking about that deposit.
+      </div>
+
+      <h2>WhatsApp messages you can send (examples)</h2>
+      <div class="card">
+        <table class="db-table">
+          <thead><tr><th>You can say…</th><th>System will…</th></tr></thead>
+          <tbody>
+            <tr><td>"My lot status" / "Where is my chilli?"</td><td>Show your active lots with quantity, chamber, dues today, and net balance</td></tr>
+            <tr><td>"My balance" / "How much advance?"</td><td>Show the same snapshot — advance + dues + net payable to you</td></tr>
+            <tr><td>"Price Teja" / "Teja price today?"</td><td>Show today's Teja price range (or latest available with date if not yet updated)</td></tr>
+            <tr><td>"334 price" / "Guntur Sannam rate?"</td><td>Show that variety's price range</td></tr>
+            <tr><td>"I want to deposit 100 bags of Teja"</td><td>Note the request — operator confirms and assigns chamber</td></tr>
+            <tr><td>"I want to release my lot" / "I want to sell"</td><td>Acknowledge and show your balance — operator will call you to agree on details</td></tr>
+            <tr><td>"I want to sell 300 bags from my lot"</td><td>Same as above — operator calls to confirm the partial release details</td></tr>
+            <tr><td>"How much storage charge for my lot?"</td><td>Show dues accrued so far on your active lot(s)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-box yellow">
+        <strong>For release requests:</strong> the bot acknowledges your message and an operator will call you. Please keep your phone available. The release only happens after you and the operator agree on the details — nothing leaves the storage without that conversation.
+      </div>
+    </section>
+
+    <!-- ─── REF: EMPLOYEE ─── -->
+    <section id="ref-employee">
+      <div class="page-header">
+        <h1>Employee — Help Card</h1>
+        <p class="subtitle">What employees do daily, how to handle each situation. For the India-based operator.</p>
+      </div>
+
+      <div class="role-card employee">
+        <h3>👷 As an Employee, your daily tasks are:</h3>
+        <ul>
+          <li class="can">✅ <strong>Check the pending queue</strong> every morning — confirm or reject AI-proposed actions</li>
+          <li class="can">✅ <strong>Reply YES/NO on WhatsApp</strong> for simple inward/outward notifications</li>
+          <li class="can">✅ <strong>Handle the review queue</strong> — voice notes or messages the AI couldn't parse clearly</li>
+          <li class="can">✅ <strong>Register inwards directly</strong> (proxy) when a farmer arrives in person or calls</li>
+          <li class="can">✅ <strong>Look up farmer balances and lot details</strong> for any farmer</li>
+          <li class="cannot">❌ You cannot change a confirmed record — only the owner can make adjustments (or grant you this permission)</li>
+          <li class="cannot">❌ You cannot change storage charge rates or system config</li>
+        </ul>
+      </div>
+
+      <h2>Morning routine</h2>
+      <div class="flow-steps">
+        <div class="flow-step employee">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">Open dashboard → Pending queue</div>
+            <div class="step-desc">Check if any overnight WhatsApp messages created pending actions.</div>
+          </div>
+        </div>
+        <div class="flow-step employee">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">Confirm, reject, or flag each pending action</div>
+            <div class="step-desc">For inwards: enter weight and assign chamber. For outwards: verify dues before confirming release.</div>
+          </div>
+        </div>
+        <div class="flow-step employee">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">Handle the review queue</div>
+            <div class="step-desc">Contact farmers with unclear messages, enter the correct action manually.</div>
+          </div>
+        </div>
+        <div class="flow-step employee">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <div class="step-title">Register any in-person arrivals</div>
+            <div class="step-desc">Use "New inward (proxy)" for farmers who arrived at the storage without messaging first.</div>
+          </div>
+        </div>
+      </div>
+
+      <h2>When in doubt</h2>
+      <div class="info-box yellow">
+        <strong>When uncertain, reject and contact the farmer directly.</strong> It is always safer to reject a pending action and ask the farmer to confirm via WhatsApp again than to confirm something incorrectly. The audit trail records every rejection too.
+      </div>
+    </section>
+
+    <!-- ─── REF: OWNER ─── -->
+    <section id="ref-owner">
+      <div class="page-header">
+        <h1>Owner — Help Card</h1>
+        <p class="subtitle">What owners can do beyond employees. Focus on oversight, config, and exception handling.</p>
+      </div>
+
+      <div class="role-card owner">
+        <h3>👑 As an Owner, you have full control:</h3>
+        <ul>
+          <li class="can">✅ Everything the employee can do</li>
+          <li class="can">✅ <strong>Adjust records</strong> — correct a wrong weight or ledger entry (logged with reason)</li>
+          <li class="can">✅ <strong>Manage staff</strong> — add employees, deactivate accounts, set permissions per person</li>
+          <li class="can">✅ <strong>View the full audit trail</strong> — see exactly who did what and when</li>
+          <li class="can">✅ <strong>Change system config</strong> — storage charge rates, chamber layout, varieties</li>
+          <li class="can">✅ <strong>See all financial records</strong> — advances, dues, settlements across all farmers</li>
+          <li class="can">✅ <strong>Delete or anonymize farmer data</strong> on request (privacy compliance)</li>
+        </ul>
+      </div>
+
+      <h2>Making an adjustment (correcting a record)</h2>
+      <div class="info-box red">
+        <strong>Adjustments are always logged.</strong> You cannot silently change a weight or financial record. Every adjustment requires a written reason and is permanently recorded in the audit log — who changed it, what it was before, what it is now, and why.
+      </div>
+
+      <div class="flow-steps">
+        <div class="flow-step owner">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">Go to the lot or ledger entry to correct</div>
+          </div>
+        </div>
+        <div class="flow-step owner">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">Click "Make adjustment" — enter new value and reason</div>
+            <div class="step-desc">e.g. "Weight corrected after re-weighment — original bag count was wrong"</div>
+          </div>
+        </div>
+        <div class="flow-step system">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">Audit log entry created automatically</div>
+            <div class="step-desc">Old value, new value, reason, your name, and timestamp are all recorded permanently.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── GLOSSARY ─── -->
+    <section id="ref-glossary">
+      <div class="page-header">
+        <h1>Glossary</h1>
+        <p class="subtitle">Key terms used in the system — for explaining to the uncle, employees, or farmers.</p>
+      </div>
+
+      <div class="card">
+        <table class="db-table">
+          <thead><tr><th>Term</th><th>What it means</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Lot</strong></td><td>A single deposit of produce by one farmer. Gets a unique Lot ID (e.g. GNT1-20260606-0001). One farmer can have multiple active lots.</td></tr>
+            <tr><td><strong>Lot ID</strong></td><td>The unique code for each deposit. Format: <code>{FACILITY_CODE}-{DATE}-{NUMBER}</code>. The farmer's receipt number.</td></tr>
+            <tr><td><strong>Inward</strong></td><td>When produce is brought in and deposited at the cold storage.</td></tr>
+            <tr><td><strong>Outward</strong></td><td>When produce is taken out (withdrawn) from cold storage.</td></tr>
+            <tr><td><strong>Pending action</strong></td><td>An action proposed by the AI (or a farmer's WhatsApp message) that is waiting for an operator to confirm or reject. Nothing happens until a human says yes.</td></tr>
+            <tr><td><strong>Advance</strong></td><td>Money given to the farmer by the operator at the time of deposit. Tracked in the ledger and deducted from dues at outward.</td></tr>
+            <tr><td><strong>Dues</strong></td><td>Storage charges owed by the farmer — calculated as days stored × charge rate × quantity.</td></tr>
+            <tr><td><strong>Ledger</strong></td><td>The financial record for each farmer — every advance, charge, payment, and settlement. Append-only: nothing is ever erased.</td></tr>
+            <tr><td><strong>Audit log</strong></td><td>A permanent record of every action in the system — who did it, when, on whose behalf, and what changed.</td></tr>
+            <tr><td><strong>Adjustment</strong></td><td>A correction to an existing record (weight, ledger entry). Always requires a written reason. Permanently logged.</td></tr>
+            <tr><td><strong>Proxy action</strong></td><td>When an employee or owner performs an action on behalf of a farmer (e.g. registering an inward because the farmer arrived in person).</td></tr>
+            <tr><td><strong>Chamber</strong></td><td>A section of the cold storage where produce is stored. Each lot is assigned to a chamber.</td></tr>
+            <tr><td><strong>Tenant</strong></td><td>A customer of ChilliTech — one cold storage business. tenant_001 = uncle's business. All data is strictly separated per tenant.</td></tr>
+            <tr><td><strong>Facility code</strong></td><td>A short code for a storage location (e.g. GNT1 = Guntur facility 1). Used in Lot IDs. One tenant can have multiple facilities.</td></tr>
+            <tr><td><strong>AI confidence</strong></td><td>How sure the AI is that it correctly understood a farmer's message. Low confidence → goes to human review queue instead of creating a pending action.</td></tr>
+            <tr><td><strong>24-hour window</strong></td><td>WhatsApp allows free messages within 24 hours of the last farmer message. Outside this, only pre-approved template messages can be sent.</td></tr>
+            <tr><td><strong>Market price</strong></td><td>The daily price range per commodity variety, entered by the employee each morning from Guntur market rates. Farmers can query this via WhatsApp to help decide whether to hold or release their stored produce.</td></tr>
+            <tr><td><strong>Price history</strong></td><td>Every daily price entry is stored permanently. Over time this builds a record useful for spotting seasonal price patterns (Phase 2 analytics).</td></tr>
+            <tr><td><strong>Partial release / partial outward</strong></td><td>Releasing only a portion of a stored lot. The farmer messages intent, the employee calls to agree on quantity and timing, then enters the release as a proxy action. The remaining quantity stays in storage under the same lot ID with status "Partial".</td></tr>
+            <tr><td><strong>Release request</strong></td><td>A farmer's WhatsApp signal that they want to release all or part of their stored produce. Triggers an employee phone call to align on details — not a direct action.</td></tr>
+            <tr><td><strong>Running statement</strong></td><td>The employee's view of a farmer's full history — two parallel running totals: inventory movements (kg in / kg out / balance) and financial entries (advances / charges / settlements / net payable). The authoritative view before confirming any outward.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  function show(id) {
+    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    event.target.classList.add('active');
+    window.scrollTo(0, 0);
+  }
+</script>
+</body>
+</html>
