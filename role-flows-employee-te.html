@@ -137,14 +137,34 @@
     .page-header { background: #fff; border-radius: 10px; padding: 1.4rem 1.6rem;
                    margin-bottom: 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
     .page-header .tags { display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap; }
+    .menu-toggle { display: none; }
+    .sidebar-overlay { display: none; }
     @media (max-width: 700px) {
-      .sidebar { display: none; }
-      .main { padding: 1rem; }
+      .menu-toggle {
+        display: flex; align-items: center; justify-content: center;
+        position: fixed; top: 0.75rem; left: 0.75rem; z-index: 200;
+        width: 40px; height: 40px; border-radius: 8px;
+        background: #1a1a2e; color: #fff; border: none;
+        font-size: 1.3rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.3);
+      }
+      .sidebar-overlay {
+        position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 150;
+      }
+      .sidebar-overlay.open { display: block; }
+      .sidebar {
+        display: block; position: fixed; top: 0; left: -270px;
+        width: 260px; height: 100vh; z-index: 160;
+        transition: left 0.25s ease;
+      }
+      .sidebar.open { left: 0; }
+      .main { padding: 1rem; padding-top: 3.5rem; }
       .wa-phone { width: 100%; }
     }
   </style>
 </head>
 <body>
+<button class="menu-toggle" onclick="toggleSidebar()" aria-label="మెను తెరవండి">☰</button>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 <div class="shell">
 
   <nav class="sidebar">
@@ -1092,6 +1112,11 @@
     document.getElementById(id).classList.add('active');
     event.target.classList.add('active');
     window.scrollTo(0, 0);
+    if (window.innerWidth <= 700) toggleSidebar();
+  }
+  function toggleSidebar() {
+    document.querySelector('.sidebar').classList.toggle('open');
+    document.getElementById('sidebar-overlay').classList.toggle('open');
   }
 </script>
 </body>
